@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+  </head>
+  <title>otheraccounts</title>
+  <body >
+    <div class='div_prin'>
+      <h2 class="h2_class">
+        Other accounts
+      </h2>
+      <p class= 'parag'>
+        Please find below my other accounts
+      </p>
+      <a  class='link' href="https://pypi.org/user/BOUZ1/">
+        • PyPi account: pypi.org/user/BOUZ1</a>
+      <br>
+      <br>
+      <a  class='link' href="https://www.kaggle.com/bozzabb">
+        • Kaggle account: kaggle.com/bozzabb</a>
+    </div>
+
+    <style>
+      .h2_class,.parag,.link{
+        padding-left:20%;
+        padding-bottom:1.5vw;
+      }
+      .h2_class{
+        font-weight: bold;
+      }
+      .div_prin{
+        padding-top:120px;
+        width:100%;
+      }
+
+      .link{text-decoration: none;}
+      .link:link {color: #0080cc;}
+      .link:visited {color: #0080cc;}
+      .link:hover {color: #0080cc;font-size:110%;}
+      .link:active {color: #0080cc;}
+
+      /**/
+      /* phone */
+      /**/
+      @media screen and (max-width: 767px) {
+        .parag,.link{
+          font-size:3.2vw ; /*3.2% of width of viewport*/
+        }
+        .h2_class{font-size: 4.2vw;}
+      }
+      /* PC */
+      @media screen and (min-width: 767px) {
+        .h2_class,.parag,.link{
+          font-size:1.5vw ; /*1.2% of width of viewport*/
+
+        }
+        .h2_class{font-size: 2vw;}
+
+    </style>
+  </body>
+
+</html>
