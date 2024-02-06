@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Text File</title>
+</head>
+<body>
+    <textarea id="fileContent" rows="10" cols="50" placeholder="Enter new content"></textarea>
+    <button onclick="saveFile()">Save File</button>
+
+    <script>
+        function saveFile() {
+            const newContent = document.getElementById("fileContent").value;
+
+            // Create a Blob with the new content
+            const blob = new Blob([newContent], { type: "text/plain" });
+
+            // Create a URL for the Blob
+            const blobUrl = URL.createObjectURL(blob);
+
+            // Create a new anchor element
+            const anchor = document.createElement("a");
+            anchor.href = blobUrl;
+            anchor.target = "_blank"; // Open in a new tab (optional)
+            anchor.style.display = "none"; // Hide the anchor
+
+            // Append the anchor to the document
+            document.body.appendChild(anchor);
+
+            // Trigger a click event to save the file
+            anchor.click();
+
+            // Clean up (remove the anchor and revoke the Blob URL)
+            document.body.removeChild(anchor);
+            URL.revokeObjectURL(blobUrl);
+        }
+    </script>
+</body>
+</html>

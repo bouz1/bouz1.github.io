@@ -1,0 +1,28 @@
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Text File</title>
+</head>
+<body>
+    <textarea id="fileContent" rows="10" cols="50" placeholder="Enter new content"></textarea>
+    <button onclick="saveFile()">Save File</button>
+
+    <script>
+        function saveFile() {
+            const newContent = document.getElementById("fileContent").value;
+
+            // Create a Blob with the new content
+            const blob = new Blob([newContent], { type: "text/plain" });
+
+            // Create a temporary anchor element
+            const anchor = document.createElement("a");
+            anchor.href = URL.createObjectURL(blob);
+            anchor.download = "updated_file.txt"; // Set the filename
+
+            // Trigger a click event to download the file
+            anchor.click();
+        }
+    </script>
+</body>
+</html>
