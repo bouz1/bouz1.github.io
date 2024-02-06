@@ -1,0 +1,20 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Read Text File</title>
+</head>
+<body>
+    <script>
+        // Read the text file
+        fetch('test.txt')
+            .then(response => response.text())
+            .then(data => {
+                console.log('File content:', data);
+                // Process the file content as needed
+            })
+            .catch(error => console.error('Error reading file:', error));
+    </script>
+</body>
+</html>
