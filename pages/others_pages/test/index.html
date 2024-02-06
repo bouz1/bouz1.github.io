@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Text File</title>
+</head>
+<body>
+    <input type="text" id="newContent" placeholder="Enter new content">
+    <button onclick="updateFile()">Update File</button>
+
+    <script>
+        function updateFile() {
+            const newContent = document.getElementById("newContent").value;
+            fetch("update.php", {
+                method: "POST",
+                body: newContent
+            })
+                .then(response => response.text())
+                .then(result => console.log("File updated:", result))
+                .catch(error => console.error("Error updating file:", error));
+        }
+    </script>
+</body>
+</html>
