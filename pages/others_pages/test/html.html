@@ -7,9 +7,21 @@
     <title>Read Text File</title>
 </head>
 <body>
+<p> 
+This HTML/JS example work proptly to read the txt and show it in the input 
+<br>
+You must run it from the URL (githbu)
+<br>
+If you run if from pc folder, the error will be accurate
+</p>
+<button onclick= 'read_file()'>
+READ THE TXT FILE
+</button>
+<br>
 <input type='txt' id='id1'>
 </input>
     <script>
+	function read_file() {
         // Read the text file
         fetch('test.txt')
             .then(response => response.text())
@@ -19,6 +31,7 @@
                 // Process the file content as needed
             })
             .catch(error => console.error('Error reading file:', error));
+			}
     </script>
 </body>
 </html>
