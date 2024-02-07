@@ -1,0 +1,44 @@
+<head>
+</head>
+<body>
+
+  <script  type="text/javascript" src='names.js'>  </script>
+  <script  type="text/javascript" src='rand_shuffle.js'>  </script>
+  <script  type="text/javascript" src='seed_dates.js'>  </script>
+  <script  type="text/javascript" src='findRightSong.js'>  </script>
+  
+  
+
+  <button onclick='findSong(document.getElementById("id_audio"))'>
+    RUN audio 
+
+  </button>
+  <button onclick='ff2()'>
+    audio duration
+
+  </button>
+  <br>
+  <input id ='title'/>
+
+
+
+  <script>
+
+
+    function ff2()
+    {
+      var audio = document.getElementById("id_audio");
+
+
+      console.log('total_time',audio.duration);
+    }
+
+
+  </script>
+  <br>
+  <audio id= 'id_audio' controls preload="metadata" onended="findSong(this)" style="width:800px;">
+
+    <source src="" type="audio/mpeg">
+
+  </audio>
+</body>

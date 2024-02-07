@@ -32,9 +32,12 @@ return ''' +str(time) + ''';
 
 function tot_times() {
 return ''' +str(np.sum(time))+''';
-}'''
+}
+
+'''
 
 
 with open ('names.js','w') as f:
     f.write(string)
     f.close()
+input('close?')
