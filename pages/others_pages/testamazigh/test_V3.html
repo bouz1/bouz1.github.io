@@ -3,13 +3,16 @@
 <script  type="text/javascript" src='seed_dates.js'>  </script>
 
 <button onclick='ff()'>
-CLICK 
+RUN audio 
 
 </button>
 <button onclick='ff2()'>
-CLICK 2
+audio duration
 
 </button>
+<br>
+<input id ='title'>
+</input>
 
 <script>
 function ff() {
@@ -35,6 +38,7 @@ var audio = document.getElementById("id_audio");
 audio.setAttribute('src', namel_sh[i]);
 var delta_time=timel_sh[i]-(t-time_play);
 //console.log(namel_sh[i])
+document.getElementById("title").value=namel_sh[i];
 console.log('delta_time',delta_time);
 console.log('total_time',audio.duration);
 
@@ -56,7 +60,7 @@ console.log('total_time',audio.duration);
 
 </script>
 <br>
-<audio id= 'id_audio' controls preload="metadata">
+<audio id= 'id_audio' controls preload="metadata" onended="ff()" style="width:800px;">
 
   <source src="" type="audio/mpeg">
 
