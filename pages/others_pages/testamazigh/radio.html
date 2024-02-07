@@ -2,21 +2,18 @@
 </head>
 <body onload='play_song(document.getElementById("id_audio"))'>
 
-  <script  type="text/javascript" src='lib/mp3/names.js'>  </script>
-  <script  type="text/javascript" src='lib/rand_shuffle.js'>  </script>
-  <script  type="text/javascript" src='lib/seed_dates.js'>  </script>
+  <script  type="text/javascript" src='mp3/names.js'>  </script>
   <script  type="text/javascript" src='find_Right_Song.js'>  </script>
   
   
 
-  <button onclick='play_song(document.getElementById("id_audio"))'>
+  <!--button onclick='play_song(document.getElementById("id_audio"))'>
     RUN audio 
-  </button>
+  </button-->
 
   
   <br>
-  <audio id= 'id_audio' controls preload="metadata" onended="play_song(this)" style="width:800px;"
-  >
+  <audio id= 'id_audio' controls preload="metadata" onended="play_song(this)" style="width:800px;">
     <source src="" type="audio/mpeg">
   </audio>
   
