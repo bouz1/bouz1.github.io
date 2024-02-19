@@ -52,8 +52,8 @@
                 <h2>
                   Data Scientist
                 </h2>
-                
-                
+
+
                 <img src='https://bouz1.github.io/images/QR_code/qr_transp_porFol.svg' class="QR_code_img">
 
               </div>
@@ -99,20 +99,7 @@
             size: 210mm 297mm;
             margin: 0; 
           }
-          @media print { /* Print settings */
-            html, body, page {
-              width: 210mm;
-              height:100%;
-              margin: 0 !important; 
-              padding: 0 !important;
-              overflow: hidden; 
-            }
-            button {
-              display: none;
-            }
-            size: A4 portrait;
-            print-color-adjust: exact;
-          }
+
 
           button{
             background-color: black;
@@ -136,11 +123,25 @@
             color: 	#7ce8eb;
           }
           @media print
+            /* Print settings */
           {    
             .no-print, .no-print *
             {
               display: none !important;
             }
+
+            html, body, page {
+              width: 210mm;
+              height:100%;
+              margin: 0 !important; 
+              padding: 0 !important;
+              overflow: hidden; 
+            }
+            button {
+              display: none;
+            }
+            size: A4 portrait;
+            print-color-adjust: exact;
           }
           #button{
             position:fixed;
@@ -209,7 +210,7 @@
             height: 100%;
           }
           .QR_code_img{
-              width: 50%;
+            width: 50%;
             /*This code change the color 
             filter: invert(48%) sepia(79%) saturate(2476%) hue-rotate(86deg) brightness(118%) contrast(119%);*/
           }
