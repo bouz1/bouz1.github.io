@@ -1,1 +1,4 @@
 https://www.qrcode-monkey.com/fr/
+
+Transparent QR CODE
+https://qrgenerator.org/transparent-qr/
