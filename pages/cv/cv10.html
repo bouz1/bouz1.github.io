@@ -297,27 +297,7 @@
             box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
             color: 	#7ce8eb;
           }
-          @media print
-            /* Print settings */
-          {    
-            .no-print, .no-print *
-            {
-              display: none !important;
-            }
 
-            html, body, page {
-              width: 210mm;
-              height:100%;
-              margin: 0 !important; 
-              padding: 0 !important;
-              overflow: hidden; 
-            }
-            button {
-              display: none;
-            }
-            size: A4 portrait;
-            print-color-adjust: exact;
-          }
           #button{
             position:fixed;
             background: none;
@@ -453,23 +433,23 @@
             padding-left: 10mm; /* Add 10px of space between border and text */
             margin: 0; /* Remove margin */
 
-            
-            
+
+
             display: flex; /* Use flexbox for layout */
 
             align-items: center; /* Center items vertically */
             padding-bottom:0;
             height:6mm;
-            
+
 
 
 
             /*text-align: center;*/ /* Center the content horizontally */
           }
           .icon_chapter{
-       
-          
-              font-size: 6mm; /* Set the desired size for the icon */
+
+
+            font-size: 6mm; /* Set the desired size for the icon */
 
           }
           .chap_head_h1{
@@ -518,6 +498,36 @@
 
 
 
+
+
+          /* Print settings */
+          @media print
+
+          {    
+            .no-print, .no-print *
+            {
+              display: none !important;
+            }
+
+            html, body, page {
+              width: 210mm;
+              height:100%;
+              margin: 0 !important; 
+              padding: 0 !important;
+              overflow: hidden; 
+
+            
+              
+            }
+            button {
+              display: none;
+            }
+
+            size: A4 portrait;
+            -webkit-print-color-adjust:exact !important;
+            print-color-adjust: exact !important;
+          }
+         
 
 
         </style>
