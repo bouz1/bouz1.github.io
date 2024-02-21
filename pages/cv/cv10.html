@@ -516,18 +516,28 @@
               padding: 0 !important;
               overflow: hidden; 
 
-            
-              
+
+
             }
             button {
               display: none;
             }
 
             size: A4 portrait;
+            
+            
+            /* for chrome + Brave */
             -webkit-print-color-adjust:exact !important;
             print-color-adjust: exact !important;
+            /* for opera edge */
+            .ZoneLeft{
+              background-color:  var(--color5);
+            }
+            .ZoneRight{
+              background-color:  var(--color6);
+            }
           }
-         
+
 
 
         </style>
