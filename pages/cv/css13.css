@@ -146,8 +146,9 @@ border:  1mm solid  var(--color6);
 
 .main_name_h1{
 text-transform: uppercase;
-font-family: 'Anta';
-font-size: 7mm;
+/*font-family: 'Anta';*/
+font-size: 7.5mm;
+padding-bottom: 2mm;
 }
 .main_title_h2{
 text-transform: uppercase;
