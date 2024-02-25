@@ -5,11 +5,9 @@
 --print_borders: 5mm;
 /* CV COLOR https://colorswall.com/palette/24162*/
 --color1:#2d2d2d; /* black for text*/
---color2:#fefeff; /* wite for html page*/
---color4:#e0e0d7; /* wite for cv zones*/
---color5:#e0c4ad; /* gold*/
---color6:#fef9f2; /* blanc casse*/
---color7:#d0d1d3;
+--color2:#e0c4ad; /* gold*/
+--color3:#fef9f2; /* blanc casse*/
+
 /* var(--print_borders)*/
 }
 
@@ -24,7 +22,6 @@ body {
 background: rgb(204,204,204); 
 }
 page {
-background: #fff;
 display: block;
 margin: 0 auto;
 
@@ -40,28 +37,22 @@ margin: 0;
 
 
 button{
-background-color: black;
-width:50mm;
+background-color:var(--color1);
+width:25mm;
 border:none;
 outline:0;
-color: #fff;
+color: var(--color3);
 font-family: 'Oswald', Helvetica, Arial, sans-serif;
-font-size: 20px;
-font-weight:bold;
+font-size: 4mm;
 padding: 8px 20px;
 text-align: center;
 text-decoration: none;
-
-
 cursor: pointer; 
 text-transform:uppercase;
-
-
-
 }
 button:hover {
 box-shadow: 0 12px 16px 0 rgba(0,0,0,0.24), 0 17px 50px 0 rgba(0,0,0,0.19);
-color:  var(--color5);;
+color:  var(--color2);;
 }
 
 #button_div_id{
@@ -77,7 +68,7 @@ text-align: right !important;
 
 page{
 overflow: hidden;
-margin-top: 13.5mm;
+margin-top: 11mm;
 }
 .page{
 position: static;
@@ -87,7 +78,7 @@ height: 1123px;*/
 width: 210mm;
 height: 297mm;
 
-background-color:  var(--color6);
+background-color:  var(--color3);
 
 
 grid-template-columns: 1fr 2fr;
@@ -99,13 +90,19 @@ overflow: hidden;
 
 #button_div_id{
 width: 210mm;
-/*background-color:  var(--color5);*/
+/*background-color:  var(--color2);*/
+}
+
+
+#button_div_id a{
+  text-decoration: none;
+  
 }
 /******************************************************************/
 /*************************** Zone left ****************************/
 /******************************************************************/
 .ZoneLeft{
-background-color:  var(--color5);
+background-color:  var(--color2);
 padding-top:var(--print_borders);
 padding-bottom:var(--print_borders);
 padding-left:var(--print_borders);
@@ -136,7 +133,7 @@ height: auto;
 display: block; /* Remove any default inline spacing */
 overflow: hidden; /* Hide any overflow beyond the container */
 border-radius: 50%; /* Make the border radius 50% to create a circle */
-border:  1mm solid  var(--color6);
+border:  1mm solid  var(--color3);
 
 
 
@@ -179,7 +176,7 @@ height: 2mm;
 border-radius: 1mm;
 overflow: hidden;
 width: 80%;
-background-color: var(--color6); 
+background-color: var(--color3); 
 }
 
 .progress {
@@ -236,7 +233,7 @@ padding-left: 0mm;
 text-align: left;
 
 }
-.contact_a:hover {color:var(--color2);}
+.contact_a:hover {color:var(--color3);}
 
 /*
 .contact_a:link {color: black;}
@@ -272,7 +269,7 @@ text-align: center;
 /*************************** Zone RIGHT ****************************/
 /******************************************************************/
 .ZoneRight{
-background-color:  var(--color6);
+background-color:  var(--color3);
 display: block;   /* it can put children in one line */
 padding-top:var(--print_borders);
 padding-bottom:var(--print_borders);
@@ -393,7 +390,7 @@ font-size: 3mm;
 
   -webkit-print-color-adjust:exact !important;
   print-color-adjust: exact !important;
-  ackground-color:  var(--color6);
+  ackground-color:  var(--color3);
 }
 
 /* Verification */
