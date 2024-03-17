@@ -44,6 +44,12 @@
             <br>
             <label>Total remboursé</label>
             <input type="number"  id="Tot1"/>
+            <br>
+            <label>Cout de crédit</label>
+            <input type="number"  id="CoutCredit1"/>
+            <br>
+            <label>Cout mensuel de crédit</label>
+            <input type="number"  id="CoutCreditMens1"/>
           </div>
 
         </div>
@@ -82,7 +88,7 @@
             <input type="number"  id="dureeTot2" value="25"/>
             <br>
             <label>Assurance % par an</label>
-            <input type="number"  id="assurTaux" value="0.6"/>
+            <input type="number"  id="assurTaux" value="0.637"/>
             <br>
             <label>Autre charge</label>
             <input type="number"  id="autre_charge" value="90"/>
@@ -161,11 +167,27 @@
                 </td>
               </tr>
             </table>
+
+            <label>Déponse total final</label>
             <lable>
+            <input type="number"  id="depTotal2" value="0"/>
+            <br>
+            <label>x1</label>
+            <lable>
+            <input type="number"  id="" value="0"/>
+            <br>
+            <label>x1</label>
+            <lable>
+            <input type="number"  id="" value="0"/>
+            <br>
+            <label>x1</label>
+            <lable>
+            <input type="number"  id="" value="0"/>
+            <br>
               Details
             </lable>
             <input type="checkbox" id="show_details_2_cbx" 
-            onclick="show_head_details2()" >
+            onclick="show_head_details2()" checked>
 
             </input>
           </div>
@@ -199,7 +221,7 @@
             </tr>
             <tr>
               <th>
-                Mensualité
+                Mensualité sans assur
               </th>
               <th>
                 Assurence
@@ -217,7 +239,7 @@
                 Reste capital
               </th>
               <th>
-                Mensualité
+                Mensualité sans assur
               </th>
               <th>
                 Assurence
@@ -235,7 +257,7 @@
                 Reste capital
               </th>
               <th>
-                Mensualité
+                Mensualité sans assur
               </th>
               <th>
                 Assurence

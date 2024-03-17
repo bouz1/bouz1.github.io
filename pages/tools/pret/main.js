@@ -1,4 +1,6 @@
- /******************** Tab Manager **********************************/
+ /****************************************************************/
+ /******************** Tab Manager *******************************/
+ /****************************************************************/
  function funtab(butt){
     buttID=butt.id;
     tabID=buttID.replace("butt","tab");
@@ -13,16 +15,24 @@
     }
 }
 
-
+/****************************************************************/
 /*********************** Function of TAB1 ***********************/
+/****************************************************************/
+
 function Mensualite_cal(){
     var cap=document.getElementById("cap1").value;
     var taux=document.getElementById("taux1").value/100;
     var durN=12*document.getElementById("duration1").value;//12 = Months
-    
     var Mens=mens_cal(cap,taux,durN);
+
     document.getElementById("Mens1").value=Mens.toFixed(2);
-    document.getElementById("Tot1").value=(Mens*durN).toFixed(2);
+    var Tot1=(Mens*durN);
+    document.getElementById("Tot1").value=Tot1.toFixed(2);
+    var CoutCredit1=Tot1-cap;
+    document.getElementById("CoutCredit1").value= CoutCredit1.toFixed(2);
+    var CoutCreditMens1=CoutCredit1/durN;
+    document.getElementById("CoutCreditMens1").value=  CoutCreditMens1.toFixed(2);
+    
 }
 
 function mens_cal(cap,taux,durN){
@@ -36,8 +46,9 @@ function mens_cal(cap,taux,durN){
     
     return Mens;
 }
-
+/****************************************************************/
 /*********************** Function of TAB2 ***********************/
+/****************************************************************/
 function show_head_details2(){
     var check=document.getElementById("show_details_2_cbx").checked;
     var div_=document.getElementById("det_div_ID2")
@@ -108,6 +119,8 @@ function amortissement(){
     var dureeTot2=parseFloat(document.getElementById("dureeTot2").value)*12;
     var assurTaux = parseFloat(document.getElementById("assurTaux").value)/100;
     var autre_charge= parseFloat(document.getElementById("autre_charge").value);
+
+    var apporPers2 = parseFloat(document.getElementById("apporPers2").value);
     
     /////////// Binary search
     MensMax=2000;
@@ -135,7 +148,9 @@ function amortissement(){
     else break;
     //console.log(i,MensTot2,cap_remb,pretclass2 ,MensMin,MensMax);
     }
-    document.getElementById("MensTot2").value=MensTot2;
+    document.getElementById("MensTot2").value=MensTot2.toFixed(2);
+
+    document.getElementById("depTotal2").value=(MensTot2*dureeTot2+apporPers2).toFixed(2);
 
 }
 
@@ -160,6 +175,8 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
         rows[i].remove();
     }
 
+    //var rembourTot2=0;
+
     for (i=0;i<dureeTot2;i++){
         var row = table.insertRow();
         mens=0;
@@ -177,10 +194,20 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
             mensPTZ2_ =mensPTZ2;
             partInteret=PTZ2*tauxPTZ2/12;
         }
+        
         cell.textContent=mensPTZ2_.toFixed(2);
+        //rembourTot2+=mensPTZ2_;
 
-        var cell = row.insertCell();
-        cell.textContent=assMensPTZ2;
+        if (i/12>=finPTZ2){
+            var cell = row.insertCell();
+            assMensPTZ2=0;
+            cell.textContent=assMensPTZ2.toFixed(2);
+        }
+        else {
+            var cell = row.insertCell();
+            cell.textContent=assMensPTZ2.toFixed(2);
+        }
+        //rembourTot2+=assMensPTZ2;
 
         var cell = row.insertCell();
         cell.textContent=partInteret.toFixed(2);
@@ -208,10 +235,19 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
             partInteret=actLog2*tauxactLog2/12;
         }
         cell.textContent=mensactLog2_.toFixed(2);
+        //rembourTot2+=mensactLog2_;
 
 
-        var cell = row.insertCell();
-        cell.textContent=assMensactLog2;
+        if (i/12>=finactLog2){
+            var cell = row.insertCell();
+            assMensactLog2=0;
+            cell.textContent=assMensactLog2.toFixed(2);
+        }
+        else {
+            var cell = row.insertCell();
+            cell.textContent=assMensactLog2.toFixed(2);
+        }
+        //rembourTot2+=assMensactLog2;
 
         var cell = row.insertCell();
         cell.textContent=partInteret.toFixed(2);
@@ -230,6 +266,17 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
         actLog2-=partCap;
        
         // Prêt classique
+
+        if (i/12>=finpretclass2){
+            var cell = row.insertCell();
+            assMenspretclass2=0;
+            cell.textContent=assMenspretclass2.toFixed(2);
+        }
+        else {
+            var cell = row.insertCell();
+            cell.textContent=assMenspretclass2.toFixed(2);
+        }
+
         var cell = row.insertCell();
         var menspretclass2_=0;
         var partInteret=0;
@@ -242,8 +289,6 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
         }
         cell.textContent=menspretclass2_.toFixed(2);
 
-        var cell = row.insertCell();
-        cell.textContent=assMenspretclass2;
 
         var cell = row.insertCell();
         cell.textContent=partInteret.toFixed(2);
@@ -274,6 +319,9 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
         */
          
     }
+    //document.getElementById("depTotal2").value=rembourTot2.toFixed(0);
+    
+    
 
     return cap_remb
 }
@@ -335,10 +383,11 @@ Plotly.newPlot("PlotID2", data, layout);
 
 
 
-
-/*********************** Initialization ***********************/
+/****************************************************************/
+/*********************** Initialization *************************/
+/****************************************************************/
 function onload_init(){
-    document.getElementById("butt1").click();
+    document.getElementById("butt2").click();
     show_head_details2();
     mainTAB2();
     Mensualite_cal();
