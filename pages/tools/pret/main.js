@@ -392,3 +392,96 @@ function onload_init(){
     mainTAB2();
     Mensualite_cal();
 }
+
+
+/****************************************************************/
+/****************** SAVE FILES  *********************************/
+/****************************************************************/
+
+/*** SAVE ***/
+function saveTextAsFile(name,str)
+{
+  var textToSaveAsBlob = new Blob([str], {type:"text/plain"});
+  var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+  var downloadLink = document.createElement("a");
+  downloadLink.download = name;
+  downloadLink.innerHTML = "Download File";
+  downloadLink.href = textToSaveAsURL;
+  downloadLink.style.display = "none";
+  document.body.appendChild(downloadLink);
+  downloadLink.click();
+}
+
+
+function file_string() {
+    let upload = document.getElementById('upload');
+    let fr = new FileReader();
+    if (upload.files.length === 0) {
+        return "Please select a file.";
+    }
+    return new Promise((resolve) => {
+        fr.readAsText(upload.files[0]);
+        fr.onload = function () {
+        resolve(fr.result);
+        };
+    });
+}
+
+
+function save_inputs(){
+    var inputs = document.querySelectorAll('input');
+    var str="";
+    for (var i = 0; i < inputs.length; i++) {
+        var input = inputs[i];
+        if (input.type=="number"){
+            str+="\n";
+            str+=input.id;
+            str+="==>";
+            str+=input.value;
+            //console.log('ID:', input.id, 'Value:', input.value,input.type);
+        }
+    }
+    
+    var file_name = document.getElementById("File_name_savedID").value;
+    saveTextAsFile(file_name+".txt",str);
+}
+
+
+/*** READ FILES ****/
+
+async function read_inputs() {
+    const fileContent = await file_string();
+    var arr = fileContent.split('\n');
+    
+    for (var i = 0; i < arr.length; i++) {
+        var line= arr[i];
+        if (line.includes("==>")){
+            line=line.split("==>");
+            var id = line[0];
+            var value= line[1];
+            if (id.length>0 & value.length > 0){
+                document.getElementById(id).value=value;
+            }
+        }
+    }
+  }
+
+function file_string() {
+    let upload = document.getElementById('upload');
+    let fr = new FileReader();
+
+    if (upload.files.length === 0) {
+        return "Please select a file.";
+    }
+
+    return new Promise((resolve) => {
+        fr.readAsText(upload.files[0]);
+        fr.onload = function () {
+        resolve(fr.result);
+        };
+    });
+}
+    /*
+    var upload = document.getElementById('upload');
+    upload.addEventListener('change', func2);
+    */

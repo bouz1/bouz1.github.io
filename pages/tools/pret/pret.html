@@ -172,7 +172,7 @@
             <lable>
             <input type="number"  id="depTotal2" value="0"/>
             <br>
-            <label>x1</label>
+            <label>Coût total du financement</label>
             <lable>
             <input type="number"  id="" value="0"/>
             <br>
@@ -283,10 +283,28 @@
           <h1>
             TAB3
           </h1>
-          Test this TAB3333333333333
-          <button onclick="test()">
-            test
+          <label>Non du fichier</label>
+          <lable>
+          <input type="text"  id="File_name_savedID" value="Simulation Pret"/>
+          
+          <button onclick="save_inputs()">
+            SAVE
           </button>
+
+          
+
+
+
+          <input type="file" id="upload" > <!--style="display: none;"-->
+          <button onclick='read_inputs()' >
+          Read
+          </button>
+
+
+
+
+
+
           
           <div id="PlotID2" style="width:100%;max-width:800px"></div>
         </div>
