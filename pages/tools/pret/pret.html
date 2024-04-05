@@ -59,7 +59,7 @@
           </h1>
           <div>
             <h2> Dépense</h2>
-            <label>Prix initial</label>
+            <label>Prix du bien</label>
             <input type="number"  id="prix2" value="257800"/>
             <br>
             <label>Notaire: Pourcentage (%)</label>
@@ -67,6 +67,9 @@
                    oninput="NotCout2.value = this.value*prix2.value/100"/>
             <label>Notaire: Cout</label>
             <input type="number"  id="NotCout2" value=""/>
+            <br>
+            <label>Prix du bien + notaire</label>
+            <input type="number" id="prix_notaire2" value=""/>
             <br>
             <label>Frais de dossier</label>
             <input type="number" id="FraisDoss2" value="500"/>
@@ -174,15 +177,17 @@
             <br>
             <label>Coût total du financement</label>
             <lable>
-            <input type="number"  id="" value="0"/>
+            <input type="number"  id="cout_tot_finanID" value="0"/>
+            <input type="number"  id="cout_tot_finan_pourcID" value="0"/>
+            <label>%</label>
             <br>
-            <label>x1</label>
+            <label>Assurance emprunteur</label>
             <lable>
-            <input type="number"  id="" value="0"/>
+            <input type="number"  id="ass_emprun2" value="0"/>
             <br>
-            <label>x1</label>
+            <label>Total d'intérêts</label>
             <lable>
-            <input type="number"  id="" value="0"/>
+            <input type="number"  id="Tot_inter2" value="0"/>
             <br>
               Details
             </lable>

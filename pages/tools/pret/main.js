@@ -64,12 +64,14 @@ function mainTAB2(){
     var prix2 = parseFloat(document.getElementById("prix2").value);
     var NotPourc2 = parseFloat(document.getElementById("NotPourc2").value);
     var NotCout2=prix2*NotPourc2/100;
-    document.getElementById("NotCout2").value=NotCout2;
+    document.getElementById("NotCout2").value=NotCout2.toFixed(2);
+    var prix_notaire2=NotCout2+prix2;
+    document.getElementById("prix_notaire2").value=prix_notaire2.toFixed(2);
     var FraisDoss2= parseFloat(document.getElementById("FraisDoss2").value);
     var courtage2= parseFloat(document.getElementById("courtage2").value);
     var frais_garentie2=parseFloat(document.getElementById("frais_garentie2").value);
     var depTot2=prix2+NotCout2+FraisDoss2+courtage2+frais_garentie2;
-    document.getElementById("depTot2").value=depTot2;
+    document.getElementById("depTot2").value=depTot2.toFixed(2);
     /**Financement**/
     var apporPers2 = parseFloat(document.getElementById("apporPers2").value);
     var PTZ2 = parseFloat(document.getElementById("PTZ2").value);
@@ -77,19 +79,28 @@ function mainTAB2(){
     
     if (isNaN(PTZ2) || chbPTZ){
         PTZ2=Math.min(84000,0.4*depTot2);
-        document.getElementById("PTZ2").value=PTZ2;
+        document.getElementById("PTZ2").value=PTZ2.toFixed(2);
         document.getElementById("ptzCbx2").checked=true;
     }
     var actLog2 = parseFloat(document.getElementById("actLog2").value);
     var chbAcLog=document.getElementById("actLogCbx2").checked;
     if (isNaN(actLog2 ) || chbAcLog){
         actLog2 =30000;
-        document.getElementById("actLog2").value=actLog2 ;
+        document.getElementById("actLog2").value=actLog2.toFixed(2) ;
         document.getElementById("actLogCbx2").checked=true;
     }
     var pretclass2=Math.max(depTot2-(apporPers2+PTZ2 +actLog2),0);
-    document.getElementById("pretclass2").value=pretclass2;
-    amortissement();
+    document.getElementById("pretclass2").value=pretclass2.toFixed(2);
+   amortissement();
+
+
+   depTotal2=document.getElementById("depTotal2").value;//=.toFixed(2);
+   var cout_tot_finanID= depTotal2-(prix2+NotCout2); 
+   document.getElementById("cout_tot_finanID").value=cout_tot_finanID.toFixed(2) ;
+   var cout_tot_finan_pourcID =100*cout_tot_finanID/prix_notaire2 ; 
+   console.log(cout_tot_finan_pourcID,cout_tot_finanID,prix_notaire2 )
+   document.getElementById("cout_tot_finan_pourcID").value=cout_tot_finan_pourcID.toFixed(2);
+ 
 }
 
 function amortissement(){
@@ -149,8 +160,10 @@ function amortissement(){
     //console.log(i,MensTot2,cap_remb,pretclass2 ,MensMin,MensMax);
     }
     document.getElementById("MensTot2").value=MensTot2.toFixed(2);
+    var depTotal2=MensTot2*dureeTot2+apporPers2 ; 
+    document.getElementById("depTotal2").value=depTotal2.toFixed(2);
 
-    document.getElementById("depTotal2").value=(MensTot2*dureeTot2+apporPers2).toFixed(2);
+    
 
 }
 
@@ -176,6 +189,8 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
     }
 
     //var rembourTot2=0;
+    var ass_emprun2=0;
+    var Tot_inter2=0;
 
     for (i=0;i<dureeTot2;i++){
         var row = table.insertRow();
@@ -194,19 +209,18 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
             mensPTZ2_ =mensPTZ2;
             partInteret=PTZ2*tauxPTZ2/12;
         }
+        if (i/12>=finPTZ2) {
+            assMensPTZ2=0;
+            
+        }
         
         cell.textContent=mensPTZ2_.toFixed(2);
         //rembourTot2+=mensPTZ2_;
 
-        if (i/12>=finPTZ2){
-            var cell = row.insertCell();
-            assMensPTZ2=0;
-            cell.textContent=assMensPTZ2.toFixed(2);
-        }
-        else {
-            var cell = row.insertCell();
-            cell.textContent=assMensPTZ2.toFixed(2);
-        }
+        var cell = row.insertCell();
+        cell.textContent=assMensPTZ2.toFixed(2);
+        console.log(i,finPTZ2,assMensPTZ2);
+    
         //rembourTot2+=assMensPTZ2;
 
         var cell = row.insertCell();
@@ -234,19 +248,15 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
             mensactLog2_ =mensactLog2;
             partInteret=actLog2*tauxactLog2/12;
         }
+        if (i/12>=finactLog2) {
+            assMensactLog2=0;
+        }
         cell.textContent=mensactLog2_.toFixed(2);
         //rembourTot2+=mensactLog2_;
 
 
-        if (i/12>=finactLog2){
-            var cell = row.insertCell();
-            assMensactLog2=0;
-            cell.textContent=assMensactLog2.toFixed(2);
-        }
-        else {
-            var cell = row.insertCell();
-            cell.textContent=assMensactLog2.toFixed(2);
-        }
+        var cell = row.insertCell();
+        cell.textContent=assMensactLog2.toFixed(2);
         //rembourTot2+=assMensactLog2;
 
         var cell = row.insertCell();
@@ -267,15 +277,13 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
        
         // Prêt classique
 
-        if (i/12>=finpretclass2){
-            var cell = row.insertCell();
+        if ( i/12>=finpretclass2) {
             assMenspretclass2=0;
-            cell.textContent=assMenspretclass2.toFixed(2);
         }
-        else {
-            var cell = row.insertCell();
-            cell.textContent=assMenspretclass2.toFixed(2);
-        }
+        
+        
+
+      
 
         var cell = row.insertCell();
         var menspretclass2_=0;
@@ -287,7 +295,14 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
             menspretclass2_ =menspretclass2;
             partInteret=pretclass2*tauxpretclass2/12;
         }
+        else {
+
+        }
         cell.textContent=menspretclass2_.toFixed(2);
+
+        var cell = row.insertCell(); 
+        cell.textContent=assMenspretclass2.toFixed(2);
+        
 
 
         var cell = row.insertCell();
@@ -309,10 +324,12 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
         /*** Others ***/
         var cell = row.insertCell();
         cell.textContent=interet.toFixed(2);
+        Tot_inter2+=interet
 
 
         var cell = row.insertCell();
         cell.textContent=assTot2.toFixed(2);
+        ass_emprun2+=assTot2;
         /*
         var cell = row.insertCell();
         cell.textContent=captot.toFixed(2);
@@ -320,6 +337,10 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
          
     }
     //document.getElementById("depTotal2").value=rembourTot2.toFixed(0);
+    document.getElementById("ass_emprun2").value=ass_emprun2.toFixed(0);
+    console.log(Tot_inter2);
+    document.getElementById("Tot_inter2").value=Tot_inter2.toFixed(0);
+    
     
     
 
