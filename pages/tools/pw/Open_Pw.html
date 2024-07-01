@@ -5,34 +5,35 @@
   <script src="MD5.js" >  </script>
   <!--Local AES-->
   <script src="AES.js" >  </script>
+  
+  
+  
+  <script src="PW_manager_AES_crypto_V3_23.js"></script>
+  <script src="pw_montage_V001.js"></script>
 </head>
 
 <body>
 
-  <script src="PW_manager_AES_crypto_V3_22.js"></script>
+
+ 
   <input type=password id = "PW"> </input> 
   <br>
-  <button onclick="open_page('PW_manager_AES_crypto_V3_22.js')">Decrept page AES</button>
+  <button onclick="open_page()">Decrept page AES</button>
 
 
   <script>
 
-    function open_page(filename){
-      var pw= document.getElementById("PW").value;
-	  
-	   
-	   
-      var funname = "fun"+CryptoJS.MD5(filename) +"()";
-      //console.log(funname);
-      //console.log(page_code);
-      var page_code=eval(funname);
-      var decbytes = CryptoJS.AES.decrypt(page_code,pw);
-      var tempPageContent =decbytes.toString(CryptoJS.enc.Utf8);
-      //console.log(tempPageContent);
-      var newWindow = window.open('', '_blank');
-      newWindow.document.write(tempPageContent);
-
-    }
+	function open_page(){
+		var pw= document.getElementById("PW").value;
+		var page_code=read_AES_encoding();
+		var decbytes = CryptoJS.AES.decrypt(page_code,pw);
+		var tempPageContent =decbytes.toString(CryptoJS.enc.Utf8);
+		var newWindow = window.open('', '_blank');
+		newWindow.document.write(tempPageContent);
+		let new_script = newWindow.document.createElement('script');
+		new_script.textContent = "function montage() {let s = '"+pw_montage()+"';\n return s;}";  
+		newWindow.document.body.appendChild(new_script);
+	}
   </script>
 
 </body>
