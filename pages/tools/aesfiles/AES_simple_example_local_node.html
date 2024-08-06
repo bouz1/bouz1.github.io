@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+
+  </head>
+  <body>
+
+
+    PW <br><input type='text' id="PW_ID" size="100">
+    <br><br>
+
+    Decrypted (source)<br> <input type='text' id="enc" size="100">
+    <br><br>
+
+    <button onclick="decr()"> encypt </button>
+    <button onclick="encr()"> decrypt </button>
+    <br><br>
+
+
+    Encrypted (hidden) <br> <input type='text' id="dec" size="100">
+    <br><br>
+
+
+    <script>
+      function decr(){
+
+        const pw = document.getElementById("PW_ID").value;
+        const txt = document.getElementById("enc").value;
+        var enctxt = CryptoJS.AES.encrypt(txt,pw);
+		var string a = enctxt;
+		console.log(a);
+        document.getElementById("dec").value=enctxt;
+
+
+      }
+
+      function encr(){
+
+        const pw = document.getElementById("PW_ID").value;
+        const txt = document.getElementById("dec").value;
+        var decbytes = CryptoJS.AES.decrypt(txt,pw);
+        var dectstr =decbytes.toString(CryptoJS.enc.Utf8);
+        document.getElementById("enc").value=dectstr;
+
+      }
+
+
+
+    </script>
+
+    <script src="AES.js" >  </script>
+
+
+  </body>
+
+
+
+</html>
