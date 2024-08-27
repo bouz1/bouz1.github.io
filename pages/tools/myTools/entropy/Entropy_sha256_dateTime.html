@@ -1,0 +1,48 @@
+<h2>
+  Entrepy generator by date and salte
+</h2>
+<label>Salt</label>
+<input id="salt" placeholder="You can add a passphrase her" size=40>
+<br><br><button onclick="generate()">
+  Generate
+</button>
+<br>
+<textarea id= "res" cols=90 rows=4>
+
+</textarea>
+<br>
+Algorithm : sha256 ( datetime + sale )
+
+<script>
+
+
+  async function sha256String(s) {
+    const encoder = new TextEncoder();
+    const data = encoder.encode(s);
+    const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+    const hashArray = Array.from(new Uint8Array(hashBuffer));
+    return String(hashArray.map(b => b.toString(16).padStart(2, '0')).join(''));
+  }
+
+  function generate(){
+    const now = new Date();
+    const dateTimeString = now.toISOString();
+    const salt = document.getElementById("salt").value;
+
+
+    sha256String(dateTimeString+salt).then(hexString => {
+
+      const bigIntValue = String(BigInt('0x' + hexString));
+
+
+      txtarea=document.getElementById("res")
+      txtarea.value="Date time : "+dateTimeString+"\n";
+      txtarea.value+="Salt :     "+salt+"\n";
+      txtarea.value+="SHA2 Hex : "+hexString+"\n";
+      txtarea.value+="SHA3 Dec : "+bigIntValue+"\n";
+
+
+    });
+  }
+
+</script>

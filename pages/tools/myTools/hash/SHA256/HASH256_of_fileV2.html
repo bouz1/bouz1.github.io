@@ -1,0 +1,46 @@
+<head>
+
+</head>
+<body>
+
+<h2>
+FILE HASH 256  (SHA2 of a file)
+</h2>
+<h3>
+SHA256 File Checksum 
+</h3>
+<input type="file" id="fileInput"><br><br>
+<!-- <button onclick="HashFile()"> Hash the file </button> -->
+<br>
+<input type='text'  id='File_Hash' size='65' />
+<br><br>
+you can verify this tool using other online tools like https://emn178.github.io/online-tools/sha256_checksum.html
+
+<script src="HASH256_Local.js"></script>
+
+<script>
+
+
+document.getElementById('fileInput').addEventListener('change', function() {
+    if (this.files.length > 0) {
+        //HashFile(this.files[0]);
+		HashFile();
+    }
+});
+
+function HashFile() {
+  const fileInput = document.getElementById('fileInput').files[0];
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    // Convert the result (ArrayBuffer) to a Uint8Array
+	const byteArray = new Uint8Array(e.target.result);
+    //console.log(byteArray);
+	document.getElementById('File_Hash').value = SHA256_V2(strArr2binb(byteArray),byteArray.length);
+  };
+  reader.readAsArrayBuffer(fileInput);
+}
+
+
+</script>
+
+</body>

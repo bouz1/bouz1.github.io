@@ -1,0 +1,111 @@
+Private key: 
+<br>
+<input type="text" id="privateK" size=100
+value= "6d4a19fa576765f8dfda7e87b3c5e0b2c2eab91b2b6714a9340d8b3c51b77c48">
+<br>
+<button onclick="calculate()"> Calculate</button> 
+<br>
+Public key: 
+<br>
+<textarea type="text" id="publicK" cols=100 rows=10> </textarea>
+<br>
+<label>
+you 
+</label>
+You can verify the functionality using online tools like <a href="https://www.bitaddress.org/bitaddress.org-v3.3.0-SHA256-dec17c07685e1870960903d8f58090475b25af946fe95a734f88408cef4aa194.html">bitaddress.org</a> (Wallet Details) or python libraries
+<script>
+
+/*
+You can verify the functionality using online tools like https://learnmeabitcoin.com/technical/keys/public-key/ or python libraries */
+function calculate(){
+const p = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F');
+var G0 = [
+	BigInt('0x79BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798'), // x-coordinate
+	BigInt('0x483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8')  // y-coordinate
+];
+
+// Function to calculate the modular inverse using modular exponentiation
+function modInverse(a, p) {
+    return modExp(a, p - BigInt(2), p);
+}
+
+// Function for modular exponentiation (base^exp % mod)
+function modExp(base, exp, mod) {
+    let result = BigInt(1);
+    base = base % mod;
+    while (exp > 0) {
+        if (exp % BigInt(2) === BigInt(1)) {
+            result = (result * base) % mod;
+        }
+        exp = exp / BigInt(2);
+        base = (base * base) % mod;
+    }
+    return result;
+}
+
+// Function to add two elliptic curve points
+function add(P1, P2) {
+    const [x1, y1] = P1;
+    const [x2, y2] = P2;
+
+    if (x1 === x2 && y1 === y2) {
+        return doubleP(P1);
+    }
+
+    const lambda = ((y2 - y1) * modInverse(x2 - x1, p)) % p;
+    const x3 = (lambda * lambda - x1 - x2) % p;
+    const y3 = (lambda * (x1 - x3) - y1) % p;
+
+    return [(x3 + p) % p, (y3 + p) % p]; // Ensure positive results for x3, y3
+}
+
+// Function to double an elliptic curve point
+function doubleP(P) {
+    const [x1, y1] = P;
+    const lambda = (BigInt(3) * x1 * x1 * modInverse(BigInt(2) * y1, p)) % p;
+    const x3 = (lambda * lambda - BigInt(2) * x1) % p;
+    const y3 = (lambda * (x1 - x3) - y1) % p;
+
+    return [(x3 + p) % p, (y3 + p) % p]; // Ensure positive results for x3, y3
+}
+
+// Function for scalar multiplication of a point G by scalar k
+function Multi_kG(k) {
+    var G = G0;
+
+    let K = null; // Initialize K as null
+    
+    // Iterate over each bit of k in reverse order
+    for (const b of k.toString(2).split('').reverse()) {
+
+        if (b === '1') {
+			if (K === null) {
+				K = G; // Set K to G if it's the first point
+			} else {
+            K = add(K, G); // If the current bit is 1, add the generator point G
+			}
+        }
+		G=doubleP(G);
+		
+    }
+
+    return K;
+}
+
+// Example usage
+//const k = BigInt('0x6d4a19fa576765f8dfda7e87b3c5e0b2c2eab91b2b6714a9340d8b3c51b77c48');
+var k = BigInt("0x"+document.getElementById("privateK").value);
+var K = Multi_kG(k);
+//console.log(`x: ${K[0].toString(16)}`);
+//console.log(`y: ${K[1].toString(16)}`);
+var x= K[0].toString(16);
+var y= K[1].toString(16);
+if (K[1]%BigInt(2)==0) evenodd="02"; // even Paire 
+else        evenodd="03"; // odd  Impaire
+
+document.getElementById("publicK").value="Point coordinates\nx : "+x+"\ny : "+y+"\n\nCompressed Format:\n"+evenodd+x+"\n\nUncompressed Format:\n"+"04"+x+y; 
+
+
+}
+
+</script>

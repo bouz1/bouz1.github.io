@@ -1,0 +1,128 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Voice Recorder</title>
+</head>
+<body>
+
+    
+    <div class="container">
+        <div class="display">
+	<h1> Entropy generator by hashing the audio recording (SHA2 (Audio))
+	</h1>
+            
+            <audio id="audio" controls></audio>
+        </div>
+        <div class="controllers">
+            <button id="startButton" onclick="startRecording()">Start Recording</button>
+            <button id="stopButton" onclick="stopRecording()">Stop Recording</button>
+            <button id="downloadButton" onclick="downloadAudio()">Download Recording</button>
+            <button id="convertButton" onclick="convertToArray()">Hash the array</button> <!-- New button -->
+		<p id="message"></p>
+        </div>
+    </div>
+
+    <script>
+        let mediaRecorder, chunks = [], audioURL = '';
+
+        const startButton = document.getElementById('startButton'),
+              stopButton = document.getElementById('stopButton'),
+              downloadButton = document.getElementById('downloadButton'),
+              convertButton = document.getElementById('convertButton'),
+              message = document.getElementById('message'),
+              audio = document.getElementById('audio');
+
+        if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
+            navigator.mediaDevices.getUserMedia({ audio: true })
+                .then(stream => {
+                    mediaRecorder = new MediaRecorder(stream);
+                    mediaRecorder.ondataavailable = e => chunks.push(e.data);
+                    mediaRecorder.onstop = () => {
+                        const blob = new Blob(chunks, { 'type': 'audio/ogg; codecs=opus' });
+                        chunks = [];
+                        audioURL = window.URL.createObjectURL(blob);
+                        audio.src = audioURL;
+                        downloadButton.style.display = 'inline';
+                        convertButton.style.display = 'inline'; // Make sure the convert button is visible
+                    };
+                })
+                .catch(error => {
+                    console.log('Error: ', error);
+                    message.textContent = 'Your browser does not support mediaDevices';
+                });
+        } else {
+            message.textContent = 'Your browser does not support mediaDevices';
+        }
+
+        const startRecording = () => {
+            mediaRecorder.start();
+            message.textContent = 'Recording...';
+        };
+
+        const stopRecording = () => {
+            mediaRecorder.stop();
+            message.textContent = '';
+        };
+
+        const downloadAudio = () => {
+            const downloadLink = document.createElement('a');
+            downloadLink.href = audioURL;
+            downloadLink.setAttribute('download', 'audio');
+            downloadLink.click();
+        };
+
+        const convertToArray = () => {
+            fetch(audioURL)
+                .then(response => response.arrayBuffer())
+                .then(buffer => {
+                const audioArray = new Uint8Array(buffer);
+		//console.log(audioArray.length);
+                //console.log(audioArray);
+		//console.log(Math.max(...audioArray));
+		//console.log(Math.min(...audioArray));
+		//console.log( calculateSHA256(audioArray));
+		message.textContent = calculateSHA256(audioArray);
+					
+					
+					
+					
+        // Calculate SHA-256 hash and update the message element
+        (async () => {
+            const hashHex = await calculateSHA256(audioArray);
+            message.textContent = "SHA256(audio) = "+hashHex;
+        })();
+		
+					
+					
+                })
+                .catch(error => console.log('Error: ', error));
+        };
+		
+		
+		
+		
+		
+		
+		
+		
+		
+		
+        async function calculateSHA256(data) {
+            // Convert Uint8Array to ArrayBuffer
+            const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+
+            // Convert ArrayBuffer to Uint8Array
+            const hashArray = new Uint8Array(hashBuffer);
+
+            // Convert Uint8Array to hex string
+            const hashHex = Array.from(hashArray)
+                                 .map(byte => byte.toString(16).padStart(2, '0'))
+                                 .join('');
+            return hashHex;
+        }
+		
+
+    </script>
+</body>
+</html>

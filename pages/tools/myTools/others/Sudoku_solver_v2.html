@@ -1,0 +1,175 @@
+<h1>
+  The Sudoku Solver
+</h1>
+The input grid:
+<br>
+<div id ='divgrid1'>
+
+</div>
+<br>
+<!--input type='button' onclick='solution()' value='Resolution'-->
+<button class="button" onclick='solution()' >Solve</button>
+<br>
+<label id='sol_id'>
+
+</label>
+<br>
+<div id ='divgrid2'>
+
+</div>
+
+<script>
+
+  function generate_tab(divID) {
+    document.getElementById(divID).innerHTML = "";
+    for (var i=0; i < 9; i++) {
+      for (var j =0; j<9; j++){
+        var inp='<input type="text" id="inp_' + divID+i +'_'+j+ '">';
+        document.getElementById(divID).innerHTML += inp;
+        if ((j+1)%3 ==0  & j < 8)
+          document.getElementById(divID).innerHTML += '&#160&#160&#160&#160';
+      }
+      if ((i+1)%3 ==0 & i < 8){
+        document.getElementById(divID).innerHTML += '<br/><br/>';
+      }
+      else {
+        document.getElementById(divID).innerHTML += '<br/>';
+      }
+    }
+  }
+
+  generate_tab('divgrid1'); 
+  generate_tab('divgrid2'); 
+
+  function read_inp(){
+    var divID='divgrid1';
+    var grid = [[0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0],
+                [0, 0, 0, 0, 0, 0, 0, 0, 0]];
+
+    for (var i=0; i < 9; i++) {
+      for (var j =0; j<9; j++){
+        var id_cell='inp_' + divID+i +'_'+j;
+        var val=document.getElementById(id_cell).value;
+        try {
+          val=parseInt(val);
+        } catch (error) {
+          val=NaN;
+        }
+        if ( ! isNaN(val)){
+          grid[i][j]=val;
+        }
+      }
+    }
+    return grid;
+  }
+  function plot_grid(grid){
+    var divID='divgrid2';
+    for (var i=0; i < 9; i++) {
+      for (var j =0; j<9; j++){
+        var id_cell='inp_' + divID+i +'_'+j;
+        document.getElementById(id_cell).value=grid[i][j];
+
+      }
+    }
+  }
+
+  function solution(){
+
+    const M = 9;
+    function solve(grid, row, col, num) {
+      for (let x = 0; x < 9; x++) {
+        if (grid[row][x] == num) {
+          return false;
+        }
+      }
+      for (let x = 0; x < 9; x++) {
+        if (grid[x][col] == num) {
+          return false;
+        }
+      }
+      const startRow = row - row % 3;
+      const startCol = col - col % 3;
+      for (let i = 0; i < 3; i++) {
+        for (let j = 0; j < 3; j++) {
+          if (grid[i + startRow][j + startCol] == num) {
+            return false;
+          }
+        }
+      }
+      return true;
+    }
+    function Suduko(grid, row, col) {
+      if (row == M - 1 && col == M) {
+        return true;
+      }
+      if (col == M) {
+        row += 1;
+        col = 0;
+      }
+      if (grid[row][col] > 0) {
+        return Suduko(grid, row, col + 1);
+      }
+      for (let num = 1; num <= M; num++) {
+        if (solve(grid, row, col, num)) {
+          grid[row][col] = num;
+          if (Suduko(grid, row, col + 1)) {
+            return true;
+          }
+        }
+        grid[row][col] = 0;
+      }
+      return false;
+    }/*
+    const grid = [[0, 0, 0, 0, 5, 2, 0, 9, 0],
+                  [0, 0, 4, 8, 7, 0, 0, 0, 1],
+                  [0, 0, 5, 0, 0, 0, 3, 0, 0],
+                  [0, 0, 0, 0, 0, 3, 0, 8, 5],
+                  [0, 0, 0, 0, 2, 0, 0, 0, 0],
+                  [6, 4, 0, 5, 0, 0, 0, 0, 0],
+                  [0, 0, 1, 0, 0, 0, 7, 0, 0],
+                  [0, 0, 0, 0, 8, 5, 2, 0, 0],
+                  [0, 2, 0, 9, 6, 0, 0, 0, 0]];*/
+    var grid =read_inp();
+    console.log(grid);
+    if (Suduko(grid, 0, 0)) {
+      console.log(grid);
+      document.getElementById('sol_id').innerHTML='The solution grid is:'
+      plot_grid(grid);
+    }
+
+  }
+</script>
+<style>
+
+
+
+  .button {
+    background-color: #4CAF50;
+    border: none;
+    color: white;
+    padding: 10px 10px;
+    text-align: center;
+    text-decoration: none;
+    display: inline-block;
+    font-size: 16px;
+    margin: 4px 2px;
+    cursor: pointer;
+  }
+
+  input {
+
+    width: 30px;
+    height: 30px;
+    border: 1px solid #ccc;
+    border-radius: 4px;
+    box-sizing: border-box;
+    text-align: center;
+  }
+</style>

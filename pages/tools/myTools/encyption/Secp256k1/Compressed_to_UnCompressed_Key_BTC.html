@@ -1,0 +1,87 @@
+<h3>
+Compressed to Uncompressed Public key BTC
+</h3>
+Compressed Public Key <br>
+<input type="text" id="compressed1" size=80
+value = '03526f077f8ffd54c2ed3d465007a538f75a61d9acf5a336d20d21ebb56e34fdea'> 
+<br>
+<button onclick="comp2uncomp()">
+Compressed to Uncompressed
+</button>
+<br>
+Uncompressed Public Key <br>
+<input type="text" id="uncompressed1" size=140> 
+
+
+
+<h3>
+Uncompressed to Compressed Public key BTC
+</h3>
+UnCompressed Public Key
+<br>
+<input type="text" id="uncompressed2" size=140
+value= '0479BE667EF9DCBBAC55A06295CE870B07029BFCDB2DCE28D959F2815B16F81798483ADA7726A3C4655DA4FBFC0E1108A8FD17B448A68554199C47D08FFB10D4B8'>
+<br>
+<button onclick="uncomp2comp()">
+Uncompressed to Compressed
+</button>
+<br>
+Compressed Public Key <br>
+<input type="text" id="compressed2" size=80>
+
+
+
+
+
+<script>
+
+function modExp(base, exp, mod) {
+  let result = BigInt(1);
+  while (exp > 0) {
+    if (exp % BigInt(2)) result = (result * base) % mod;
+    base = (base * base) % mod;
+    exp /= BigInt(2);
+  }
+  return result;
+}
+
+
+
+function compressedToUncompressed(compressedKey) {
+  const p = BigInt('0xFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFFEFFFFFC2F');
+  const x = BigInt('0x' + compressedKey.slice(2));
+  const rhs = (x ** BigInt(3) + BigInt(7)) % p;
+  const y = modExp(rhs, (p + BigInt(1)) / BigInt(4), p);
+  const yFinal = (compressedKey[1] === '2') === (y % BigInt(2) === BigInt(0)) ? y : p - y;
+  return '04' + x.toString(16).padStart(64, '0') + yFinal.toString(16).padStart(64, '0');
+}
+
+
+
+
+
+
+function uncompressedToCompressed(uncompressedKey) {
+  const x = uncompressedKey.slice(2, 66); // Extract x-coordinate (64 hex characters)
+  const y = BigInt('0x' + uncompressedKey.slice(66)); // Extract y-coordinate
+
+  // Determine the prefix based on whether y is even or odd
+  const prefix = y % BigInt(2) === BigInt(0) ? '02' : '03';
+
+  return prefix + x;
+}
+
+// Button 1
+function comp2uncomp(){
+document.getElementById("uncompressed1").value="On going....";
+const compressedKey = document.getElementById("compressed1").value;
+document.getElementById("uncompressed1").value=compressedToUncompressed(compressedKey);
+}
+
+// Button 2
+function uncomp2comp(){
+const uncompressedKey = document.getElementById("uncompressed2").value;
+document.getElementById("compressed2").value=uncompressedToCompressed(uncompressedKey);
+}
+
+</script>

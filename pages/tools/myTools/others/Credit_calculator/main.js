@@ -1,6 +1,4 @@
- /****************************************************************/
- /******************** Tab Manager *******************************/
- /****************************************************************/
+ /******************** Tab Manager **********************************/
  function funtab(butt){
     buttID=butt.id;
     tabID=buttID.replace("butt","tab");
@@ -15,24 +13,16 @@
     }
 }
 
-/****************************************************************/
-/*********************** Function of TAB1 ***********************/
-/****************************************************************/
 
+/*********************** Function of TAB1 ***********************/
 function Mensualite_cal(){
     var cap=document.getElementById("cap1").value;
     var taux=document.getElementById("taux1").value/100;
     var durN=12*document.getElementById("duration1").value;//12 = Months
-    var Mens=mens_cal(cap,taux,durN);
-
-    document.getElementById("Mens1").value=Mens.toFixed(2);
-    var Tot1=(Mens*durN);
-    document.getElementById("Tot1").value=Tot1.toFixed(2);
-    var CoutCredit1=Tot1-cap;
-    document.getElementById("CoutCredit1").value= CoutCredit1.toFixed(2);
-    var CoutCreditMens1=CoutCredit1/durN;
-    document.getElementById("CoutCreditMens1").value=  CoutCreditMens1.toFixed(2);
     
+    var Mens=mens_cal(cap,taux,durN);
+    document.getElementById("Mens1").value=Mens.toFixed(2);
+    document.getElementById("Tot1").value=(Mens*durN).toFixed(2);
 }
 
 function mens_cal(cap,taux,durN){
@@ -46,9 +36,8 @@ function mens_cal(cap,taux,durN){
     
     return Mens;
 }
-/****************************************************************/
+
 /*********************** Function of TAB2 ***********************/
-/****************************************************************/
 function show_head_details2(){
     var check=document.getElementById("show_details_2_cbx").checked;
     var div_=document.getElementById("det_div_ID2")
@@ -64,14 +53,12 @@ function mainTAB2(){
     var prix2 = parseFloat(document.getElementById("prix2").value);
     var NotPourc2 = parseFloat(document.getElementById("NotPourc2").value);
     var NotCout2=prix2*NotPourc2/100;
-    document.getElementById("NotCout2").value=NotCout2.toFixed(2);
-    var prix_notaire2=NotCout2+prix2;
-    document.getElementById("prix_notaire2").value=prix_notaire2.toFixed(2);
+    document.getElementById("NotCout2").value=NotCout2;
     var FraisDoss2= parseFloat(document.getElementById("FraisDoss2").value);
     var courtage2= parseFloat(document.getElementById("courtage2").value);
     var frais_garentie2=parseFloat(document.getElementById("frais_garentie2").value);
     var depTot2=prix2+NotCout2+FraisDoss2+courtage2+frais_garentie2;
-    document.getElementById("depTot2").value=depTot2.toFixed(2);
+    document.getElementById("depTot2").value=depTot2;
     /**Financement**/
     var apporPers2 = parseFloat(document.getElementById("apporPers2").value);
     var PTZ2 = parseFloat(document.getElementById("PTZ2").value);
@@ -79,28 +66,19 @@ function mainTAB2(){
     
     if (isNaN(PTZ2) || chbPTZ){
         PTZ2=Math.min(84000,0.4*depTot2);
-        document.getElementById("PTZ2").value=PTZ2.toFixed(2);
+        document.getElementById("PTZ2").value=PTZ2;
         document.getElementById("ptzCbx2").checked=true;
     }
     var actLog2 = parseFloat(document.getElementById("actLog2").value);
     var chbAcLog=document.getElementById("actLogCbx2").checked;
     if (isNaN(actLog2 ) || chbAcLog){
         actLog2 =30000;
-        document.getElementById("actLog2").value=actLog2.toFixed(2) ;
+        document.getElementById("actLog2").value=actLog2 ;
         document.getElementById("actLogCbx2").checked=true;
     }
     var pretclass2=Math.max(depTot2-(apporPers2+PTZ2 +actLog2),0);
-    document.getElementById("pretclass2").value=pretclass2.toFixed(2);
-   amortissement();
-
-
-   depTotal2=document.getElementById("depTotal2").value;//=.toFixed(2);
-   var cout_tot_finanID= depTotal2-(prix2+NotCout2); 
-   document.getElementById("cout_tot_finanID").value=cout_tot_finanID.toFixed(2) ;
-   var cout_tot_finan_pourcID =100*cout_tot_finanID/prix_notaire2 ; 
-   console.log(cout_tot_finan_pourcID,cout_tot_finanID,prix_notaire2 )
-   document.getElementById("cout_tot_finan_pourcID").value=cout_tot_finan_pourcID.toFixed(2);
- 
+    document.getElementById("pretclass2").value=pretclass2;
+    amortissement();
 }
 
 function amortissement(){
@@ -130,8 +108,6 @@ function amortissement(){
     var dureeTot2=parseFloat(document.getElementById("dureeTot2").value)*12;
     var assurTaux = parseFloat(document.getElementById("assurTaux").value)/100;
     var autre_charge= parseFloat(document.getElementById("autre_charge").value);
-
-    var apporPers2 = parseFloat(document.getElementById("apporPers2").value);
     
     /////////// Binary search
     MensMax=2000;
@@ -159,11 +135,7 @@ function amortissement(){
     else break;
     //console.log(i,MensTot2,cap_remb,pretclass2 ,MensMin,MensMax);
     }
-    document.getElementById("MensTot2").value=MensTot2.toFixed(2);
-    var depTotal2=MensTot2*dureeTot2+apporPers2 ; 
-    document.getElementById("depTotal2").value=depTotal2.toFixed(2);
-
-    
+    document.getElementById("MensTot2").value=MensTot2;
 
 }
 
@@ -188,10 +160,6 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
         rows[i].remove();
     }
 
-    //var rembourTot2=0;
-    var ass_emprun2=0;
-    var Tot_inter2=0;
-
     for (i=0;i<dureeTot2;i++){
         var row = table.insertRow();
         mens=0;
@@ -209,19 +177,10 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
             mensPTZ2_ =mensPTZ2;
             partInteret=PTZ2*tauxPTZ2/12;
         }
-        if (i/12>=finPTZ2) {
-            assMensPTZ2=0;
-            
-        }
-        
         cell.textContent=mensPTZ2_.toFixed(2);
-        //rembourTot2+=mensPTZ2_;
 
         var cell = row.insertCell();
-        cell.textContent=assMensPTZ2.toFixed(2);
-        console.log(i,finPTZ2,assMensPTZ2);
-    
-        //rembourTot2+=assMensPTZ2;
+        cell.textContent=assMensPTZ2;
 
         var cell = row.insertCell();
         cell.textContent=partInteret.toFixed(2);
@@ -248,16 +207,11 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
             mensactLog2_ =mensactLog2;
             partInteret=actLog2*tauxactLog2/12;
         }
-        if (i/12>=finactLog2) {
-            assMensactLog2=0;
-        }
         cell.textContent=mensactLog2_.toFixed(2);
-        //rembourTot2+=mensactLog2_;
 
 
         var cell = row.insertCell();
-        cell.textContent=assMensactLog2.toFixed(2);
-        //rembourTot2+=assMensactLog2;
+        cell.textContent=assMensactLog2;
 
         var cell = row.insertCell();
         cell.textContent=partInteret.toFixed(2);
@@ -276,15 +230,6 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
         actLog2-=partCap;
        
         // Prêt classique
-
-        if ( i/12>=finpretclass2) {
-            assMenspretclass2=0;
-        }
-        
-        
-
-      
-
         var cell = row.insertCell();
         var menspretclass2_=0;
         var partInteret=0;
@@ -295,15 +240,10 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
             menspretclass2_ =menspretclass2;
             partInteret=pretclass2*tauxpretclass2/12;
         }
-        else {
-
-        }
         cell.textContent=menspretclass2_.toFixed(2);
 
-        var cell = row.insertCell(); 
-        cell.textContent=assMenspretclass2.toFixed(2);
-        
-
+        var cell = row.insertCell();
+        cell.textContent=assMenspretclass2;
 
         var cell = row.insertCell();
         cell.textContent=partInteret.toFixed(2);
@@ -324,25 +264,16 @@ function add_table_details2(PTZ2,tauxPTZ2,debutPTZ2,finPTZ2,mensPTZ2,
         /*** Others ***/
         var cell = row.insertCell();
         cell.textContent=interet.toFixed(2);
-        Tot_inter2+=interet
 
 
         var cell = row.insertCell();
         cell.textContent=assTot2.toFixed(2);
-        ass_emprun2+=assTot2;
         /*
         var cell = row.insertCell();
         cell.textContent=captot.toFixed(2);
         */
          
     }
-    //document.getElementById("depTotal2").value=rembourTot2.toFixed(0);
-    document.getElementById("ass_emprun2").value=ass_emprun2.toFixed(0);
-    console.log(Tot_inter2);
-    document.getElementById("Tot_inter2").value=Tot_inter2.toFixed(0);
-    
-    
-    
 
     return cap_remb
 }
@@ -404,105 +335,11 @@ Plotly.newPlot("PlotID2", data, layout);
 
 
 
-/****************************************************************/
-/*********************** Initialization *************************/
-/****************************************************************/
+
+/*********************** Initialization ***********************/
 function onload_init(){
-    document.getElementById("butt2").click();
+    document.getElementById("butt1").click();
     show_head_details2();
     mainTAB2();
     Mensualite_cal();
 }
-
-
-/****************************************************************/
-/****************** SAVE FILES  *********************************/
-/****************************************************************/
-
-/*** SAVE ***/
-function saveTextAsFile(name,str)
-{
-  var textToSaveAsBlob = new Blob([str], {type:"text/plain"});
-  var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
-  var downloadLink = document.createElement("a");
-  downloadLink.download = name;
-  downloadLink.innerHTML = "Download File";
-  downloadLink.href = textToSaveAsURL;
-  downloadLink.style.display = "none";
-  document.body.appendChild(downloadLink);
-  downloadLink.click();
-}
-
-
-function file_string() {
-    let upload = document.getElementById('upload');
-    let fr = new FileReader();
-    if (upload.files.length === 0) {
-        return "Please select a file.";
-    }
-    return new Promise((resolve) => {
-        fr.readAsText(upload.files[0]);
-        fr.onload = function () {
-        resolve(fr.result);
-        };
-    });
-}
-
-
-function save_inputs(){
-    var inputs = document.querySelectorAll('input');
-    var str="";
-    for (var i = 0; i < inputs.length; i++) {
-        var input = inputs[i];
-        if (input.type=="number"){
-            str+="\n";
-            str+=input.id;
-            str+="==>";
-            str+=input.value;
-            //console.log('ID:', input.id, 'Value:', input.value,input.type);
-        }
-    }
-    
-    var file_name = document.getElementById("File_name_savedID").value;
-    saveTextAsFile(file_name+".txt",str);
-}
-
-
-/*** READ FILES ****/
-
-async function read_inputs() {
-    const fileContent = await file_string();
-    var arr = fileContent.split('\n');
-    
-    for (var i = 0; i < arr.length; i++) {
-        var line= arr[i];
-        if (line.includes("==>")){
-            line=line.split("==>");
-            var id = line[0];
-            var value= line[1];
-            if (id.length>0 & value.length > 0){
-                document.getElementById(id).value=value;
-            }
-        }
-    }
-  }
-
-function file_string() {
-    let upload = document.getElementById('upload');
-    let fr = new FileReader();
-
-    if (upload.files.length === 0) {
-        return "Please select a file.";
-    }
-
-    return new Promise((resolve) => {
-        fr.readAsText(upload.files[0]);
-        fr.onload = function () {
-        resolve(fr.result);
-        };
-    });
-}
-    /*
-    var upload = document.getElementById('upload');
-    upload.addEventListener('change', func2);
-    */
