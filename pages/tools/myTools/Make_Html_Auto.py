@@ -22,7 +22,15 @@ for file in html_files:
         else :
             print('<br>')
             html+='<br>'+"\n"
+        txt=txt.replace('_',' ')
         print('<a href="'+file+'">'+ txt+"</a>")
         html+='<a href="'+file+'">'+ txt+"</a>"
+html+="""
+<style>
+a {
+    text-decoration: none;
+}
+</style>
+"""
 with open("tools.html", "w") as f:
     f.write(html)

@@ -1,0 +1,269 @@
+
+<html>
+  <head>
+    <title>Number converter</title>
+  </head>
+
+  <body>
+
+    <h3>
+      Converter of Numbers: Decimal, Hexadecimal, Binary, Octal, Romain
+    </h3>
+    <select id="selectNB1">
+      <option value="Decimal">Decimal</option>
+      <option value="Hexdecimal">Hexdecimal</option>
+      <option value="Binary">Binary</option>
+      <option value="Octal">Octal</option>
+      <option value="Roman">Roman</option>
+
+    </select>
+    <br>
+    <textarea rows=3 cols=80 id="NB1">
+
+    </textarea>
+
+    <br>
+    <button onclick='convert()'>
+      Convertion
+    </button>
+    <br>
+    <select id="selectNB2">
+      <option value="Decimal">Decimal</option>
+      <option value="Hexdecimal">Hexdecimal</option>
+      <option value="Binary">Binary</option>
+      <option value="Octal">Octal</option>
+      <option value="Roman">Roman</option>
+      <!-- <option value="Base64">Base64</option> -->
+      <!-- <option value="Base32">Base32</option> -->
+    </select>
+    Split bytes in Bin and Hex<input type="checkbox" id="checkboxid" onclick="handleClick()" checked>
+    <br>
+
+
+
+
+    <textarea rows=3 cols=80 id="NB2">
+
+    </textarea>
+    <script>
+
+
+      function handleClick() {
+        var NB2 = document.getElementById("NB2").value;
+        var selectNB2 = document.getElementById("selectNB2").value;
+
+        const checkbox = document.getElementById('checkboxid');
+        if (checkbox.checked) {
+          if(selectNB2=="Hexdecimal"){
+            NB2= sepBytes(NB2,2);
+          }
+          else if (selectNB2=="Binary"){
+            NB2= sepBytes(NB2,8);
+          }
+        } else {
+          NB2=NB2.replace(/\s+/g, ''); // remove all spaces
+        }
+        document.getElementById("NB2").value=NB2;
+      }
+
+
+
+      function romanToInt(roman) {
+
+        // Define valid Roman numeral characters
+        const validRomanChars = /^[IVXLCDM]+$/;
+        // Define maximum and minimum valid Roman numeral values
+        const minValue = 1;
+        const maxValue = 3999;
+
+        // Check if the input is a string and matches valid Roman numeral characters
+        if (typeof roman !== 'string' || !validRomanChars.test(roman)) {
+          return 'Invalid Roman numeral.';
+        }
+
+        const romanToValue = {
+          'I': 1,
+          'V': 5,
+          'X': 10,
+          'L': 50,
+          'C': 100,
+          'D': 500,
+          'M': 1000
+        };
+        let total = 0;
+        let prevValue = 0;
+
+        for (let i = roman.length - 1; i >= 0; i--) {
+          const currentValue = romanToValue[roman[i]];
+          if (currentValue < prevValue) {
+            total -= currentValue;
+          } else {
+            total += currentValue;
+          }
+          prevValue = currentValue;
+        }
+        return BigInt(total);
+      }
+
+
+
+
+
+
+
+      function intToRoman(num) {
+        // Convert BigInt to Number if within range
+        if (typeof num === 'bigint') {
+          if (num < 1n || num > 3999n) {
+            return 'Romain number out of range. Valid range is 1 to 3999.';
+          }
+          num = Number(num);
+        } else if (num <= 0 || num > 3999) {
+          return 'Romain number out of range. Valid range is 1 to 3999.';
+        }
+
+        const valueToRoman = [
+          { value: 1000, symbol: 'M' },
+          { value: 900, symbol: 'CM' },
+          { value: 500, symbol: 'D' },
+          { value: 400, symbol: 'CD' },
+          { value: 100, symbol: 'C' },
+          { value: 90, symbol: 'XC' },
+          { value: 50, symbol: 'L' },
+          { value: 40, symbol: 'XL' },
+          { value: 10, symbol: 'X' },
+          { value: 9, symbol: 'IX' },
+          { value: 5, symbol: 'V' },
+          { value: 4, symbol: 'IV' },
+          { value: 1, symbol: 'I' }
+        ];
+
+        let roman = '';
+        for (const { value, symbol } of valueToRoman) {
+          while (num >= value) {
+            roman += symbol;
+            num -= value;
+          }
+        }
+
+        return roman;
+        return roman;
+      }
+
+
+
+
+
+
+
+    </script>
+
+
+    <script>
+      // Initialisation 
+      document.getElementById("selectNB1").value="Hexdecimal";
+      document.getElementById("NB1").value="AAEE14E";
+      document.getElementById("selectNB2").value="Binary";
+      convert();
+
+
+
+      function input_to_bigint_(selectNB1, NB1S){
+        try {
+          // remove all space return new line in inputs
+          NB1S=NB1S.replace(/\s+/g, '').replace(/\n+/g,"").toLowerCase();
+          if (selectNB1=="Decimal"){
+            return BigInt(NB1S,10);
+          }
+          else if(selectNB1=="Hexdecimal"){
+            if (!NB1S.startsWith("0x")) {
+              NB1S= "0x" + NB1S;
+            }
+            return BigInt(NB1S,16);
+          }
+          else if (selectNB1=="Binary"){
+            if (!NB1S.startsWith("0b")) {
+              NB1S= "0b" + NB1S;
+            }
+            return BigInt(NB1S,2);
+          }
+          else if (selectNB1=="Octal"){
+            if (!NB1S.startsWith("0o")) {
+              NB1S= "0o" + NB1S;
+            }
+
+            return BigInt(NB1S,8);
+
+          }
+          else if (selectNB1=="Roman"){
+            NB1S=NB1S.toUpperCase();
+            return   romanToInt(NB1S);
+          }
+        }
+        catch{
+          return "Please check the input numbner";
+        }
+
+
+      }
+
+
+
+      function bigint_to_output_(selectNB2, NB1){
+        var checked=document.getElementById('checkboxid').checked;
+
+        try {
+          if (selectNB2=="Decimal"){
+            return NB1;
+          }
+          else if(selectNB2=="Hexdecimal"){
+            var out=NB1.toString(16);
+            out= out.toUpperCase();
+            if (checked) return sepBytes(out,2);
+
+            return out;
+          }
+          else if (selectNB2=="Binary"){
+            var out=NB1.toString(2);
+
+            if (checked) return sepBytes(out,8);
+            return out;
+
+          }
+          else if (selectNB2=="Octal"){
+            return NB1.toString(8);
+          }
+          else if (selectNB2=="Roman"){
+            return intToRoman(NB1);
+          }
+
+
+        }
+        catch{
+          return "Please check the input numbner 2";
+        }
+      }
+
+
+      function sepBytes(Ns,n){
+        const paddedNs = Ns.padStart(Math.ceil(Ns.length / n) * n, '0');
+        const byteArray = [];
+        for (let i = 0; i < paddedNs.length; i += n) {
+          byteArray.push(paddedNs.slice(i, i + n));
+        }
+        return byteArray.join(' ');
+      }
+
+
+      function convert(){
+        var selectNB1 = document.getElementById("selectNB1").value;
+        var selectNB2 = document.getElementById("selectNB2").value;
+        var NB1S=document.getElementById("NB1").value;
+        var NB1=input_to_bigint_(selectNB1,NB1S);
+        var NB2= bigint_to_output_(selectNB2, NB1);
+        document.getElementById("NB2").value=NB2;
+      }
+
+    </script>
+  </body>
+</html>
