@@ -1,0 +1,102 @@
+import glob
+import os
+import json
+
+
+with open('version.json', 'r') as f:
+    version = json.load(f)
+    ver=int(version["version"].replace("V",""))
+    ver=ver+1
+    version["version"]="V"+str(ver)
+    
+
+
+
+
+folder_path = './'
+html_files = glob.glob(os.path.join(folder_path,'**', '*.html'), recursive=True)
+old_folder=""
+
+html='<!--           '+version["version"]+'        -->\n'
+html+="""
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Content Loader</title>
+    <style>
+        /* Basic styling for layout */
+        #container {
+            display: flex;
+        }
+        #leftPanel {
+            width: 200px;
+            border-right: 1px solid #ccc;
+             
+        }
+        #rightPanel {
+            flex: 1;
+        }
+        iframe {
+            width: 100%;
+            height: 100vh; /* Adjust height as needed */
+            border: none;
+        }
+        /*
+        a {
+            display: block;
+            margin-bottom: 10px;
+            text-decoration: none;
+            color: #000;
+        }
+        a:hover {
+            color: #007BFF;
+        }*/
+
+        .h4_ {
+            button-padding:10px;
+        }
+    </style>
+</head>
+<body>
+    <h2> Tools</h2>
+    <p>Local tools using local nodes and personal codes </p>
+    <br>
+    <div id="container">
+        <!-- Left panel for links -->
+        <div id="leftPanel">
+"""
+a_tag='<a href="link" target="contentFrame">Page_Name</a>'
+for file in html_files:
+    txt=file.split('\\')[-1].replace('.html','')
+    folder=file.split('\\')[1]
+    if txt != "tools":
+        if old_folder != folder:
+            old_folder=folder
+            folder_=folder[0].upper() + folder[1:].lower()
+            html+='<h4 class="h4_">'+folder_+"</h4>"
+
+            
+        else :
+            html+='<br>'+"\n"
+        txt=txt.replace('_',' ')
+
+        html+=a_tag.replace('link',file).replace('Page_Name',txt)
+        
+html+="""
+            <!-- Add more links as needed -->
+        </div>
+
+        <!-- Right panel for displaying the content -->
+        <div id="rightPanel">
+            <iframe name="contentFrame" src="" frameborder="0"></iframe>
+        </div>
+    </div>
+</body>
+</html>
+"""
+with open("tools.html", "w") as f:
+    f.write(html)
+with open('version.json', 'w') as file:
+    json.dump(version, file)
