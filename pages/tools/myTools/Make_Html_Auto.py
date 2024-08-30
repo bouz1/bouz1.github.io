@@ -1,11 +1,23 @@
 import glob
 import os
+import json
+
+
+with open('version.json', 'r') as f:
+    version = json.load(f)
+    ver=int(version["version"].replace("V",""))
+    ver=ver+1
+    version["version"]="V"+str(ver)
+    
+
+
+
 
 folder_path = './'
 html_files = glob.glob(os.path.join(folder_path,'**', '*.html'), recursive=True)
 old_folder=""
 
-html=''
+html='<!--           '+version["version"]+'        -->\n'
 print("<h2> Tools</h2>")
 html+="<h2> Tools</h2>"+"\n"
 print("Local tools using local nodes and personal codes")
@@ -34,3 +46,5 @@ a {
 """
 with open("tools.html", "w") as f:
     f.write(html)
+with open('version.json', 'w') as file:
+    json.dump(version, file)
