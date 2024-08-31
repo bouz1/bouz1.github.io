@@ -66,6 +66,16 @@ html+="""
         .h4_ {
             button-padding:10px;
         }
+        #show_hide_ID {
+            padding: 10px 30px;
+            background-color: #28a745; /* Green color */
+            color: white;
+            border: none;
+            border-radius: 50px; /* Fully rounded edges */
+            font-size: 14px;
+            font-weight: bold;
+            transition: all 0.3s ease; /* Smooth transition for all properties */
+        }
     </style>
 </head>
 <body>
