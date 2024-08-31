@@ -72,6 +72,7 @@ html+="""
     <h2> ToolBox</h2>
     <p>Local tools using local nodes and personal codes </p>
     <br>
+    <button onclick="show_hide()" id ="show_hide_ID">Hide Menu <<<</button>
     <div id="container">
         <!-- Left panel for links -->
         <div id="leftPanel">
@@ -102,6 +103,18 @@ html+="""
             <iframe name="contentFrame" src="" frameborder="0"></iframe>
         </div>
     </div>
+                    <script> 
+                     function show_hide() {
+                var leftPanel = document.getElementById('leftPanel');
+                if (leftPanel.style.display === 'none') {
+                    leftPanel.style.display = 'block';			
+                                    document.getElementById("show_hide_ID").innerText = "Hide Menu <<<";
+                } else {
+                    leftPanel.style.display = 'none';
+                                    document.getElementById("show_hide_ID").innerText = "Show Menu >>>";
+                }
+                    }
+                    </script>
 </body>
 </html>
 """
