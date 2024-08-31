@@ -43,17 +43,26 @@ html+="""
             height: 100vh; /* Adjust height as needed */
             border: none;
         }
-        /*
-        a {
-            display: block;
-            margin-bottom: 10px;
-            text-decoration: none;
-            color: #000;
-        }
-        a:hover {
-            color: #007BFF;
-        }*/
+   
 
+        a {
+            text-decoration: none; /* Removes the underline */
+            /*padding-top: 20px; */   /* Adds top padding */
+            /*padding-bottom: 10px;*/ /* Adds bottom padding */
+            margin-bottom: 10px;
+           color: blue;          /* Set default link color */
+        }
+
+        a:visited {
+            color: blue; /* Ensure visited link color remains the same */
+        }
+
+        a:hover, a:active {
+            color: darkblue; /* Change color on hover and when active */
+        }
+
+
+        
         .h4_ {
             button-padding:10px;
         }
@@ -67,7 +76,7 @@ html+="""
         <!-- Left panel for links -->
         <div id="leftPanel">
 """
-a_tag='<a href="link" target="contentFrame">Page_Name</a>'
+a_tag=' <span> &#8226; </span> <a href="link" target="contentFrame">Page_Name</a>'
 for file in html_files:
     txt=file.split('\\')[-1].replace('.html','')
     folder=file.split('\\')[1]
@@ -82,7 +91,7 @@ for file in html_files:
             html+='<br>'+"\n"
         txt=txt.replace('_',' ')
 
-        html+=a_tag.replace('link',file).replace('Page_Name',txt)
+        html+= a_tag.replace('link',file).replace('Page_Name',txt)
         
 html+="""
             <!-- Add more links as needed -->
