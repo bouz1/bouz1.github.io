@@ -1,0 +1,241 @@
+<html>
+<head>
+<meta charset="UTF-8">
+</head>
+<body>
+<script src="gauge.js"></script>
+
+
+<canvas id="gauge"></canvas>
+<br>
+<div>
+<label for="mass" class="Label1"> Poids (kg)</label>
+<input id="masse" value = 65 onchange="Calculation()" type="number" class="inpNum" size=5>
+<label for="length" class="Label1"> Taille (cm)</label>
+<input id="length" value = 170 onchange="Calculation()" type="number" class="inpNum" size=10>
+</div>
+<div id="legend"></div>
+<label id="ResultLabel" class="Label1"></label>
+<!-- <div id="preview-textfield"></div> -->
+<style>
+
+.Label1, .inpNum{
+padding:10px;
+margin:10px;
+font-size:20px;
+
+
+}
+.inpNum{
+width: 80px; 
+}
+
+#ResultLabel {
+  color: white;
+  text-shadow: 1px 1px 2px black;
+
+}
+</style>
+
+    <style>
+	/********** For Legend ***********/
+        #legend {
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+        }
+        .legend-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+			
+    margin-left: 20px; /* Adjust as needed for alignment */
+        }
+        .circle {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+        }
+    </style>
+	
+<script>
+
+// Initialisation values
+const values_ranges = [10, 18.5, 25, 30, 35, 40];
+const legend= ["maigreur", "poids normal","surpoids","obésité modérée","obésité sévère"];
+const color_ranges = ["#0000FF", "#00FF00", "#FFFF00", "#FFA500", "#FF0000"];
+
+const values_rangesList = values_ranges.slice(0, -1);
+if (color_ranges.length !== values_ranges.length - 1) {
+    throw new Error("The number of colors does not match the number of ranges.");
+}
+
+// Generate static zones
+const staticZonesList = values_ranges.slice(0, -1).map((min, index) => {
+    const max = values_ranges[index + 1];
+    const color = color_ranges[index];
+    return { strokeStyle: color, min: min, max: max };
+});
+
+var opts = {
+    // customize pointer
+    pointer: {
+      length: 0.8,
+      strokeWidth: 0.035,
+      iconScale: 1.0
+    },
+    // static labels
+    staticLabels: {
+      font: "20px sans-serif",
+      labels: values_rangesList,
+      fractionDigits: 0
+    },
+    // static zones
+    staticZones: staticZonesList,
+    // render ticks
+    renderTicks: {
+      divisions: 5,
+      divWidth: 1.1,
+      divLength: 0.7,
+      subDivisions: 3,
+      subLength: 0.5,
+      subWidth: 0.6
+    },
+    // the span of the gauge arc
+    angle: 0,
+    // line thickness
+    lineWidth: 0.44,
+    // radius scale
+    radiusScale: 1.0,
+    // font size
+    fontSize: 40,
+    // if false, max value increases automatically if value > maxValue
+    limitMax: true,
+    // if true, the min value of the gauge will be fixed
+    limitMin: true,
+    // High resolution support
+    highDpiSupport: true
+};
+
+var target = document.getElementById('gauge'); 
+target.style.width = '600px';
+
+var gauge = new Gauge(target).setOptions(opts);
+
+//document.getElementById("preview-textfield").className = "preview-textfield";
+//gauge.setTextField(document.getElementById("preview-textfield"));
+max_value=Math.max(...values_ranges);
+min_value=Math.min(...values_ranges);
+gauge.maxValue = max_value;
+gauge.setMinValue(min_value); 
+gauge.set(0);
+
+gauge.animationSpeed = 10;
+
+
+
+
+
+
+
+const legendDiv = document.getElementById('legend');
+
+        for (let i = 0; i < legend.length; i++) {
+          
+		
+		
+		const rangeText = `${values_ranges[i].toFixed(1)}-${values_ranges[i + 1].toFixed(1)}: ${legend[i]}`;
+
+		
+            const legendItem = document.createElement('div');
+            legendItem.className = 'legend-item';
+
+            const circle = document.createElement('div');
+            circle.className = 'circle';
+            circle.style.backgroundColor = color_ranges[i];
+            
+            const text = document.createElement('span');
+            text.textContent = rangeText;
+
+            legendItem.appendChild(circle);
+            legendItem.appendChild(text);
+            legendDiv.appendChild(legendItem);
+        }
+</script>
+
+<script>
+
+function getCategory(value) {
+    for (let i = 0; i < values_ranges.length - 1; i++) {
+        if (value >= values_ranges[i] && value < values_ranges[i + 1]) {
+            return legend[i];
+        }
+    }
+    return value >= values_ranges[values_ranges.length - 1] ? legend[legend.length - 1] : null;
+}
+
+function getIndex(value) {
+	if (value > max_value) return legend.length - 1;
+	if (value < min_value) return 0;
+    for (let i = 0; i < values_ranges.length - 1; i++) {
+        if (value >= values_ranges[i] && value < values_ranges[i + 1]) {
+            return i
+        }
+    }
+    
+}
+
+
+
+function Calculation(){
+//https://fr.wikipedia.org/wiki/Indice_de_masse_corporelle
+//https://www.who.int/europe/news-room/fact-sheets/item/a-healthy-lifestyle---who-recommendations
+
+
+var masse = document.getElementById("masse").value;
+var length = document.getElementById("length").value;
+length=length/100;
+BMI= masse/(length**2);//Body mass index
+gauge.set(BMI);
+console.log(BMI);
+
+const lab = document.getElementById("ResultLabel");
+const index = getIndex(BMI); 
+const category =legend[index] ; 
+
+const color_cat=color_ranges[index];
+
+
+
+lab.innerText="Votre Indice de masse corporelle est: "+BMI.toFixed(1)+" ( "+category+" )";
+ 
+//lab.style.backgroundColor = color_cat;
+lab.style.color = color_cat;
+}
+Calculation()
+/*
+// If you need data to trace pourcentel
+|    |   Pourcentel |   Femelle BMI 19 years |   Mal MBI 19 years |
+|---:|-------------:|-----------------------:|-------------------:|
+|  0 |          0.1 |                 14.58  |             15.717 |
+|  1 |          1   |                 15.879 |             16.964 |
+|  2 |          3   |                 16.734 |             17.779 |
+|  3 |          5   |                 17.22  |             18.241 |
+|  4 |         10   |                 18.017 |             18.996 |
+|  5 |         15   |                 18.593 |             19.539 |
+|  6 |         25   |                 19.504 |             20.395 |
+|  7 |         50   |                 21.427 |             22.188 |
+|  8 |         75   |                 23.707 |             24.295 |
+|  9 |         85   |                 25.113 |             25.584 |
+| 10 |         90   |                 26.151 |             26.531 |
+| 11 |         95   |                 27.833 |             28.058 |
+| 12 |         97   |                 29.03  |             29.14  |
+| 13 |         99   |                 31.553 |             31.405 |
+| 14 |         99.9 |                 36.889 |             36.143 |
+
+https://www.who.int/tools/growth-reference-data-for-5to19-years/indicators/bmi-for-age
+*/
+</script>
+</body>
+</html>
+
