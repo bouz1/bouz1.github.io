@@ -1,0 +1,173 @@
+<!doctype html> 
+<html> 
+<head> 
+<meta charset="utf-8" /> 
+<title>CB suivi</title> 
+<meta name="viewport" content="width=device-width, initial-scale=1" /> 
+<link rel="icon" href="./log.jpg" type="image/x-icon">
+</head> 
+<body> 
+<script>
+  //////////////////////// Initialization ///////////////////////
+  var names=['Boursorama Hanane','HelloBank Hanane', 'HelloBank Abdelaziz','Ultim Abdelaziz'];
+  var nb=names.length;
+  var colors=['#2F3F67', '#09C6CF', '#09C6CF', '#C71585'];
+  ///////////////////////////////////////////////////////////////
+</script>
+<div id = "card_buttons">
+</div>
+
+<input type="checkbox" onclick="showhead()" >Mise à jour manuel
+<div id="myDiv_xx" style="border:1px solid">
+    <br>Mise à jour de la date de dernier payement manuellement 
+    <br><br>
+    <div id ='shose_nb_cards'>
+      <label> Carte : </label>
+      <!-- <input type="number" id='nbcrd' size="5" min="1"/> -->
+	  <select id='nbcrd'>
+	  </select>
+    </div>
+    <br>
+    date du dernier payement
+    <!-- <input type="date" id="datecrd" min='1899-01-01' max='2022-12-13'> -->
+	<input type="datetime-local" id="datecrd" min="1899-01-01T00:00" max="2022-12-13T23:59">
+
+    <br>
+    <input type='button' id='update_m' value='mise à jour' />
+</div>
+
+
+<script>
+
+  function add_card_buttons(){
+    const par_div=document.getElementById("card_buttons"); 
+	const selectElement = document.getElementById('nbcrd');
+
+    for( i = 1; i<nb+1;i++){
+        // Create input element
+        var button = document.createElement('input');
+        button.type = 'button';
+        button.id = 'save_date'+i.toString(); 
+        button.value = names[i-1];
+        button.className="butt_card";
+        button.style.backgroundColor = colors[i-1];
+        // Create div element
+        var div = document.createElement('div');
+        div.id = 'myDiv_'+i.toString();
+        div.style.border = '1px solid';
+
+        // Create first paragraph element
+        var parag1 = document.createElement('p');
+        parag1.id = 'parag'+i.toString();
+
+        // Create second paragraph element
+        var parag1_2 = document.createElement('p');
+        parag1_2.id = 'parag'+i.toString()+'_2';
+
+        // Create a line break
+        var br = document.createElement('br');
+
+        // Append paragraphs to div
+        div.appendChild(parag1);
+        div.appendChild(parag1_2);
+
+        // Append button and div to body
+        par_div.appendChild(button);
+        par_div.appendChild(div);
+        par_div.appendChild(br);
+		
+		
+		const optionElement = document.createElement("option");
+		optionElement.value = i;
+		optionElement.text = names[i-1]; 
+		selectElement.appendChild(optionElement); 
+    }
+  }
+  add_card_buttons();
+</script>
+
+
+
+<style>
+    .butt_card
+    {width: 200px;
+    height: 100px;
+    /*background-color:#2F3F67;*/
+    font-family:verdana;
+    font-size:15px;
+    color: #ffffff;
+    }
+</style>
+
+
+<script>
+document.addEventListener("DOMContentLoaded", function() {
+    update();
+    var div = document.getElementById("myDiv_xx");
+    if (div.style.display !== "none") div.style.display = "none";
+    let datenow = new Date().toISOString().slice(0,10); //return YYYY-MM-DD
+   document.getElementById("datecrd").setAttribute("max", datenow);
+});
+
+
+function update(){
+
+  let datenow = new Date();
+  
+  for (i=1;i<nb+1;i++){
+    var read1 = localStorage.getItem('date_carte'+i.toString());
+    let olddate1 = new Date(read1);
+    var diffTime1 = Math.abs(datenow - olddate1);
+    var diffs1 = Math.ceil(diffTime1 / (1000 * 60 * 60 * 24)); //days
+    //const diffs1 = Math.ceil(diffTime1 / (1000 )); //secondes
+
+    document.getElementById('parag'+i.toString()+'_2').textContent = 'dernier payement le '+olddate1.toLocaleString();//toLocaleDateString();
+    document.getElementById('parag'+i.toString()).textContent = diffs1.toString() +' jours près le dernier payement';
+
+    var element = document.getElementById("myDiv_"+i.toString());
+    if (diffs1<10) element.style.backgroundColor = "#6EF599";
+    else if (diffs1<20) element.style.backgroundColor = "#F1F56E";
+    else element.style.backgroundColor = "#F56E6E";
+  } 
+}
+
+
+for (let i = 0; i < names.length; i++) {
+  let id = `save_date${i + 1}`;
+  document.getElementById(id).onclick = function() {
+    var answer = window.confirm(`Enregistrer la date de ${names[i]}?`);
+    if (answer) {
+      let date1 = new Date();
+      var txt = date1.toString();
+      localStorage.setItem(`date_carte${i + 1}`, txt);
+      update();
+    }
+  };
+}
+
+
+function showhead(){ 
+    var div = document.getElementById("myDiv_xx");
+    if (div.style.display !== "none")div.style.display = "none";
+    else div.style.display = "block";}
+
+document.getElementById('update_m' ).onclick = function() { 
+  var vardate=document.getElementById("datecrd").value;
+  var vardate2=new Date(vardate);
+  var nbcard = document.getElementById("nbcrd").value;
+  if ( nbcard>=1 & Date.parse(vardate) >1) {
+     var date_carte_='date_carte'+nbcard.toString();
+    var txt=vardate2.toString();
+    
+    var answer = window.confirm("Vous voulez vraiment faire la mise à jour de manuellement de?\n"+names[parseInt(nbcard)-1]);
+      if (answer) localStorage.setItem(date_carte_, txt );
+      update();
+  }
+  else alert ('erreur de saisie, vérifiez et recommancer')
+}
+
+document.getElementById('nbcrd').setAttribute('max', nb);
+
+</script>
+</body> 
+</html>
