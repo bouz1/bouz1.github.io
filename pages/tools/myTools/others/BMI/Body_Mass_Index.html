@@ -2,7 +2,7 @@
   <head>
     <meta charset="UTF-8">
     <script src="gauge.js"></script>
-	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   </head>
   <body>
 
@@ -10,29 +10,29 @@
     <h2>Indice de masse corporelle</h2>
     <canvas id="gauge"></canvas>
     <br>
-   
-      <div id="InputDivId">
-        <div class="input-group">
-          <label for="mass" class="Label1">Poids (kg)</label>
-          <input id="masse" value="65" onchange="Calculation()" type="number" class="inpNum" size="5">
-        </div>
-        <div class="input-group">
-          <label for="length" class="Label1">Taille (cm)</label>
-          <input id="length" value="170" onchange="Calculation()" type="number" class="inpNum" size="10">
-        </div>
-        <div class="input-group">
-          <label for="MaleFemale" class="Label1">Genre</label>
-          <select id="MaleFemale" onchange="selectChange()"> 
-            <option value='BMImales'>Homme</option>
-            <option value='BMIfemales'>Femme</option>
-          </select>
-        </div>
-        <div class="input-group">
-          <label for="AgeSelection" class="Label1">Âge</label>
-          <select id="AgeSelection" onchange="selectChange()"></select>
-        </div>
+
+    <div id="InputDivId">
+      <div class="input-group">
+        <label for="mass" class="Label1">Poids (kg)</label>
+        <input id="masse" value="65" onchange="Calculation()" type="number" class="inpNum" size="5">
       </div>
-    
+      <div class="input-group">
+        <label for="length" class="Label1">Taille (cm)</label>
+        <input id="length" value="170" onchange="Calculation()" type="number" class="inpNum" size="10">
+      </div>
+      <div class="input-group">
+        <label for="MaleFemale" class="Label1">Genre</label>
+        <select id="MaleFemale" onchange="selectChange()"> 
+          <option value='BMImales'>Homme</option>
+          <option value='BMIfemales'>Femme</option>
+        </select>
+      </div>
+      <div class="input-group">
+        <label for="AgeSelection" class="Label1">Âge</label>
+        <select id="AgeSelection" onchange="selectChange()"></select>
+      </div>
+    </div>
+
     <div id="legend"></div>
     <div id = "ResDivId">
       <label id="ResultLabel" class="Label1 resLabel"></label>
@@ -40,8 +40,8 @@
       <label id="ResultLabelTxt" class="Label1 resLabel"></label>
     </div>
     <br>
-	<div id="PlotID2" style="width:100%;max-width:800px"></div>
-	<br>
+    <div id="PlotID2" style="width:100%;max-width:800px"></div>
+    <br>
     <a href = "https://en.wikipedia.org/wiki/Body_mass_index">?</a>
     <!-- <div id="preview-textfield"></div> -->
 
@@ -84,7 +84,7 @@
         /*The first two values horizontal and vertical offset of the shadow*/
         /*The third value controls the blur radius*/
         /*If you want an even darker shadow, you can add multiple layers*/
-        font-size: 18px;
+        font-size: 16px;
 
       }
       h2 {
@@ -202,7 +202,7 @@
     </script>
 
     <script>
-	
+
 
       const legendDiv = document.getElementById('legend');
 
@@ -228,57 +228,59 @@
         legendDiv.appendChild(legendItem);
       }
     </script>
-	
-	
-	
-	<script>
-	
-	/* For ploting */
-	function plot_data(xArray, yArray,value_BMI , percentileBMI){
-
-
-// Define Data
-
-var data = [
-    {
-        x: xArray,
-        y: yArray,
-        mode: 'lines',
-        name: 'Distribution cumulative' // Legend name for the first line
-    },
-    {
-        x: [value_BMI],
-        y: [ percentileBMI],
-        mode: 'markers',
-        name: 'Votre mésure', // Legend name for the markers
-        marker: { color: 'red', size: 10 } // Customizing marker color and size
-    }
-];
 
 
 
+    <script>
 
-// Define Layout
-var layout = {
-  xaxis: {range: [18,46], title: "Indice de masse corporelle"},
-  yaxis: {range: [0, 100], title: "Population de même catégorie"},  
-  title: "Distribution cumulative de l'indice de masse corporelle", 
-      legend: {
-        orientation: "h", // Horizontal orientation
-        yanchor: "top",   // Anchor the legend to the top
-        y: 1.1            // Position the legend slightly above the plot area
-    }
-};
+      /* For ploting */
+      function plot_data(xArray, yArray,value_BMI , percentileBMI){
 
 
+        // Define Data
 
-// Display using Plotly
-Plotly.newPlot("PlotID2", data, layout);
-}
+        var data = [
+          {
+            x: xArray,
+            y: yArray,
+            mode: 'lines',
+            name: 'Distribution cumulative' // Legend name for the first line
+          },
+          {
+            x: [value_BMI],
+            y: [ percentileBMI],
+            mode: 'markers',
+            name: 'Votre mésure', // Legend name for the markers
+            marker: { color: 'red', size: 10 } // Customizing marker color and size
+          }
+        ];
 
 
 
-</script>
+
+        // Define Layout
+        var layout = {
+          xaxis: {range: [18,46], title: "Indice de masse corporelle"},
+          yaxis: {range: [0, 100], title: "Population de même catégorie"},  
+          title: "Distribution cumulative de l'indice de masse corporelle", 
+          legend: {
+            orientation: "h", // Horizontal orientation
+            yanchor: "top",   // Anchor the legend to the top
+            y: 1.1            // Position the legend slightly above the plot area
+          },
+          dragmode: false, // Disable dragging
+          scrollZoom: false // Disable scroll zoom
+        };
+
+
+
+        // Display using Plotly
+        Plotly.newPlot("PlotID2", data, layout);
+      }
+
+
+
+    </script>
 
     <script>
 
@@ -359,11 +361,11 @@ Plotly.newPlot("PlotID2", data, layout);
         console.log(txtDisp);
         const labText = document.getElementById("ResultLabelTxt");
         labText.innerText= txtDisp; 
-		
-		/*Plot*/
-		var xArray = BMIdata[MaleFemaleValue][ind_];
-var yArray = BMIdata['Percentile'];
-plot_data(xArray, yArray,BMI , percentile);
+
+        /*Plot*/
+        var xArray = BMIdata[MaleFemaleValue][ind_];
+        var yArray = BMIdata['Percentile'];
+        plot_data(xArray, yArray,BMI , percentile);
       }
     </script>
     <script>
