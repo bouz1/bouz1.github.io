@@ -1,219 +1,367 @@
 <html>
-<head>
-<meta charset="UTF-8">
-</head>
-<body>
-<script src="gauge.js"></script>
+  <head>
+    <meta charset="UTF-8">
+    <script src="gauge.js"></script>
+  </head>
+  <body>
 
 
-<canvas id="gauge"></canvas>
-<br>
-<div>
-<label for="mass" class="Label1"> Poids (kg)</label>
-<input id="masse" value = 65 onchange="Calculation()" type="number" class="inpNum" size=5>
-<label for="length" class="Label1"> Taille (cm)</label>
-<input id="length" value = 170 onchange="Calculation()" type="number" class="inpNum" size=10>
-</div>
-<div id="legend"></div>
-<label id="ResultLabel" class="Label1"></label>
-<!-- <div id="preview-textfield"></div> -->
-<style>
+    <h2>Indice de masse corporelle</h2>
+    <canvas id="gauge"></canvas>
+    <br>
+   
+      <div id="InputDivId">
+        <div class="input-group">
+          <label for="mass" class="Label1">Poids (kg)</label>
+          <input id="masse" value="65" onchange="Calculation()" type="number" class="inpNum" size="5">
+        </div>
+        <div class="input-group">
+          <label for="length" class="Label1">Taille (cm)</label>
+          <input id="length" value="170" onchange="Calculation()" type="number" class="inpNum" size="10">
+        </div>
+        <div class="input-group">
+          <label for="MaleFemale" class="Label1">Genre</label>
+          <select id="MaleFemale" onchange="selectChange()"> 
+            <option value='BMImales'>Homme</option>
+            <option value='BMIfemales'>Femme</option>
+          </select>
+        </div>
+        <div class="input-group">
+          <label for="AgeSelection" class="Label1">Âge</label>
+          <select id="AgeSelection" onchange="selectChange()"></select>
+        </div>
+      </div>
+    
+    <div id="legend"></div>
+    <div id = "ResDivId">
+      <label id="ResultLabel" class="Label1 resLabel"></label>
+      <br>
+      <label id="ResultLabelTxt" class="Label1 resLabel"></label>
+    </div>
+    <br>
+    <a href = "https://en.wikipedia.org/wiki/Body_mass_index">?</a>
+    <!-- <div id="preview-textfield"></div> -->
 
-.Label1, .inpNum{
-padding:10px;
-margin:10px;
-font-size:20px;
 
-
-}
-.inpNum{
-width: 80px; 
-}
-
-#ResultLabel {
-  color: white;
-  text-shadow: 1px 1px 2px black;
-
-}
-</style>
 
     <style>
-	/********** For Legend ***********/
-        #legend {
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-        }
-        .legend-item {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-			
-    margin-left: 20px; /* Adjust as needed for alignment */
-        }
-        .circle {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-        }
+      .input-group {
+        display: flex;
+        align-items: center; /* Vertically align the items */
+        margin-bottom: 10px; /* Space between rows */
+      }
+
+      .Label1 {
+        width: 150px;
+        padding: 10px;
+        font-size: 16px;
+      }
+
+      .inpNum,
+      select {
+        width: 150px;
+        padding: 10px;
+        font-size: 16px;
+        border: 2px solid #333;
+        border-radius: 5px;
+        background-color: #f8f8f8;
+        color: #333;
+        outline: none;
+      }
+
+      #InputDivId {
+        padding: 10px;
+        margin: 10px;
+      }
+
+
+      .resLabel {
+        color: white;
+        text-shadow: 0px 0px 5px black , 0px 0px 5px black, 0px 0px 5px black, 0px 0px 5px black;
+        /*The first two values horizontal and vertical offset of the shadow*/
+        /*The third value controls the blur radius*/
+        /*If you want an even darker shadow, you can add multiple layers*/
+        font-size: 18px;
+
+      }
+      h2 {
+        padding : 10px 150px;
+      }
+
+
+
+      #ResDivId{
+        padding : 10px 10px 10px 40px;  /*[top] [right] [bottom] [left]*/
+        margin:  10px 10px 10px 40px;
+        width: 450px;
+      }
     </style>
-	
-<script>
 
-// Initialisation values
-const values_ranges = [10, 18.5, 25, 30, 35, 40];
-const legend= ["maigreur", "poids normal","surpoids","obésité modérée","obésité sévère"];
-const color_ranges = ["#0000FF", "#00FF00", "#FFFF00", "#FFA500", "#FF0000"];
+    <style>
+      /********** For Legend ***********/
+      #legend {
+        display: flex;
+        flex-direction: column;
+        gap: 10px;
+      }
+      .legend-item {
+        display: flex;
+        align-items: center;
+        gap: 10px;
 
-const values_rangesList = values_ranges.slice(0, -1);
-if (color_ranges.length !== values_ranges.length - 1) {
-    throw new Error("The number of colors does not match the number of ranges.");
-}
+        margin-left: 20px; /* Adjust as needed for alignment */
+      }
+      .circle {
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+      }
+    </style>
 
-// Generate static zones
-const staticZonesList = values_ranges.slice(0, -1).map((min, index) => {
-    const max = values_ranges[index + 1];
-    const color = color_ranges[index];
-    return { strokeStyle: color, min: min, max: max };
-});
+    <script>
 
-var opts = {
-    // customize pointer
-    pointer: {
-      length: 0.8,
-      strokeWidth: 0.035,
-      iconScale: 1.0
-    },
-    // static labels
-    staticLabels: {
-      font: "20px sans-serif",
-      labels: values_rangesList,
-      fractionDigits: 0
-    },
-    // static zones
-    staticZones: staticZonesList,
-    // render ticks
-    renderTicks: {
-      divisions: 5,
-      divWidth: 1.1,
-      divLength: 0.7,
-      subDivisions: 3,
-      subLength: 0.5,
-      subWidth: 0.6
-    },
-    // the span of the gauge arc
-    angle: 0,
-    // line thickness
-    lineWidth: 0.44,
-    // radius scale
-    radiusScale: 1.0,
-    // font size
-    fontSize: 40,
-    // if false, max value increases automatically if value > maxValue
-    limitMax: true,
-    // if true, the min value of the gauge will be fixed
-    limitMin: true,
-    // High resolution support
-    highDpiSupport: true
-};
+      // Initialisation values
+      const values_ranges = [13, 18.5, 25, 30, 35, 40,45];
+      const legend= ["maigreur", "poids normal","surpoids","obésité modérée","obésité sévère","obésité massive"];
+      const color_ranges = ["#0000FF", "#00FF00", "#FFFF00", "#FFA500", "#FF0000","#8a0101"];
 
-var target = document.getElementById('gauge'); 
-target.style.width = '600px';
+      const values_rangesList = values_ranges.slice(0, -1);
+      if (color_ranges.length !== values_ranges.length - 1) {
+        throw new Error("The number of colors does not match the number of ranges.");
+      }
 
-var gauge = new Gauge(target).setOptions(opts);
+      // Generate static zones
+      const staticZonesList = values_ranges.slice(0, -1).map((min, index) => {
+        const max = values_ranges[index + 1];
+        const color = color_ranges[index];
+        return { strokeStyle: color, min: min, max: max };
+      });
 
-//document.getElementById("preview-textfield").className = "preview-textfield";
-//gauge.setTextField(document.getElementById("preview-textfield"));
-max_value=Math.max(...values_ranges);
-min_value=Math.min(...values_ranges);
-gauge.maxValue = max_value;
-gauge.setMinValue(min_value); 
-gauge.set(0);
+      var opts = {
+        // customize pointer
+        pointer: {
+          length: 0.8,
+          strokeWidth: 0.035,
+          iconScale: 1.0
+        },
+        // static labels
+        staticLabels: {
+          font: "20px sans-serif",
+          labels: values_rangesList,
+          fractionDigits: 0
+        },
+        // static zones
+        staticZones: staticZonesList,
+        // render ticks
+        renderTicks: {
+          divisions: 5,
+          divWidth: 1.1,
+          divLength: 0.7,
+          subDivisions: 3,
+          subLength: 0.5,
+          subWidth: 0.6
+        },
+        // the span of the gauge arc
+        angle: 0,
+        // line thickness
+        lineWidth: 0.44,
+        // radius scale
+        radiusScale: 1.0,
+        // font size
+        fontSize: 40,
+        // if false, max value increases automatically if value > maxValue
+        limitMax: true,
+        // if true, the min value of the gauge will be fixed
+        limitMin: true,
+        // High resolution support
+        highDpiSupport: true
+      };
 
-gauge.animationSpeed = 10;
+      var target = document.getElementById('gauge'); 
+      target.style.width = '600px';
+
+      var gauge = new Gauge(target).setOptions(opts);
+
+      //document.getElementById("preview-textfield").className = "preview-textfield";
+      //gauge.setTextField(document.getElementById("preview-textfield"));
+      max_value=Math.max(...values_ranges);
+      min_value=Math.min(...values_ranges);
+      gauge.maxValue = max_value;
+      gauge.setMinValue(min_value); 
+      gauge.set(0);
+
+      gauge.animationSpeed = 10;
 
 
 
 
 
+    </script>
+
+    <script>
+
+      const legendDiv = document.getElementById('legend');
+
+      for (let i = 0; i < legend.length; i++) {
 
 
-const legendDiv = document.getElementById('legend');
 
-        for (let i = 0; i < legend.length; i++) {
-          
-		
-		
-		const rangeText = `${values_ranges[i].toFixed(1)}-${values_ranges[i + 1].toFixed(1)}: ${legend[i]}`;
+        const rangeText = `${values_ranges[i].toFixed(1)}-${values_ranges[i + 1].toFixed(1)}: ${legend[i]}`;
 
-		
-            const legendItem = document.createElement('div');
-            legendItem.className = 'legend-item';
 
-            const circle = document.createElement('div');
-            circle.className = 'circle';
-            circle.style.backgroundColor = color_ranges[i];
-            
-            const text = document.createElement('span');
-            text.textContent = rangeText;
+        const legendItem = document.createElement('div');
+        legendItem.className = 'legend-item';
 
-            legendItem.appendChild(circle);
-            legendItem.appendChild(text);
-            legendDiv.appendChild(legendItem);
+        const circle = document.createElement('div');
+        circle.className = 'circle';
+        circle.style.backgroundColor = color_ranges[i];
+
+        const text = document.createElement('span');
+        text.textContent = rangeText;
+
+        legendItem.appendChild(circle);
+        legendItem.appendChild(text);
+        legendDiv.appendChild(legendItem);
+      }
+    </script>
+
+    <script>
+
+      const BMIdata= {
+        'Percentile': [5.0, 10.0, 15.0, 25.0, 50.0, 75.0, 85.0, 90.0, 95.0],
+        'Age': ['20–29', '30–39', '40–49', '50–59', '60–69', '70–79', '≥ 80'],
+        'BMImales': [[19.3, 20.5, 21.2, 22.5, 25.5, 30.5, 33.1, 35.1, 39.2],
+                     [21.1, 22.4, 23.3, 24.8, 27.5, 31.9, 35.1, 36.5, 39.3],
+                     [21.9, 23.4, 24.3, 25.7, 28.5, 31.9, 34.4, 36.5, 40.0],
+                     [21.6, 22.7, 23.6, 25.4, 28.3, 32.0, 34.0, 35.2, 40.3],
+                     [21.6, 22.7, 23.6, 25.3, 28.0, 32.4, 35.3, 36.9, 41.2],
+                     [21.5, 23.2, 23.9, 25.4, 27.8, 30.9, 33.1, 34.9, 38.9],
+                     [20.0, 21.5, 22.5, 24.1, 26.3, 29.0, 31.1, 32.3, 33.8]],
+        'BMIfemales': [[18.6, 19.8, 20.7, 21.9, 25.6, 31.8, 36.0, 38.9, 42.0],
+                       [19.8, 21.1, 22.0, 23.3, 27.6, 33.1, 36.6, 40.0, 44.7],
+                       [20.0, 21.5, 22.5, 23.7, 28.1, 33.4, 37.0, 39.6, 44.5],
+                       [19.9, 21.5, 22.2, 24.5, 28.6, 34.4, 38.3, 40.7, 45.2],
+                       [20.0, 21.7, 23.0, 24.5, 28.9, 33.4, 36.1, 38.7, 41.8],
+                       [20.5, 22.1, 22.9, 24.6, 28.3, 33.4, 36.5, 39.1, 42.9],
+                       [19.3, 20.4, 21.3, 23.3, 26.1, 29.7, 30.9, 32.8, 35.2]]
+      }
+
+      function interpolation(xarray, yarray, xvalue) {
+        const n = xarray.length;
+        var res;
+        // Handle cases where xvalue is outside the range of xarray
+        if (xvalue < xarray[0]) {
+          res= yarray[0] + ((yarray[1] - yarray[0]) / (xarray[1] - xarray[0])) * (xvalue - xarray[0]);
+        } else if (xvalue > xarray[n - 1]) {
+          res= yarray[n - 2] + ((yarray[n - 1] - yarray[n - 2]) / (xarray[n - 1] - xarray[n - 2])) * (xvalue - xarray[n - 2]);
         }
-</script>
 
-<script>
+        // Perform linear interpolation for xvalue within xarray range
+        for (let i = 0; i < n - 1; i++) {
+          if (xvalue >= xarray[i] && xvalue <= xarray[i + 1]) {
+            res= yarray[i] + ((yarray[i + 1] - yarray[i]) / (xarray[i + 1] - xarray[i])) * (xvalue - xarray[i]);
+          }
+        }
+        if (res > 99) res=99; 
+        if (res < 1) res= 1; 
+        return res; 
+      }
 
-function getCategory(value) {
-    for (let i = 0; i < values_ranges.length - 1; i++) {
-        if (value >= values_ranges[i] && value < values_ranges[i + 1]) {
+
+
+
+      const AgeSelection = document.getElementById("AgeSelection");
+      for( i = 0; i<BMIdata['Age'].length;i++){
+        const optionElement = document.createElement("option");
+        optionElement.value = BMIdata['Age'][i];
+        optionElement.text = BMIdata['Age'][i]; 
+        AgeSelection.appendChild(optionElement); 
+      }
+
+
+      function selectChange(){
+        var AgeSelectionValue=document.getElementById("AgeSelection").value;
+        var MaleFemaleValue=document.getElementById("MaleFemale").value;
+        var ind_= BMIdata['Age'].indexOf(AgeSelectionValue);
+        /*
+	console.log(AgeSelectionValue,MaleFemaleValue, ind_, 
+	"Vous êtes supérieur à ",
+	interpolation(BMIdata[MaleFemaleValue][ind_], BMIdata['Percentile'], BMI), 
+	" % De votre Catégorie"
+	); 
+	*/
+        var percentile = interpolation(BMIdata[MaleFemaleValue][ind_], BMIdata['Percentile'], BMI); 
+
+        if (percentile > 50){
+          var percStr= percentile.toFixed(1);
+          var txtDisp= "Vous êtes supérieur à "+percStr+" % De votre Catégorie";
+        }
+        else {
+          var percStr= (100-percentile).toFixed(1);
+          var txtDisp="Vous êtes inférieur à "+percStr+" % De votre Catégorie";
+        }
+
+        console.log(txtDisp);
+        const labText = document.getElementById("ResultLabelTxt");
+        labText.innerText= txtDisp; 
+      }
+    </script>
+    <script>
+
+      function getCategory(value) {
+        for (let i = 0; i < values_ranges.length - 1; i++) {
+          if (value >= values_ranges[i] && value < values_ranges[i + 1]) {
             return legend[i];
+          }
         }
-    }
-    return value >= values_ranges[values_ranges.length - 1] ? legend[legend.length - 1] : null;
-}
+        return value >= values_ranges[values_ranges.length - 1] ? legend[legend.length - 1] : null;
+      }
 
-function getIndex(value) {
-	if (value > max_value) return legend.length - 1;
-	if (value < min_value) return 0;
-    for (let i = 0; i < values_ranges.length - 1; i++) {
-        if (value >= values_ranges[i] && value < values_ranges[i + 1]) {
+      function getIndex(value) {
+        if (value > max_value) return legend.length - 1;
+        if (value < min_value) return 0;
+        for (let i = 0; i < values_ranges.length - 1; i++) {
+          if (value >= values_ranges[i] && value < values_ranges[i + 1]) {
             return i
+          }
         }
-    }
-    
-}
+
+      }
 
 
 
-function Calculation(){
-//https://fr.wikipedia.org/wiki/Indice_de_masse_corporelle
-//https://www.who.int/europe/news-room/fact-sheets/item/a-healthy-lifestyle---who-recommendations
+      function Calculation(){
+        //https://fr.wikipedia.org/wiki/Indice_de_masse_corporelle
+        //https://www.who.int/europe/news-room/fact-sheets/item/a-healthy-lifestyle---who-recommendations
 
 
-var masse = document.getElementById("masse").value;
-var length = document.getElementById("length").value;
-length=length/100;
-BMI= masse/(length**2);//Body mass index
-gauge.set(BMI);
-console.log(BMI);
+        var masse = document.getElementById("masse").value;
+        var length = document.getElementById("length").value;
+        length=length/100;
+        BMI= masse/(length**2);//Body mass index
+        gauge.set(BMI);
+        console.log(BMI);
 
-const lab = document.getElementById("ResultLabel");
-const index = getIndex(BMI); 
-const category =legend[index] ; 
+        const lab = document.getElementById("ResultLabel");
 
-const color_cat=color_ranges[index];
+        const index = getIndex(BMI); 
+        const category =legend[index] ; 
+
+        const color_cat=color_ranges[index];
 
 
 
-lab.innerText="Votre Indice de masse corporelle est: "+BMI.toFixed(1)+" ( "+category+" )";
- 
-//lab.style.backgroundColor = color_cat;
-lab.style.color = color_cat;
-}
-Calculation()
-/*
+        lab.innerText="Votre Indice de masse corporelle est: "+BMI.toFixed(1)+" ( "+category+" )";
+
+        //.backgroundColor .color
+        //lab.style.backgroundColor = color_cat;
+        document.getElementById("ResDivId").style.backgroundColor = color_cat;
+
+        selectChange(); 
+        return BMI ; 
+      }
+      BMI = Calculation();
+      /*
 // If you need data to trace pourcentel
 |    |   Pourcentel |   Femelle BMI 19 years |   Mal MBI 19 years |
 |---:|-------------:|-----------------------:|-------------------:|
@@ -235,7 +383,9 @@ Calculation()
 
 https://www.who.int/tools/growth-reference-data-for-5to19-years/indicators/bmi-for-age
 */
-</script>
-</body>
+    </script>
+
+
+  </body>
 </html>
 
