@@ -2,6 +2,7 @@
   <head>
     <meta charset="UTF-8">
     <script src="gauge.js"></script>
+	<script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
   </head>
   <body>
 
@@ -39,6 +40,8 @@
       <label id="ResultLabelTxt" class="Label1 resLabel"></label>
     </div>
     <br>
+	<div id="PlotID2" style="width:100%;max-width:800px"></div>
+	<br>
     <a href = "https://en.wikipedia.org/wiki/Body_mass_index">?</a>
     <!-- <div id="preview-textfield"></div> -->
 
@@ -199,6 +202,7 @@
     </script>
 
     <script>
+	
 
       const legendDiv = document.getElementById('legend');
 
@@ -224,6 +228,57 @@
         legendDiv.appendChild(legendItem);
       }
     </script>
+	
+	
+	
+	<script>
+	
+	/* For ploting */
+	function plot_data(xArray, yArray,value_BMI , percentileBMI){
+
+
+// Define Data
+
+var data = [
+    {
+        x: xArray,
+        y: yArray,
+        mode: 'lines',
+        name: 'Distribution cumulative' // Legend name for the first line
+    },
+    {
+        x: [value_BMI],
+        y: [ percentileBMI],
+        mode: 'markers',
+        name: 'Votre mésure', // Legend name for the markers
+        marker: { color: 'red', size: 10 } // Customizing marker color and size
+    }
+];
+
+
+
+
+// Define Layout
+var layout = {
+  xaxis: {range: [18,46], title: "Indice de masse corporelle"},
+  yaxis: {range: [0, 100], title: "Population de même catégorie"},  
+  title: "Distribution cumulative de l'indice de masse corporelle", 
+      legend: {
+        orientation: "h", // Horizontal orientation
+        yanchor: "top",   // Anchor the legend to the top
+        y: 1.1            // Position the legend slightly above the plot area
+    }
+};
+
+
+
+// Display using Plotly
+Plotly.newPlot("PlotID2", data, layout);
+}
+
+
+
+</script>
 
     <script>
 
@@ -304,6 +359,11 @@
         console.log(txtDisp);
         const labText = document.getElementById("ResultLabelTxt");
         labText.innerText= txtDisp; 
+		
+		/*Plot*/
+		var xArray = BMIdata[MaleFemaleValue][ind_];
+var yArray = BMIdata['Percentile'];
+plot_data(xArray, yArray,BMI , percentile);
       }
     </script>
     <script>
