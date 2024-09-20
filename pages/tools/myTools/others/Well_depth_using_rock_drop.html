@@ -11,9 +11,13 @@
         padding-top: 100px;
       }
       #startStopBtn {
-        padding: 15px 30px;
-        font-size: 18px;
+        padding: 30px 60px;
+        font-size: 36px;
         margin: 15px;
+        border-radius: 40px; /* Adjust the radius as needed */
+        background-color: #37b2eb; /* Change to your desired color */
+        color: white; /* Text color */
+        border: none; /* Remove border */
       }
 
       label {
@@ -60,6 +64,8 @@
       <br />
       speed = g ⋅ t
     </div>
+	<br>
+	This tool does not account for air drag and the speed of sound, which could result in an error of less than 2%.
 
     <script>
       let startTime,
