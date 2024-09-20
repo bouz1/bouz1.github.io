@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AES-256 Encryption/Decryption with IV</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.1.1/crypto-js.min.js"></script>
+    <style>
+      body { font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; padding: 20px; }
+      textarea ,input, button { margin: 10px 0; padding: 5px; width: 100%; }
+      #result { margin-top: 20px; font-weight: bold; word-wrap: break-word; }
+      div {
+        display: flex;
+        align-items: center;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>AES-256 Encryption/Decryption with IV</h1>
+
+    <textarea id="text" rows=10> </textarea>
+    <input type="password" id="password" placeholder="Enter password">
+    <div>
+      Basic AES Algo (without iv, PBKDF2, Hmac)
+      <input type="checkbox" id="id_cb">
+    </div>
+    <button onclick="encrypt()">Encrypt</button>
+    <button onclick="decrypt()">Decrypt</button>
+
+    <!-- <div id="result"></div> -->
+    <textarea id="result" rows=10> </textarea>
+
+    <script>
+      /*
+      function validatePassword(password) {
+        if (password.length < 12) {
+          alert('Password must be at least 12 characters long.');
+          return false;
+        }
+        return true;
+      }
+	  */
+
+      function encrypt() {
+        const text = document.getElementById('text').value;
+        const password = document.getElementById('password').value;
+        const cb = document.getElementById('id_cb').checked;
+        const result = encrypt_hmac_iv_salt(text,password,cb);
+        document.getElementById('result').value =  result;
+
+      }
+
+      function decrypt() {
+        const text = document.getElementById('text').value;
+        const password = document.getElementById('password').value;
+        const cb = document.getElementById('id_cb').checked;
+        const result = decrypt_hmac_iv_salt(text,password,cb); 
+        document.getElementById('result').value =  result;
+
+      }
+    </script>
+    <script>
+      function encrypt_hmac_iv_salt(text,password,cb){
+        var result
+        if (cb) {
+          // Basic AES encryption without IV, PBKDF2, or HMAC
+          const encrypted = CryptoJS.AES.encrypt(text, password);
+          result = encrypted.toString(); // Serialize the full encryption result (including IV, salt if present)
+          return result;
+
+        } else {
+          //if (!validatePassword(password)) return;
+
+          const iv = CryptoJS.lib.WordArray.random(16);
+          const salt = CryptoJS.lib.WordArray.random(16);
+          const key = CryptoJS.PBKDF2(password, salt, { keySize: 256/32, iterations: 1000 });
+
+          const encrypted = CryptoJS.AES.encrypt(text, key, { iv: iv });
+          const hmac = CryptoJS.HmacSHA256(encrypted.ciphertext, key);
+
+          result = salt.concat(iv).concat(encrypted.ciphertext).concat(hmac).toString(CryptoJS.enc.Base64);
+          return result;
+
+        }
+
+      }
+
+
+
+
+
+      function decrypt_hmac_iv_salt(text,password,cb){
+        var result 
+        if (cb) {
+          try {
+            // Decrypt using basic AES (no IV or HMAC)
+            const decrypted = CryptoJS.AES.decrypt(text, password);
+            result = decrypted.toString(CryptoJS.enc.Utf8);
+            return result;
+
+
+          } catch  {
+            result = 'Decryption failed. Please check your input and password.';
+            return result;
+          }
+        } else {
+          try {
+            //if (!validatePassword(password)) return;
+
+            const combined = CryptoJS.enc.Base64.parse(text);
+            const salt = CryptoJS.lib.WordArray.create(combined.words.slice(0, 4));
+            const iv = CryptoJS.lib.WordArray.create(combined.words.slice(4, 8));
+            const ciphertext = CryptoJS.lib.WordArray.create(combined.words.slice(8, combined.words.length - 8));
+            const hmac = CryptoJS.lib.WordArray.create(combined.words.slice(combined.words.length - 8));
+
+            const key = CryptoJS.PBKDF2(password, salt, { keySize: 256/32, iterations: 1000 });
+
+            const newHmac = CryptoJS.HmacSHA256(ciphertext, key);
+            if (CryptoJS.enc.Hex.stringify(newHmac) !== CryptoJS.enc.Hex.stringify(hmac)) {
+              result = 'Authentication failed';
+              return result;
+            }
+
+            const decrypted = CryptoJS.AES.decrypt({ ciphertext: ciphertext }, key, { iv: iv });
+            result = decrypted.toString(CryptoJS.enc.Utf8);
+            return result;
+
+
+          } catch  {
+            result = 'Decryption failed. Please check your input and password.';
+            return result;
+          }
+        }
+
+
+      }
+    </script>
+  </body>
+</html>

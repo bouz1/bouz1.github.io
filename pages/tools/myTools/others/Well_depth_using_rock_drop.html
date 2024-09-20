@@ -1,0 +1,104 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Well Depth Using Rock Drop</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding-top: 100px;
+      }
+      #startStopBtn {
+        padding: 15px 30px;
+        font-size: 18px;
+        margin: 15px;
+      }
+
+      label {
+        width: 150px;
+        display: inline-block;
+        text-align: left;
+        font-size: 18px;
+      }
+      input {
+        width: 80px;
+        display: inline-block;
+        font-size: 18px;
+      }
+      label,
+      input,
+      p {
+        margin: 5px;
+      }
+
+      .formula {
+        font-family: "Arial", sans-serif;
+        font-size: 20px;
+        text-align: center;
+        margin-top: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Well depth using rock drop</h1>
+    <button id="startStopBtn" onclick="startStopTimer()">Start</button>
+    <p id="timerDisplay">0.00</p>
+    <br />
+    <label>Time (s)</label>
+    <input id="id_time" />
+    <br />
+    <label>End speed (m/s)</label>
+    <input id="id_speed" />
+    <br />
+    <label>Height (m)</label>
+    <input id="id_height" />
+    <br />
+    <div class="formula">
+      height = ½ ⋅ g ⋅ t²
+      <br />
+      speed = g ⋅ t
+    </div>
+
+    <script>
+      let startTime,
+        endTime,
+        isRunning = false,
+        intervalId;
+
+      function startStopTimer() {
+        const button = document.getElementById("startStopBtn");
+        const timerDisplay = document.getElementById("timerDisplay");
+        const g = 9.81; // gravitational acceleration in m/s^2
+
+        if (!isRunning) {
+          // Start the timer
+          startTime = new Date().getTime();
+          button.textContent = "Stop";
+          isRunning = true;
+
+          // Update the display every 10ms (0.01s)
+          intervalId = setInterval(() => {
+            let currentTime = new Date().getTime();
+            let timeInSeconds = (currentTime - startTime) / 1000;
+            timerDisplay.textContent = timeInSeconds.toFixed(2);
+          }, 10);
+        } else {
+          // Stop the timer and calculate height
+          clearInterval(intervalId);
+          endTime = new Date().getTime();
+          let timeInSeconds = (endTime - startTime) / 1000;
+          let speed = g * timeInSeconds;
+          let height = 0.5 * g * timeInSeconds * timeInSeconds; // h = 0.5 * g * t^2
+
+          button.textContent = "Start";
+          document.getElementById("id_time").value = timeInSeconds.toFixed(2);
+          document.getElementById("id_speed").value = speed.toFixed(2);
+          document.getElementById("id_height").value = height.toFixed(2);
+          isRunning = false;
+        }
+      }
+    </script>
+  </body>
+</html>
