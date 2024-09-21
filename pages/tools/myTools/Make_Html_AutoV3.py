@@ -2,12 +2,18 @@ import glob
 import os
 import json
 
-
-with open('version.json', 'r') as f:
-    version = json.load(f)
-    ver=int(version["version"].replace("V",""))
-    ver=ver+1
-    version["version"]="V"+str(ver)
+try:
+    with open('version.json', 'r') as f:
+        version = json.load(f)
+        ver=int(version["version"].replace("V",""))
+        ver=ver+1
+        version["version"]="V"+str(ver)
+except: 
+    with open('./pages/tools/myTools/version.json', 'r') as f:
+        version = json.load(f)
+        ver=int(version["version"].replace("V",""))
+        ver=ver+1
+        version["version"]="V"+str(ver)
     
 
 
