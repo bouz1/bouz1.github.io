@@ -144,6 +144,7 @@ html+="""
 </html>
 """
 print(folder__)
+print(version)
 with open(folder__+"tools.html", "w") as f:
     f.write(html)
 with open(folder__+'version.json', 'w') as file:

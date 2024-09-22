@@ -36,7 +36,9 @@
       p {
         margin: 5px;
       }
-	  p{display:none;}
+      p {
+        display: none;
+      }
 
       .formula {
         font-family: "Arial", sans-serif;
@@ -65,8 +67,9 @@
       <br />
       speed = g ⋅ t
     </div>
-	<br>
-	This tool does not account for air drag and the speed of sound, which could result in an error of less than 2%.
+    <br />
+    This tool does not account for air drag and the speed of sound, which could
+    result in an error of less than 2%.
 
     <script>
       let startTime,
@@ -78,33 +81,36 @@
         const button = document.getElementById("startStopBtn");
         const timerDisplay = document.getElementById("timerDisplay");
         const g = 9.81; // gravitational acceleration in m/s^2
-
+        var timeInSeconds, speed, height;
         if (!isRunning) {
           // Start the timer
           startTime = new Date().getTime();
           button.textContent = "Stop";
           isRunning = true;
-		  
-		  
-		  document.getElementById("id_time").value = "0.0";
+
+          document.getElementById("id_time").value = "0.0";
           document.getElementById("id_speed").value = "0.0";
           document.getElementById("id_height").value = "0.0";
-		  
 
           // Update the display every 10ms (0.01s)
           intervalId = setInterval(() => {
             let currentTime = new Date().getTime();
             let timeInSeconds = (currentTime - startTime) / 1000;
             timerDisplay.textContent = timeInSeconds.toFixed(2);
-			document.getElementById("id_time").value = timeInSeconds.toFixed(3);
+
+            speed = g * timeInSeconds;
+            height = 0.5 * g * timeInSeconds * timeInSeconds; // h = 0.5 * g * t^2
+            document.getElementById("id_time").value = timeInSeconds.toFixed(3);
+            document.getElementById("id_speed").value = speed.toFixed(1);
+            document.getElementById("id_height").value = height.toFixed(1);
           }, 10);
         } else {
           // Stop the timer and calculate height
           clearInterval(intervalId);
           endTime = new Date().getTime();
-          let timeInSeconds = (endTime - startTime) / 1000;
-          let speed = g * timeInSeconds;
-          let height = 0.5 * g * timeInSeconds * timeInSeconds; // h = 0.5 * g * t^2
+          timeInSeconds = (endTime - startTime) / 1000;
+          speed = g * timeInSeconds;
+          height = 0.5 * g * timeInSeconds * timeInSeconds; // h = 0.5 * g * t^2
 
           button.textContent = "Start";
           document.getElementById("id_time").value = timeInSeconds.toFixed(3);
@@ -114,36 +120,33 @@
         }
       }
     </script>
-	<script>
-		lang={
-		'en':{ 
-			'title':'Well depth using rock drop',
-			'stop':"Stop", 
-			'start':"Start",
-			'time':'Time (s)',
-			'speed':'End speed (m/s)',
-			'height':'Height (m)', 
-			'formula1':'height = ½ ⋅ g ⋅ t²', 
-			'formula2':'speed = g ⋅ t',
-			'Comment1':'This tool does not account for air drag and the speed of sound, which could result in an error of less than 2%.'
-			},
-		'fr':{ 
-			'title':'Well depth using rock drop__',
-			'stop':"Stop__", 
-			'start':"Start__",
-			'time':'Time (s)__',
-			'speed':'End speed (m/s)__',
-			'height':'Height (m)__', 
-			'formula1':'height = ½ ⋅ g ⋅ t²__', 
-			'formula2':'speed = g ⋅ t__',
-			'Comment1':'This tool does not account for air drag and the speed of sound, which could result in an error of less than 2%.__'
-			}
-		};
-	</script>
+    <script>
+      lang = {
+        en: {
+          title: "Well depth using rock drop",
+          stop: "Stop",
+          start: "Start",
+          time: "Time (s)",
+          speed: "End speed (m/s)",
+          height: "Height (m)",
+          formula1: "height = ½ ⋅ g ⋅ t²",
+          formula2: "speed = g ⋅ t",
+          Comment1:
+            "This tool does not account for air drag and the speed of sound, which could result in an error of less than 2%.",
+        },
+        fr: {
+          title: "Well depth using rock drop__",
+          stop: "Stop__",
+          start: "Start__",
+          time: "Time (s)__",
+          speed: "End speed (m/s)__",
+          height: "Height (m)__",
+          formula1: "height = ½ ⋅ g ⋅ t²__",
+          formula2: "speed = g ⋅ t__",
+          Comment1:
+            "This tool does not account for air drag and the speed of sound, which could result in an error of less than 2%.__",
+        },
+      };
+    </script>
   </body>
 </html>
-
-
-
-
-
