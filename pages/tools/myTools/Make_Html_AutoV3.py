@@ -2,20 +2,13 @@ import glob
 import os
 import json
 
-try:
-    with open('version.json', 'r') as f:
-        version = json.load(f)
-        ver=int(version["version"].replace("V",""))
-        ver=ver+1
-        version["version"]="V"+str(ver)
-        folder__=""
-except: 
-    with open('./pages/tools/myTools/version.json', 'r') as f:
-        version = json.load(f)
-        ver=int(version["version"].replace("V",""))
-        ver=ver+1
-        version["version"]="V"+str(ver)
-        folder__='./pages/tools/myTools/'
+
+with open('version.json', 'r') as f:
+	version = json.load(f)
+	ver=int(version["version"].replace("V",""))
+	ver=ver+1
+	version["version"]="V"+str(ver)
+
     
 
 
@@ -143,11 +136,11 @@ html+="""
 </body>
 </html>
 """
-print(folder__)
+
 print(version)
-with open(folder__+"tools.html", "w") as f:
+with open("tools.html", "w") as f:
     f.write(html)
-with open(folder__+'version.json', 'w') as file:
+with open('version.json', 'w') as file:
     json.dump(version, file)
 
 print("tools.html AND version.json are updated")
