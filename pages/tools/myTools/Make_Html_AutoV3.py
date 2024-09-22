@@ -94,8 +94,10 @@ html+="""
     <div id="container">
         <!-- Left panel for links -->
         <div id="leftPanel">
+
 """
-a_tag=' <span> &#8226; </span> <a href="link" target="contentFrame">Page_Name</a>'
+a_tag=""" <span> &#8226; </span> <a href="link" target="contentFrame" onclick="document.getElementById('idopetool').href = 'link';">Page_Name</a>"""
+
 for file in html_files:
     txt=file.split('\\')[-1].replace('.html','')
     folder=file.split('\\')[1]
@@ -110,7 +112,7 @@ for file in html_files:
             html+='<br>'+"\n"
         txt=txt.replace('_',' ')
 
-        html+= a_tag.replace('link',file).replace('Page_Name',txt)
+        html+= a_tag.replace('link',file).replace('Page_Name',txt).replace('\\',"/")
         
 html+="""
             <!-- Add more links as needed -->
@@ -119,6 +121,11 @@ html+="""
         <!-- Right panel for displaying the content -->
         <div id="rightPanel">
             <iframe name="contentFrame" src="" frameborder="0"></iframe>
+            <div>
+                
+                <a href="#" id="idopetool">link</a>
+                <br>
+            </div>
         </div>
     </div>
                     <script> 
