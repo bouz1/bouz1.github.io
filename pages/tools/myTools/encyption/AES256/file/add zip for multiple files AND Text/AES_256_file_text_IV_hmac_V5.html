@@ -1,0 +1,325 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <title>Encrypt/Decrypt Text and Files with AES-256, IV, HMAC</title>
+    <script src="crypto-js.min.js"></script>
+    <!-- <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.7.1/jszip.min.js"></script> -->
+    <script src="jszip.min.js"></script>
+
+    <style>
+      label {
+        width: 100%;
+      }
+      body {
+        font-family: Arial, sans-serif;
+        max-width: 900px;
+        margin: 0 auto;
+        padding: 20px;
+      }
+      textarea,
+      input {
+        margin: 10px 0;
+        padding: 5px;
+        width: 100%;
+      }
+      button {
+        margin: 10px 0;
+        padding: 5px;
+        width: 150px;
+      }
+      #result {
+        margin-top: 20px;
+        font-weight: bold;
+        word-wrap: break-word;
+      }
+      div {
+        display: flex;
+        align-items: center;
+      }
+      #div_txt,
+      #div_file {
+        display: block;
+      }
+      #div_file {
+        border-top: 5px solid black;
+		padding-top:10px;
+		padding-bottom:10px;
+		margin-top:20px;
+		margin-bottom:20px;
+      }
+      #div_txt {
+        border-top: 5px solid black;
+		border-bottom: 5px solid black;
+		padding-top:10px;
+		padding-bottom:10px;
+		margin-top:20px;
+		margin-bottom:20px;
+      }
+
+    </style>
+  </head>
+  <body>
+  <h2>Online AES 256 Encryption/Decryption</h2>
+    <label>
+      This tool helps you encrypt and decrypt text, files, or multiple files
+      using a secure AES-256 algorithm with Initialization Vector (IV), HMAC,
+      and Salt. Please choose a strong password to ensure the security of your
+      encryption.
+    </label>
+    <div id="div_file">
+      <h3>AES-256 Encryption/Decryption Mult Files</h3>
+      <input type="password" id="password_file" placeholder="Enter Password" />
+      <input type="file" id="fileInput" multiple />
+      <div>
+        <label>Basic AES Algo (without iv, PBKDF2, Hmac)</label>
+        <input type="checkbox" id="id_cb_file" />
+      </div>
+      <button onclick="encryptFile()">Encrypt and Save</button>
+      <button onclick="decryptFile()">Decrypt and Save</button>
+    </div>
+
+    <div id="div_txt">
+      <h3>AES-256 Encryption/Decryption Text</h3>
+      <input type="password" id="password_txt" placeholder="Enter Password" />
+      <textarea
+        id="textInput"
+        placeholder="Enter text here"
+        rows="10"
+      ></textarea>
+      <div>
+        <label>Basic AES Algo (without iv, PBKDF2, Hmac)</label>
+        <input type="checkbox" id="id_cb_txt" />
+      </div>
+      <button onclick="encryptText()">Encrypt</button>
+      <button onclick="decryptText()">Decrypt</button>
+      <!-- <p id="result"></p> -->
+      <textarea id="result" rows="10"></textarea>
+    </div>
+
+    <script>
+      // Encrypt multiple files and zip if more than one
+      async function encryptFile() {
+        const fileInput = document.getElementById("fileInput").files;
+        const password = document.getElementById("password_file").value;
+        const cb = document.getElementById("id_cb_file").checked;
+
+        if (fileInput.length > 1) {
+          const zip = new JSZip();
+
+          for (let i = 0; i < fileInput.length; i++) {
+            const file = fileInput[i];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+              const wordArray = CryptoJS.lib.WordArray.create(e.target.result);
+              const encrypted = encrypt_hmac_iv_salt_file(
+                wordArray,
+                password,
+                cb
+              );
+              zip.file(file.name + ".enc", encrypted);
+            };
+
+            reader.readAsArrayBuffer(file);
+            await new Promise((resolve) => (reader.onloadend = resolve)); // Ensure async behavior
+          }
+
+          // Generate zip
+          zip.generateAsync({ type: "blob" }).then(function (blob) {
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "encrypted_files.zip";
+            link.click();
+          });
+        } else {
+          // Encrypt single file
+          const file = fileInput[0];
+          const reader = new FileReader();
+
+          reader.onload = function (e) {
+            const wordArray = CryptoJS.lib.WordArray.create(e.target.result);
+            const encrypted = encrypt_hmac_iv_salt_file(
+              wordArray,
+              password,
+              cb
+            );
+            const blob = new Blob([encrypted], { type: "text/plain" });
+
+            const filename = file.name + ".enc";
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+          };
+
+          reader.readAsArrayBuffer(file);
+        }
+      }
+
+      // Decrypt multiple files and zip if more than one
+      async function decryptFile() {
+        const fileInput = document.getElementById("fileInput").files;
+        const password = document.getElementById("password_file").value;
+        const cb = document.getElementById("id_cb_file").checked;
+
+        if (fileInput.length > 1) {
+          const zip = new JSZip();
+
+          for (let i = 0; i < fileInput.length; i++) {
+            const file = fileInput[i];
+            const reader = new FileReader();
+
+            reader.onload = function (e) {
+              const encryptedText = e.target.result;
+              const decrypted = decrypt_hmac_iv_salt_file(
+                encryptedText,
+                password,
+                cb
+              );
+              const typedArray = new Uint8Array(decrypted.sigBytes);
+
+              for (let j = 0; j < decrypted.sigBytes; j++) {
+                typedArray[j] =
+                  (decrypted.words[j >>> 2] >>> (24 - (j % 4) * 8)) & 0xff;
+              }
+
+              zip.file(file.name.replace(".enc", ""), typedArray.buffer);
+            };
+
+            reader.readAsText(file);
+            await new Promise((resolve) => (reader.onloadend = resolve)); // Ensure async behavior
+          }
+
+          // Generate zip
+          zip.generateAsync({ type: "blob" }).then(function (blob) {
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "decrypted_files.zip";
+            link.click();
+          });
+        } else {
+          // Decrypt single file
+          const file = fileInput[0];
+          const reader = new FileReader();
+
+          reader.onload = function (e) {
+            const encryptedText = e.target.result;
+            const decrypted = decrypt_hmac_iv_salt_file(
+              encryptedText,
+              password,
+              cb
+            );
+            const typedArray = new Uint8Array(decrypted.sigBytes);
+
+            for (let j = 0; j < decrypted.sigBytes; j++) {
+              typedArray[j] =
+                (decrypted.words[j >>> 2] >>> (24 - (j % 4) * 8)) & 0xff;
+            }
+
+            const blob = new Blob([typedArray.buffer], { type: file.type });
+            const filename = file.name.replace(".enc", "");
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+          };
+
+          reader.readAsText(file);
+        }
+      }
+
+      // Encrypt text
+      function encryptText() {
+        const text = document.getElementById("textInput").value;
+        const password = document.getElementById("password_txt").value;
+        const cb = document.getElementById("id_cb_txt").checked;
+
+        const encrypted = encrypt_hmac_iv_salt_file(text, password, cb);
+        document.getElementById("result").value = encrypted;
+      }
+
+      // Decrypt text
+      function decryptText() {
+        const encryptedText = document.getElementById("textInput").value;
+        const password = document.getElementById("password_txt").value;
+        const cb = document.getElementById("id_cb_txt").checked;
+
+        const decrypted = decrypt_hmac_iv_salt_file(
+          encryptedText,
+          password,
+          cb
+        );
+        document.getElementById("result").value = decrypted.toString(
+          CryptoJS.enc.Utf8
+        );
+      }
+
+      // Encryption helper
+      function encrypt_hmac_iv_salt_file(text, password, cb) {
+        if (cb) {
+          const encrypted = CryptoJS.AES.encrypt(text, password);
+          return encrypted.toString();
+        } else {
+          const iv = CryptoJS.lib.WordArray.random(16);
+          const salt = CryptoJS.lib.WordArray.random(16);
+          const key = CryptoJS.PBKDF2(password, salt, {
+            keySize: 256 / 32,
+            iterations: 1000,
+          });
+
+          const encrypted = CryptoJS.AES.encrypt(text, key, { iv: iv });
+          const hmac = CryptoJS.HmacSHA256(encrypted.ciphertext, key);
+
+          return salt
+            .concat(iv)
+            .concat(encrypted.ciphertext)
+            .concat(hmac)
+            .toString(CryptoJS.enc.Base64);
+        }
+      }
+
+      // Decryption helper
+      function decrypt_hmac_iv_salt_file(text, password, cb) {
+        if (cb) {
+          const decrypted = CryptoJS.AES.decrypt(text, password);
+          return decrypted;
+        } else {
+          const combined = CryptoJS.enc.Base64.parse(text);
+          const salt = CryptoJS.lib.WordArray.create(
+            combined.words.slice(0, 4)
+          );
+          const iv = CryptoJS.lib.WordArray.create(combined.words.slice(4, 8));
+          const ciphertext = CryptoJS.lib.WordArray.create(
+            combined.words.slice(8, combined.words.length - 8)
+          );
+          const hmac = CryptoJS.lib.WordArray.create(
+            combined.words.slice(combined.words.length - 8)
+          );
+
+          const key = CryptoJS.PBKDF2(password, salt, {
+            keySize: 256 / 32,
+            iterations: 1000,
+          });
+
+          const hmacVerify = CryptoJS.HmacSHA256(ciphertext, key);
+
+          if (
+            CryptoJS.enc.Base64.stringify(hmac) !==
+            CryptoJS.enc.Base64.stringify(hmacVerify)
+          ) {
+            throw new Error("HMAC verification failed");
+          }
+
+          const decrypted = CryptoJS.AES.decrypt(
+            { ciphertext: ciphertext },
+            key,
+            { iv: iv }
+          );
+
+          return decrypted;
+        }
+      }
+    </script>
+  </body>
+</html>
