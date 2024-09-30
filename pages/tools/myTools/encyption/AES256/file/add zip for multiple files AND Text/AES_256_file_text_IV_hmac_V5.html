@@ -95,6 +95,7 @@
       <button onclick="decryptText()">Decrypt</button>
       <!-- <p id="result"></p> -->
       <textarea id="result" rows="10"></textarea>
+	  <button onclick="copyTextArea()">Copy</button>
     </div>
 
     <script>
@@ -321,5 +322,12 @@
         }
       }
     </script>
+	<script>
+		function copyTextArea(){  
+			var ResElem=document.getElementById("result");
+			ResElem.select();
+			document.execCommand("copy");
+		}
+	</script>
   </body>
 </html>
