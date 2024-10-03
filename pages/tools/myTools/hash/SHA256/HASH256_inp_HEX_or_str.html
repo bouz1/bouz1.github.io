@@ -1,0 +1,58 @@
+<head>
+
+</head>
+<body>
+
+<h4>SHA256 of HexDecimal</h4>
+Enter a text:<br/>
+<input type='text'  id='strex' size='65' value="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"/> 
+  <input type='button' id='calcul_hash_HEX' value='Encrypt' /><br/>
+    SHA256 hash string:<br/>
+      <input type='text'  id='ENT_ID' size='65' />
+        <br> 
+        <label>
+        inp= "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+<br> 
+        expected ="5df6e0e2761359d30a8275058e299fcc0381534545f55cf43e41983f5d4c9456"
+<br> 
+        </label>
+
+
+<h4>SHA256 of String</h4>
+Enter a text:<br/>
+<input type='text'  id='strex2' size='65' value="e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"/> 
+  <input type='button' id='calcul_hash_STR' value='Encrypt' /><br/>
+    SHA256 hash string:<br/>
+      <input type='text'  id='ENT_ID2' size='65' />
+        <br> 
+        <label>
+        inp= "e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855"
+<br> 
+        expected ="cd372fb85148700fa88095e3492d3f9f5beb43e555e5ff26d95f5a6adc36f8e6"
+<br> 
+        </label>
+
+
+<script src="HASH256_Local.js"></script>
+
+
+<script>
+document.getElementById('calcul_hash_HEX').onclick = function(){
+var txt_string = document.getElementById('strex').value;
+var decarr=hexToDecimalArray(txt_string);
+document.getElementById('ENT_ID').value = SHA256_V2(strArr2binb(decarr),decarr.length);
+return false;
+}
+
+document.getElementById('calcul_hash_STR').onclick = function(){
+var txt_string = document.getElementById('strex2').value;
+var txt_UTF8 = Utf8Encode(txt_string);
+document.getElementById('ENT_ID2').value = SHA256_V2(str2binb(txt_UTF8),txt_UTF8.length);
+return false;
+}
+
+
+</script>
+
+
+</body>

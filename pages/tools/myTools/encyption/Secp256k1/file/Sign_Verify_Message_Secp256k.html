@@ -1,0 +1,125 @@
+<head>
+
+</head>
+<body>
+
+  <h2>
+	Sign and Verify Messages with the Secp256k1 Algorithm (ECDSA)
+  </h2>
+  <p>
+    This tool can sign a string using a private key and the secp256k1 algorithm. 
+    <br>You can also verify the signature using the public key, the signature, and the original message
+  </p>
+  Message to be signed or verified
+  <br>
+  <textarea type="text" id="inpText" cols=70 
+  rows=10>Hello, world!</textarea>
+  <br>
+  Private Key
+  <br>
+  <input type='text'  id='PrivateKey' size='75' 
+         value="6d4a19fa576765f8dfda7e87b3c5e0b2c2eab91b2b6714a9340d8b3c51b77c48"/>
+  <br>
+  <br>
+  <button onclick="SigneText()"> Signe Message</button>
+  <br>
+  <br>
+  <textarea type="text" id="outSign" cols=70 rows=11>
+  </textarea>
+  <br><br>
+
+  <br>
+  Public key (compressed format)
+  <br>
+  <input type='text'  id='PublicKey' size='75' 
+         value="02334ddbc6e5fe33041f91d920f4bf738c692a73e9c6647b764d673473d79be75c"/>
+  <br>
+  <br>
+  <button onclick="VerifySignedmessage()"> Verify </button>
+  <br><br>
+  <label id="resultSigning"> </label>
+  <!-- you can verify this tool using other online tools like https://emn178.github.io/online-tools/sha256_checksum.html -->
+
+  <script src="HASH256_Local.js"></script>
+  <script src="Secp256k1Local.js"> </script>
+
+
+  <script>
+
+    function MakSignFromHex(ri, si) {
+      var r = BigInt("0x"+ri);
+      var s = BigInt("0x"+si);
+      return { r, s };
+    }
+
+    function saveTextAsmessage(name,str)
+    {
+      var textToSaveAsBlob = new Blob([str], {type:"text/plain"});
+      var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+      var downloadLink = document.createElement("a");
+      downloadLink.download = name;
+      downloadLink.innerHTML = "Download message";
+      downloadLink.href = textToSaveAsURL;
+      downloadLink.style.display = "none";
+      document.body.appendChild(downloadLink);
+      downloadLink.click();
+    }
+
+
+
+    function string2Unit8(str){
+      const byteArray = new Uint8Array([...str].map(char => char.charCodeAt(0)));
+      return byteArray;
+    }
+    
+    function SigneText() {
+      const text = document.getElementById("inpText").value;
+      const byteArray = string2Unit8(text);
+      var messageSize=String(byteArray.length);
+      var messageHash = SHA256_V2(strArr2binb(byteArray),byteArray.length);
+      const messageHashBig = BigInt('0x'+messageHash);
+      const privateKey = BigInt('0x'+document.getElementById('PrivateKey').value);
+      const publicKey = Multi_kPoint(privateKey, G);
+      var publicKeyComp=point2compressed(publicKey);
+      const signature = sign(messageHashBig, privateKey);
+      var signatureResult='{'+
+          '\n"TextSizeBytes" : "'+messageSize+'"'+
+          ',\n"messageHash256" : "'+messageHash+'"'+
+          ',\n"publicKeyComp" : "'+publicKeyComp+'"'+
+          ',\n"SignatureR" : "'+signature.r.toString(16)+'"'+
+          ',\n"SignatureS" : "'+signature.s.toString(16)+'"'+
+          '\n}';
+      document.getElementById("outSign").value=signatureResult;
+      return null;
+    }
+
+
+
+
+
+
+
+    async function VerifySignedmessage() {
+      const messageContent = document.getElementById("outSign").value;
+      var signatureResultObj = JSON.parse(messageContent);
+      const text = document.getElementById("inpText").value;
+      const byteArray = string2Unit8(text);
+      var messageSize=String(byteArray.length);
+      var messageHash = SHA256_V2(strArr2binb(byteArray),byteArray.length);
+      var signatureIn=MakSignFromHex(signatureResultObj.SignatureR, signatureResultObj.SignatureS);
+      var publicKeyIn=compressedToPoint(
+        document.getElementById('PublicKey').value 
+      );
+      var messageHashIn=BigInt('0x'+messageHash );
+
+      isValid = verify(messageHashIn, signatureIn, publicKeyIn);
+      var lab = document.getElementById('resultSigning')
+      lab.innerHTML = "The message is correctly signed: "+String(isValid);
+      if (isValid) lab.style.color='green';
+      else lab.style.color='red';
+    }
+
+
+  </script>
+
+</body>

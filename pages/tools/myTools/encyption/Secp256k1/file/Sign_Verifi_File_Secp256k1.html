@@ -1,0 +1,270 @@
+<head>
+
+</head>
+<body>
+
+<h2>
+FILE 256 HASH
+</h2>
+File to be signed or verified
+<input type="file" id="fileInput">
+<br>
+Private Key
+<br>
+<input type='text'  id='PrivateKey' size='66' 
+value="6d4a19fa576765f8dfda7e87b3c5e0b2c2eab91b2b6714a9340d8b3c51b77c48"/>
+<br><button onclick="SigneFile()"> Signe File</button>
+<br><br>
+Signature file
+<input type="file" id="fileSinature">
+<br>
+Public key (compressed format)
+<br>
+<input type='text'  id='PublicKey' size='66' 
+value="02334ddbc6e5fe33041f91d920f4bf738c692a73e9c6647b764d673473d79be75c"/>
+<br><button onclick="VerifySignedFile()"> Verify </button>
+<br><br>
+<label id="resultSigning"> TEST </label>
+<!-- you can verify this tool using other online tools like https://emn178.github.io/online-tools/sha256_checksum.html -->
+
+<script src="HASH256_Local.js"></script>
+<script src="Secp256k1Local.js"> </script>
+
+
+<script>
+
+function MakSignFromHex(ri, si) {
+    var r = BigInt("0x"+ri);
+    var s = BigInt("0x"+si);
+    return { r, s };
+}
+
+function saveTextAsFile(name,str)
+{
+	var textToSaveAsBlob = new Blob([str], {type:"text/plain"});
+	var textToSaveAsURL = window.URL.createObjectURL(textToSaveAsBlob);
+	var downloadLink = document.createElement("a");
+	downloadLink.download = name;
+	downloadLink.innerHTML = "Download File";
+	downloadLink.href = textToSaveAsURL;
+	downloadLink.style.display = "none";
+	document.body.appendChild(downloadLink);
+	downloadLink.click();
+}
+	  
+
+
+
+function SigneFile() {
+  const fileInput = document.getElementById('fileInput').files[0];
+  var file_name=fileInput.name; 
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    // Convert the result (ArrayBuffer) to a Uint8Array
+	const byteArray = new Uint8Array(e.target.result);
+	var fileSize=String(byteArray.length);
+    //console.log(byteArray);
+	var fileHash = SHA256_V2(strArr2binb(byteArray),byteArray.length);
+	
+	
+	console.log(fileHash);
+	
+	
+	
+	
+	
+	//const fileHash = await HashFile256('fileInputId'); 
+	
+
+	const fileHashBig = BigInt('0x'+fileHash);
+
+	// Private and public keys
+	 
+	const privateKey = BigInt('0x'+document.getElementById('PrivateKey').value);
+
+	const publicKey = Multi_kPoint(privateKey, G);
+	var publicKeyComp=point2compressed(publicKey);
+
+
+	// Sign the message
+	const signature = sign(fileHashBig, privateKey);
+	console.log("Signature r :", signature.r.toString(16));
+	console.log("Signature s :", signature.s.toString(16));
+
+	// Verify the signature
+	isValid = verify(fileHashBig, signature, publicKey);
+	console.log("Signature valid:", isValid);
+	
+	var now = new Date();
+
+    // Format the date and time
+    var dateTimeString = now.toString(); 
+	dateTimeString = dateTimeString.replace(/\s\([^\)]+\)$/, '');
+	
+	var signatureResult='{'+
+	'"FileName" : "'+file_name+'"'+
+	',\n"FileSizeBytes" : "'+fileSize+'"'+
+	',\n"FileHash256" : "'+fileHash+'"'+
+	',\n"publicKeyComp" : "'+publicKeyComp+'"'+
+	',\n"SignatureR" : "'+signature.r.toString(16)+'"'+
+	',\n"SignatureS" : "'+signature.s.toString(16)+'"'+
+	',\n"DateTimeSignature" : "'+dateTimeString+'"'+
+	'\n}';
+	
+	saveTextAsFile(file_name+".signed",signatureResult);
+	return null;
+	
+	
+	/*
+	console.log("=============signatureResult============");
+	console.log(signatureResult);
+	 
+	
+	var signatureResultObj = JSON.parse(signatureResult);
+
+	// Access properties 'a' and 'b'
+	console.log(signatureResultObj.FileSizeBytes); // Output: 1
+	console.log(signatureResultObj.FileName); // Output: 2
+	console.log(signatureResultObj.SignatureR);
+	
+	
+	
+	
+	
+	
+	// Signature Verification ==============================================
+	var signatureIn=MakSignFromHex(signatureResultObj.SignatureR, signatureResultObj.SignatureS);
+	
+	
+	
+	var publicKeyIn=compressedToPoint(signatureResultObj.publicKeyComp) ;
+	var fileHashIn=BigInt('0x'+fileHash);
+	
+	isValid = verify(fileHashIn, signatureIn, publicKeyIn);
+	
+	console.log("Signature valid:", isValid);
+
+	
+
+	
+	
+	*/
+	
+	
+	
+	
+  };
+  reader.readAsArrayBuffer(fileInput);
+}
+
+
+
+
+
+
+/*
+async function VerifySignedFile() {
+const fileContent = await file_string();
+console.log(fileContent);
+var signatureResultObj = JSON.parse(fileContent);
+
+
+
+
+// Signature Verification ==============================================
+var signatureIn=MakSignFromHex(signatureResultObj.SignatureR, signatureResultObj.SignatureS);
+
+
+
+//var publicKeyIn=document.getElementById('PublicKey').value ;
+
+var publicKeyIn=compressedToPoint(
+document.getElementById('PublicKey').value 
+);
+var fileHashIn=BigInt('0x'+signatureResultObj.FileHash256);
+
+isValid = verify(fileHashIn, signatureIn, publicKeyIn);
+
+console.log("Signature valid:", isValid);
+
+
+}
+*/
+
+function file_string() {
+	let upload = document.getElementById("fileSinature");
+	let fr = new FileReader();
+
+	if (upload.files.length === 0) {
+	  return "Please select a file.";
+	}
+
+	return new Promise((resolve) => {
+	  fr.readAsText(upload.files[0]);
+	  fr.onload = function () {
+		resolve(fr.result);
+	  };
+	});
+}
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+async function VerifySignedFile() {
+
+
+	const fileContent = await file_string();
+	var signatureResultObj = JSON.parse(fileContent);
+	
+	
+  const fileInput = document.getElementById('fileInput').files[0];
+  var file_name=fileInput.name; 
+  const reader = new FileReader();
+  reader.onload = function(e) {
+    // Convert the result (ArrayBuffer) to a Uint8Array
+	const byteArray = new Uint8Array(e.target.result);
+	var fileSize=String(byteArray.length);
+    //console.log(byteArray);
+	var fileHash = SHA256_V2(strArr2binb(byteArray),byteArray.length);
+	
+	
+
+
+
+	// Signature Verification ==============================================
+	var signatureIn=MakSignFromHex(signatureResultObj.SignatureR, signatureResultObj.SignatureS);
+	var publicKeyIn=compressedToPoint(
+	document.getElementById('PublicKey').value 
+	);
+	var fileHashIn=BigInt('0x'+fileHash );
+
+	isValid = verify(fileHashIn, signatureIn, publicKeyIn);
+	//if (isValid) {
+	var lab = document.getElementById('resultSigning')
+	lab.innerHTML = "The file is correctly signed: "+String(isValid);
+	if (isValid) lab.style.color='green';
+	else lab.style.color='red';
+		
+	//}
+	
+	console.log("Signature valid:", isValid);
+	
+  };
+  reader.readAsArrayBuffer(fileInput);
+}
+	
+	
+</script>
+
+</body>

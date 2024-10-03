@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<script src='sha512.js'></script>
+  </head>
+  <body>
+
+	<label>File 1</label>
+    <input type="file" id="upload1" >
+	<br>
+	<label> hash512 of file 1: </label>
+	<label id = "hashfile1"></label>
+	<br><br>
+	<label>File 2</label>
+    <input type="file" id="upload2" >
+	<br>
+	<label> hash512 of file 2: </label>
+	<label id = "hashfile2"></label>
+	<br><br> 
+	<button onclick='compare()'>
+	Compare the files
+	</button>
+	<br>
+	<label id = "result"></label>
+
+    <script>
+      async function func1() {
+        const fileContent = await file_string1();
+		document.getElementById("hashfile1").innerHTML=SHA512(fileContent);
+  
+		
+      }
+
+      function file_string1() {
+        let upload1 = document.getElementById('upload1');
+        let fr = new FileReader();
+
+        if (upload1.files.length === 0) {
+          return "Please select a file.";
+        }
+
+        return new Promise((resolve) => {
+          fr.readAsText(upload1.files[0]);
+          fr.onload = function () {
+            resolve(fr.result);
+          };
+        });
+      }
+
+      // Execute func1() when a file is chosen
+      upload1.addEventListener('change', func1);
+    </script>
+	<script>
+	   async function func2() {
+        const fileContent = await file_string2();
+		document.getElementById("hashfile2").innerHTML=SHA512(fileContent);
+  
+		
+      }
+
+      function file_string2() {
+        let upload2 = document.getElementById('upload2');
+        let fr = new FileReader();
+
+        if (upload2.files.length === 0) {
+          return "Please select a file.";
+        }
+
+        return new Promise((resolve) => {
+          fr.readAsText(upload2.files[0]);
+          fr.onload = function () {
+            resolve(fr.result);
+          };
+        });
+      }
+
+      // Execute func2() when a file is chosen
+      upload2.addEventListener('change', func2);
+	  </script>
+	  <script>
+	  function compare(){
+	  var hash1= document.getElementById("hashfile1").innerHTML; 
+	  var hash2= document.getElementById("hashfile2").innerHTML; 
+	  if (hash1==hash2){
+	  document.getElementById("result").innerHTML="The files has the same hash 512: TRUE";
+	  document.getElementById("result").style.color = "green";
+	  }
+	  else{
+	  document.getElementById("result").innerHTML="The files has the same hash 512: FALSE";
+	  document.getElementById("result").style.color = "red";
+	  }
+	  }
+	  </script>
+
+
+  </body>
+</html>

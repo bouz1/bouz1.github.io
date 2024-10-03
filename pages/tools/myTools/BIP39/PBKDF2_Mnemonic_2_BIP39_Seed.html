@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>PBKDF2</title>
+</head>
+<body>
+    <h2>PBKDF2: Mnemonic to Bip39 SEED</h2>
+    <label for="mnemonic">Mnemonic Phrase:</label>
+	<br>
+    <textarea  id="mnemonic" 
+	rows=3 cols=60>enlist utility stereo attend burger pledge ginger bundle tray remain win leader abandon script mad knee index peanut legend metal emotion border attend range</textarea><br><br>
+    
+    <label for="passphrase">Passphrase:</label>
+    <input type="text" id="passphrase" value="Test Pass"><br><br>
+    
+    <button onclick="generateSeed()">Generate Seed</button>
+    
+    <h3>BIP39 Seed:</h3>
+    <p id="seed"></p>
+    
+    <p>
+      entrepy: 4ade0b560741eb4d1880f2e7b6b3ed3f400183616bdc72d43dfe46048c3383a5
+	  <br> 
+	  Passphrase: "Test Pass"
+      <br>
+      mnemonic phrase="enlist utility stereo attend burger pledge ginger bundle tray remain win leader abandon script mad knee index peanut legend metal emotion border attend range"
+      <br>expectation (seed): 336c803187f452f0b7f9a207780a2e84914e936775189597a46b2337c9944fea1017bceb2db409e36da2372b6538861495f8266c33fef3ed73df642c3bad7fa8
+      <br> you can verify in the site
+	  <br>
+	  <a href = "https://particl.github.io/bip39/bip39-standalone.html"> https://particl.github.io/bip39/bip39-standalone.html</a>
+    </p>
+	
+
+    <script>
+        async function generateSeed() {
+            const mnemonic = document.getElementById('mnemonic').value;
+            const passphrase = document.getElementById('passphrase').value;
+            const iterations = 2048; // Number of iterations
+            const hashAlgorithm = 'SHA-512'; // Hash function
+            const keyLength = 64; // Desired key length in bytes (512 bits)
+
+            // Combine mnemonic and passphrase
+            const combined = new TextEncoder().encode(mnemonic);
+
+            // Generate a salt (for demonstration, using a static salt; in practice, use a unique salt for each user)
+            const salt = new TextEncoder().encode('mnemonic' + passphrase);
+
+            // Derive the key
+            const keyMaterial = await window.crypto.subtle.importKey(
+                'raw',
+                combined,
+                { name: 'PBKDF2' },
+                false,
+                ['deriveBits']
+            );
+
+            const derivedKey = await window.crypto.subtle.deriveBits(
+                {
+                    name: 'PBKDF2',
+                    salt: salt,
+                    iterations: iterations,
+                    hash: hashAlgorithm,
+                },
+                keyMaterial,
+                keyLength * 8 // Key length in bits
+            );
+
+            // Convert derived key to hex
+            const seedHex = Array.from(new Uint8Array(derivedKey))
+                .map(byte => byte.toString(16).padStart(2, '0'))
+                .join('');
+
+            document.getElementById('seed').textContent = seedHex;
+        }
+    </script>
+</body>
+</html>

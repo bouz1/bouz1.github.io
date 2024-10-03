@@ -1,0 +1,53 @@
+.div_button_top{
+    width:100%;
+}
+.top_button{
+    width:33%;
+    max-width: 200px; 
+}
+
+table,th,tr,td{
+    border : solid black 1px; 
+}
+
+/**************Table **********/
+
+/*#det_table_ID2 {
+    font-family: Arial, Helvetica, sans-serif;
+    border-collapse: collapse;
+    width: 200mm;
+  }*/
+  
+  #det_table_ID2 td, #det_table_ID2 th {
+    border: 1px solid #ddd;
+    padding: 8px;
+  }
+  
+  #det_table_ID2 td:nth-child(even){background-color: #f2f2f2;}
+  
+  #det_table_ID2 tr:hover {background-color: #ddd;}
+  
+  #det_table_ID2 th {
+    padding-top: 12px;
+    padding-bottom: 12px;
+    text-align: left;
+    background-color:#0a548c;
+    color: white;
+  }
+
+
+/*#det_table_ID2 td:nth-child(5n)*/
+#det_table_ID2 td:nth-child(2),
+#det_table_ID2 td:nth-child(8),
+#det_table_ID2 td:nth-child(14),
+#det_table_ID2 td:nth-child(20)
+{
+    border-right-color: black;
+    /*background-color: #f00;*/
+}
+
+
+
+/*div,button, input, label,table,th,tr,td{
+    border : solid black 1px; 
+}*/

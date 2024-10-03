@@ -1,0 +1,54 @@
+<!--// see code source of SHA512 in:
+https://coursesweb.net/javascript/sha512-encrypt-hash_cs--> 
+<html> 
+<head> 
+<meta charset="utf-8" /> 
+<title>SHA512</title> 
+<meta name="viewport" content="width=device-width, initial-scale=1" /> 
+</head> 
+<body> 
+<h1>Local SHA512()</h1> 
+<br>
+ 
+<form action='#' method='post'> 
+Input(String)<br> 
+<!--input type='text' name='strex' id='strex' size='200' /--> 
+<textarea id="strex" name="strex" rows="10" >
+</textarea>
+<br>
+<input type='button' id='cryptstr' value='Encrypt' />
+<br> 
+SHA512 hash (HEX)<br> 
+<!--input type='text' name='strcrypt' id='strcrypt' size='200' /--> 
+<textarea id='strcrypt' name='strcrypt'rows="4" >
+</textarea>
+</form> 
+<style>
+
+#strex {
+  display: block;
+  width: 100%;
+}
+#strcrypt {
+  display: block;
+  width: 100%;
+}
+</style>
+
+
+ <script>
+// register onclick events for Encrypt button 
+document.getElementById('cryptstr').onclick = function() { 
+var txt_string = document.getElementById('strex').value; // gets data from input text 
+ 
+// encrypts data and adds it in #strcrypt element 
+document.getElementById('strcrypt').value = SHA512(txt_string); 
+return false; 
+}
+</script>
+
+
+<script src='sha512.js'></script>
+
+</body> 
+</html>

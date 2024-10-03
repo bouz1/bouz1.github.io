@@ -1,0 +1,19 @@
+<script src="MD5.js"></script>
+<h2> 
+Local node MD5 of string
+</h2>
+<!-- <input type="password" placeholder="Enter Password" size = 100> </input> -->
+<br><input type="text" placeholder="Enter text" id='inp' size = 100> </input>
+<br><button onclick="hash()">
+HASH MD5
+</button>
+
+<br><input type="text" id="out" placeholder="Hash result" size = 100> </input>
+<script>
+function hash(){
+var txt = document.getElementById('inp').value;
+   var hash = CryptoJS.MD5(txt);
+   document.getElementById('out').value= hash;
+   //alert(hash);
+  }
+</script>

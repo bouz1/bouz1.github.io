@@ -1,0 +1,162 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Code Editor, Preview, and Console</title>
+    <style>
+      * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+      }
+      body, html {
+        height: 100%;
+        width: 100%;
+        display: flex;
+        margin: 0;
+        padding: 0;
+        overflow: hidden;
+      }
+      #left, #right {
+        height: 100%;
+        width: 50%;
+        text-align: center;
+      }
+      #right {
+        display: flex;
+        flex-direction: column;
+      }
+      textarea {
+        width: 100%;
+        height: 90%;
+        font-family: monospace;
+        font-size: 16px;
+        box-sizing: border-box;
+      }
+      button {
+        /*width: 200px;*/
+        width: 30%;
+        height: 8%;
+        font-size: 18px;
+        background-color: #4CAF50;
+        color: white;
+        border: none;
+        cursor: pointer;
+        margin: 0.5%;
+        /*
+        margin: 10px;
+        display: flex;
+        justify-content: center; /* Horizontal centering */
+        align-items: center; /* Vertical centering */
+        */
+
+      }
+      #preview {
+        height: 50%;
+        background-color: #f0f0f0;
+        border-bottom: 2px solid #ccc;
+      }
+      #console {
+        height: 50%;
+        background-color: #000;
+        color: white;
+        overflow-y: auto;
+        padding: 10px;
+        font-family: monospace;
+        text-align: left;
+
+      }
+      #cbconsole{
+        width: 20px;
+        height: 20px;
+
+        justify-content: center; /* Horizontal centering */
+        align-items: center; /* Vertical centering */
+        */
+      }
+    </style>
+  </head>
+  <body>
+    <div id="left">
+      <textarea
+                id="code"
+                placeholder="Write your HTML, CSS, and JavaScript here..."
+                >
+        <!DOCTYPE html>
+        <html>
+          <head>
+            <title>Test Page</title>
+          </head>
+          <body>
+            <h1>Hello, World!</h1>
+            <button onclick="f()">Test button</button>
+            <script>
+              function f(){
+                for (i = 0 ; i<10;i++){
+                  console.log("loop", i);
+                }
+              }
+              f();
+            </script>
+          </body>
+        </html>
+      </textarea>
+      <button id="runCode">Exécuter</button>
+      Console
+      <input type="checkbox" id="cbconsole" onclick="showConsole()" checked />
+    </div>
+    <div id="right">
+      <iframe id="preview"></iframe>
+      <div id="console"></div>
+    </div>
+    <script>
+      const codeArea = document.getElementById("code");
+      const previewFrame = document.getElementById("preview");
+      const consoleDiv = document.getElementById("console");
+      const runButton = document.getElementById("runCode");
+
+      // Listen for messages from the iframe
+      window.addEventListener("message", (event) => {
+        if (event.data && event.data.type === "log") {
+          consoleDiv.innerHTML += event.data.message + "<br>";
+        }
+      });
+
+      function runCode() {
+        const code = codeArea.value;
+        consoleDiv.innerHTML = ""; // Clear console
+        previewFrame.srcdoc = `
+          <script>
+            // Override console.log inside iframe
+            console.log = function(...args) {
+              parent.postMessage({ type: 'log', message: args.join(" ") }, '*');
+            };
+          <\/script>
+          ${code}
+        `;
+      }
+
+      runButton.addEventListener("click", runCode);
+
+      // Run the code initially
+      runCode();
+    </script>
+    <script>
+      function showConsole() {
+        const checkbox = document.getElementById("cbconsole");
+        const previewFrame = document.getElementById("preview");
+        const consoleDiv = document.getElementById("console");
+        if (checkbox.checked) {
+          consoleDiv.style.display = "flex";
+          consoleDiv.style.height = "50%";
+          previewFrame.style.height = "50%";
+        } else {
+          consoleDiv.style.display = "none";
+          consoleDiv.style.height = "0%";
+          previewFrame.style.height = "100%";
+        }
+      }
+    </script>
+  </body>
+</html>

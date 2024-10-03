@@ -1,0 +1,120 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mouse Coordinates</title>
+  </head>
+  <body>
+    <div id="fother">
+
+
+      <h1>ENTREPY GENERATOR: Hash 256/512 generater with mouse</h1>
+	  <p>Number of points </p><input id="nbpoints" size=5 value="1000"> </input>
+		<br><label>STOP </label><input type="checkbox" id='chbox' checked style="width: 20px; height: 20px;">
+		
+	  
+      <p>Move your mouse around the page to see the coordinates.</p>
+      <div id="coordinates">X: 0, Y: 0</div>
+      <div id="Nb" ></div>
+	  <BR><BR>
+	  HASH256
+      <input id="hashdiv256" size=70>
+	  <br>
+	  HASH512
+	  <input id="hashdiv512" size=140>
+	  
+
+      <script>
+	  document.getElementById('chbox').style.pointerEvents = 'auto';
+        function addPoint(x, y) {
+          // Create a new div element for the point
+          const point = document.createElement('div');
+          // Add the 'point' class to it
+          point.classList.add('point');
+          // Set the position of the point
+          point.style.left = `${x}px`;
+          point.style.top = `${y}px`;
+
+          // Get the container element
+          const container = document.getElementById('fother');
+          // Append the point to the container
+          container.appendChild(point);
+        }
+        // Function to remove all points from the container
+        function removePoints() {
+          // Get all elements with the class 'point'
+          const points = document.querySelectorAll('.point');
+          // Loop through the NodeList and remove each element
+          points.forEach(point => point.remove());
+        }
+        async function HASH256(inputString,div_result) {
+          const encoder = new TextEncoder();
+          const data = encoder.encode(inputString);
+          const hashBuffer = await crypto.subtle.digest('SHA-256', data);//'SHA-512'
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+          document.getElementById(div_result).value = hashHex;
+        }
+	async function HASH512(inputString,div_result) {
+          const encoder = new TextEncoder();
+          const data = encoder.encode(inputString);
+          const hashBuffer = await crypto.subtle.digest('SHA-512', data);//
+          const hashArray = Array.from(new Uint8Array(hashBuffer));
+          const hashHex = hashArray.map(b => b.toString(16).padStart(2, '0')).join('');
+          document.getElementById(div_result).value = hashHex;
+        }
+
+        str="";
+        document.addEventListener('mousemove', function(event) {
+		if (document.getElementById('chbox').checked) {
+          var x = event.clientX;
+          var y = event.clientY;
+          document.getElementById('coordinates').textContent = 'X: ' + x + ', Y: ' + y;
+          str=str+x + ',' + y+ ',';
+          addPoint(x, y);
+		  
+		  var nbs=document.getElementById("nbpoints" ).value; 
+		  var nb= parseInt(nbs, 10);
+		  
+          document.getElementById('Nb').textContent ="Nb of points "+str.length+" (limit ="+nbs+")";
+		  
+          if (str.length> nb){
+            removePoints() ;
+            HASH256(str,"hashdiv256")
+			HASH512(str,"hashdiv512")
+            str="";
+          }
+		  }
+        });
+      </script>
+
+      <style>
+        body {
+          font-family: Arial, sans-serif;
+          text-align: center;
+          margin-top: 50px;
+        }
+        #coordinates {
+          font-size: 24px;
+          color: #333;
+        }
+
+        .point {
+          position: absolute;
+          width: 5px;
+          height: 5px;
+          background-color: red;
+          border-radius: 50%;
+		  z-index: 1; /* Ensure points are below other elements */
+        }
+		 p,h1,label, #chbox, #coordinates, #Nb, #hashdiv512, #hashdiv256, #nbpoints{
+		z-index: 2;
+		  position: relative;
+		}
+      </style>
+
+
+    </div>
+  </body>
+</html>

@@ -1,0 +1,152 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Well Depth Using Rock Drop</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        text-align: center;
+        padding-top: 100px;
+      }
+      #startStopBtn {
+        padding: 30px 60px;
+        font-size: 36px;
+        margin: 15px;
+        border-radius: 40px; /* Adjust the radius as needed */
+        background-color: #37b2eb; /* Change to your desired color */
+        color: white; /* Text color */
+        border: none; /* Remove border */
+      }
+
+      label {
+        width: 150px;
+        display: inline-block;
+        text-align: left;
+        font-size: 18px;
+      }
+      input {
+        width: 80px;
+        display: inline-block;
+        font-size: 18px;
+      }
+      label,
+      input,
+      p {
+        margin: 5px;
+      }
+      p {
+        display: none;
+      }
+
+      .formula {
+        font-family: "Arial", sans-serif;
+        font-size: 20px;
+        text-align: center;
+        margin-top: 50px;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Well depth using rock drop</h1>
+    <button id="startStopBtn" onclick="startStopTimer()">Start</button>
+    <p id="timerDisplay">0.00</p>
+    <br />
+    <label>Time (s)</label>
+    <input id="id_time" />
+    <br />
+    <label>End speed (m/s)</label>
+    <input id="id_speed" />
+    <br />
+    <label>Height (m)</label>
+    <input id="id_height" />
+    <br />
+    <div class="formula">
+      height = ½ ⋅ g ⋅ t²
+      <br />
+      speed = g ⋅ t
+    </div>
+    <br />
+    This tool does not account for air drag and the speed of sound, which could
+    result in an error of less than 2%.
+
+    <script>
+      let startTime,
+        endTime,
+        isRunning = false,
+        intervalId;
+
+      function startStopTimer() {
+        const button = document.getElementById("startStopBtn");
+        const timerDisplay = document.getElementById("timerDisplay");
+        const g = 9.81; // gravitational acceleration in m/s^2
+        var timeInSeconds, speed, height;
+        if (!isRunning) {
+          // Start the timer
+          startTime = new Date().getTime();
+          button.textContent = "Stop";
+          isRunning = true;
+
+          document.getElementById("id_time").value = "0.0";
+          document.getElementById("id_speed").value = "0.0";
+          document.getElementById("id_height").value = "0.0";
+
+          // Update the display every 10ms (0.01s)
+          intervalId = setInterval(() => {
+            let currentTime = new Date().getTime();
+            let timeInSeconds = (currentTime - startTime) / 1000;
+            timerDisplay.textContent = timeInSeconds.toFixed(2);
+
+            speed = g * timeInSeconds;
+            height = 0.5 * g * timeInSeconds * timeInSeconds; // h = 0.5 * g * t^2
+            document.getElementById("id_time").value = timeInSeconds.toFixed(3);
+            document.getElementById("id_speed").value = speed.toFixed(1);
+            document.getElementById("id_height").value = height.toFixed(1);
+          }, 10);
+        } else {
+          // Stop the timer and calculate height
+          clearInterval(intervalId);
+          endTime = new Date().getTime();
+          timeInSeconds = (endTime - startTime) / 1000;
+          speed = g * timeInSeconds;
+          height = 0.5 * g * timeInSeconds * timeInSeconds; // h = 0.5 * g * t^2
+
+          button.textContent = "Start";
+          document.getElementById("id_time").value = timeInSeconds.toFixed(3);
+          document.getElementById("id_speed").value = speed.toFixed(1);
+          document.getElementById("id_height").value = height.toFixed(1);
+          isRunning = false;
+        }
+      }
+    </script>
+    <script>
+      lang = {
+        en: {
+          title: "Well depth using rock drop",
+          stop: "Stop",
+          start: "Start",
+          time: "Time (s)",
+          speed: "End speed (m/s)",
+          height: "Height (m)",
+          formula1: "height = ½ ⋅ g ⋅ t²",
+          formula2: "speed = g ⋅ t",
+          Comment1:
+            "This tool does not account for air drag and the speed of sound, which could result in an error of less than 2%.",
+        },
+        fr: {
+          title: "Well depth using rock drop__",
+          stop: "Stop__",
+          start: "Start__",
+          time: "Time (s)__",
+          speed: "End speed (m/s)__",
+          height: "Height (m)__",
+          formula1: "height = ½ ⋅ g ⋅ t²__",
+          formula2: "speed = g ⋅ t__",
+          Comment1:
+            "This tool does not account for air drag and the speed of sound, which could result in an error of less than 2%.__",
+        },
+      };
+    </script>
+  </body>
+</html>

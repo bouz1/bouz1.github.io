@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Code Formatter with Syntax Highlighting</title>
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/themes/prism.min.css" rel="stylesheet" />
+    <style>
+        body, html {
+            height: 100%;
+            margin: 0;
+            padding: 0;
+            font-family: Arial, sans-serif;
+        }
+        body {
+            display: flex;
+            flex-direction: column;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        h1 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+        #codeInput, #highlightedCode {
+            flex-grow: 1;
+            width: 100%;
+            height: 300px;
+            resize: none;
+            font-family: monospace;
+            font-size: 14px;
+            margin-bottom: 10px;
+            border: 1px solid #ccc;
+            padding: 10px;
+            box-sizing: border-box;
+        }
+        #highlightedCode {
+            display: none;
+            overflow: auto;
+        }
+        button {
+            padding: 5px 10px;
+            font-size: 14px;
+            cursor: pointer;
+            margin-left: 10px;
+        }
+    </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prettier/2.8.8/standalone.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prettier/2.8.8/parser-html.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prettier/2.8.8/parser-postcss.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prettier/2.8.8/parser-babel.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.24.1/components/prism-javascript.min.js"></script>
+</head>
+<body>
+    <div class="header">
+        <h1>Code Formatter with Syntax Highlighting</h1>
+        <div>
+            <button onclick="formatAndHighlight()">Format Code</button>
+            <button onclick="copyCode()">Copy</button>
+        </div>
+    </div>
+    <textarea id="codeInput" placeholder="Paste your HTML, CSS, or JavaScript code here"></textarea>
+    <pre id="highlightedCode"><code></code></pre>
+
+    <script>
+        function formatAndHighlight() {
+            const input = document.getElementById('codeInput');
+            const highlightedCode = document.getElementById('highlightedCode');
+            const code = input.value.trim();
+            let formattedCode;
+            let language;
+
+            try {
+                if (code.startsWith('<')) {
+                    formattedCode = prettier.format(code, {
+                        parser: "html",
+                        plugins: prettierPlugins
+                    });
+                    language = 'html';
+                } else if (code.includes('{') && code.includes('}') && !code.includes('function')) {
+                    formattedCode = prettier.format(code, {
+                        parser: "css",
+                        plugins: prettierPlugins
+                    });
+                    language = 'css';
+                } else {
+                    formattedCode = prettier.format(code, {
+                        parser: "babel",
+                        plugins: prettierPlugins
+                    });
+                    language = 'javascript';
+                }
+                
+                highlightedCode.querySelector('code').textContent = formattedCode;
+                highlightedCode.querySelector('code').className = `language-${language}`;
+                Prism.highlightElement(highlightedCode.querySelector('code'));
+                
+                input.style.display = 'none';
+                highlightedCode.style.display = 'block';
+            } catch (error) {
+                alert("Error formatting code: " + error.message);
+            }
+        }
+
+        function copyCode() {
+            const highlightedCode = document.getElementById('highlightedCode');
+            const codeText = highlightedCode.querySelector('code').textContent;
+            
+            navigator.clipboard.writeText(codeText).then(() => {
+                alert('Code copied to clipboard!');
+            }).catch(err => {
+                console.error('Failed to copy: ', err);
+                alert('Failed to copy code. Please try again.');
+            });
+        }
+    </script>
+</body>
+</html>
