@@ -1,40 +1,65 @@
-<!-- VERSION 324, V004 -->
+
 <head>
   <!--MD5 -->
   <!--script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/4.0.0/core.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/crypto-js/3.1.9-1/md5.js"></script-->
-  <script src="MD5.js" >  </script>
+  <!--script src="MD5.js" >  </script-->
   <!--Local AES-->
   <script src="AES.js" >  </script>
-  
-  
-  
+
+
+
   <script src="PW_manager_AES_crypto_V3_23.js"></script>
   <script src="pw_montage_V001.js"></script>
+  <style>
+    input {
+      width: 100%; 
+    }
+  </style>
 </head>
 
 <body>
 
 
- 
-  <input type=password id = "PW"> </input> 
+  Password 
   <br>
-  <button onclick="open_page()">Decrept page AES</button>
+  <input type=password id = "PW"> </input> 
+<br><br>
+<button onclick="open_page()">decrypt and open PW page AES-256</button>
 
 
-  <script>
+<script>
 
-	function open_page(){
-		var pw= document.getElementById("PW").value;
-		var page_code=read_AES_encoding();
-		var decbytes = CryptoJS.AES.decrypt(page_code,pw);
-		var tempPageContent =decbytes.toString(CryptoJS.enc.Utf8);
-		var newWindow = window.open('', '_blank');
-		newWindow.document.write(tempPageContent);
-		let new_script = newWindow.document.createElement('script');
-		new_script.textContent = "function montage() {let s = '"+pw_montage()+"';\n return s;}";  
-		newWindow.document.body.appendChild(new_script);
-	}
-  </script>
+  function open_page(){
+    try{
+      var pw= document.getElementById("PW").value;
+      var page_code=read_AES_encoding();
+      var decbytes = CryptoJS.AES.decrypt(page_code,pw);
+      var tempPageContent =decbytes.toString(CryptoJS.enc.Utf8);
+      var newWindow = window.open('', '_blank');
+      newWindow.document.write(tempPageContent);
+      let new_script = newWindow.document.createElement('script');
+      new_script.textContent = "function montage() {let s = '"+pw_montage()+"';\n return s;}";  
+      newWindow.document.body.appendChild(new_script);
+    }
+    catch{
+      alert("Pw error");
+    }
+  }
+</script>
+
+
+<script>
+// When we press ENTER KEYBOARD
+  function onEnterPress(event) {
+    if (event.key === "Enter") {
+      open_page();
+      // Call your desired function here
+    }
+  }
+
+  // Attach the keydown event listener to the document
+  document.addEventListener('keydown', onEnterPress);
+</script>
 
 </body>
