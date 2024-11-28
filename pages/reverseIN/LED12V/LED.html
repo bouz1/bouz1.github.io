@@ -1,0 +1,229 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Horizontal Voltage and Current Table</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        line-height: 1.6;
+        background-color: #f9f9f9;
+        color: #333;
+      }
+
+      h2,
+      h3 {
+        color: #0056b3;
+      }
+      h2 {
+        align-items: center;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: center;
+      }
+
+      th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+      }
+
+      td {
+        font-size: 0.9em;
+      }
+
+      img {
+        width: 50%;
+        height: auto;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      section {
+        margin-bottom: 40px;
+      }
+
+      /* Grid layout for images */
+      .image-grid,
+      .image-grid4 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+      .image-grid img {
+        width: 50%; /* Make the image width 100% of its container */
+        height: 100%; /* Make the image height 100% of its container */
+
+        object-fit: contain; /* Ensures the entire image is visible without cutting */
+        object-position: center; /* Centers the image if there's extra space */
+      }
+
+      .image-grid4 img {
+        width: 80%; /* Make the image width 100% of its container */
+        height: 100%; /* Make the image height 100% of its container */
+
+        object-fit: contain; /* Ensures the entire image is visible without cutting */
+        object-position: center; /* Centers the image if there's extra space */
+      }
+
+      .image-grid-1-3 {
+        display: grid;
+        grid-template-columns: 2fr 1fr; /* First image takes 2 parts, second takes 1 part */
+        gap: 20px;
+        align-items: center; /* Align images vertically if they differ in height */
+      }
+
+      .image-grid-1-3 img {
+        width: 80%; /* Make the image width 100% of its container */
+        height: 100%; /* Make the image height 100% of its container */
+        object-fit: cover; /* Ensures the image covers the space while maintaining aspect ratio */
+      }
+
+      p {
+        background-color: #eef;
+        padding: 10px;
+        border-left: 4px solid #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Reverse engineering of a LED bulb 12V 6W</h2>
+    <p>Name: LER bulb, Power: 6W, CCT: 3000K, Voltage: DC12V</p>
+
+    <p>Cost of the LED Bulb: 1.5 euros, Date: 28/11/2024</p>
+    <div class="image-grid-1-3">
+      <img src="imgs/setup.jpg" alt="Setup image" />
+      <img src="imgs/ref.jpg" alt="Product reference image" />
+    </div>
+    <section>
+      <h3>The electrical schematic of the LED bulb</h3>
+      <div class="image-grid-1-3">
+        <img src="imgs/schematic.jpg" alt="Schematic of LED bulb" />
+        <img src="imgs/pcb.jpg" alt="pcb of LED bulb" />
+      </div>
+      <p>
+        The measurement by a multimeter of the equivalent resistance of the
+        three resistors is 8 - 8.1 Ω
+      </p>
+    </section>
+
+    <section>
+      <h3>Voltage/current measurements</h3>
+      <table>
+        <!--thead>
+                <tr>
+                    <th></th>
+                    <th colspan="22">Measurements</th>
+                </tr>
+            </thead-->
+        <tbody>
+          <tr>
+            <td>Voltage (V)</td>
+            <td>14</td>
+            <td>13.5</td>
+            <td>13</td>
+            <td>12.5</td>
+            <td>12</td>
+            <td>11.5</td>
+            <td>11</td>
+            <td>10.5</td>
+            <td>10</td>
+            <td>9.5</td>
+            <td>9</td>
+            <td>8.5</td>
+            <td>8</td>
+            <td>7.9</td>
+            <td>7.84</td>
+            <td>7.82</td>
+            <td>7.64</td>
+            <td>7.58</td>
+            <td>7.5</td>
+            <td>7.42</td>
+            <td>7.26</td>
+            <td>7.05</td>
+          </tr>
+          <tr>
+            <td>Current (mA)</td>
+            <td>618</td>
+            <td>570</td>
+            <td>518</td>
+            <td>466</td>
+            <td>414</td>
+            <td>362</td>
+            <td>311</td>
+            <td>259</td>
+            <td>209</td>
+            <td>158</td>
+            <td>109</td>
+            <td>61</td>
+            <td>18</td>
+            <td>11</td>
+            <td>6</td>
+            <td>5</td>
+            <td>0.928</td>
+            <td>0.659</td>
+            <td>0.362</td>
+            <td>0.187</td>
+            <td>0.0372</td>
+            <td>0.0046</td>
+          </tr>
+          <tr>
+            <td>Power (W)</td>
+            <td>8.652</td>
+            <td>7.695</td>
+            <td>6.734</td>
+            <td>5.825</td>
+            <td>4.968</td>
+            <td>4.163</td>
+            <td>3.421</td>
+            <td>2.7195</td>
+            <td>2.09</td>
+            <td>1.501</td>
+            <td>0.981</td>
+            <td>0.518</td>
+            <td>0.144</td>
+            <td>0.086</td>
+            <td>0.047</td>
+            <td>0.039</td>
+            <td>0.007</td>
+            <td>0.005</td>
+            <td>0.003</td>
+            <td>0.001</td>
+            <td>0.0002</td>
+            <td>0.00003</td>
+          </tr>
+        </tbody>
+      </table>
+    </section>
+
+    <section>
+      <h3>Voltage-current curve</h3>
+      <div class="image-grid4">
+        <img src="imgs/curve.JPG" alt="Voltage-Current Curve" />
+        <img src="imgs/curveLOG.JPG" alt="Voltage-Current Curve" />
+      </div>
+    </section>
+
+    <section>
+      <h3>Other images of the analyzed product</h3>
+      <div class="image-grid">
+        <img src="imgs/packaging1.jpg" alt="Packaging image 1" />
+        <img src="imgs/packaging2.jpg" alt="Packaging image 2" />
+      </div>
+    </section>
+  </body>
+</html>
