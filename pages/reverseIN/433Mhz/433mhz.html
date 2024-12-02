@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<!--V2-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>433MHz Transmitter receiver</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        line-height: 1.6;
+        background-color: #f9f9f9;
+        color: #333;
+      }
+
+      h2,
+      h3 , h4{
+        color: #0056b3;
+      }
+      h2 {
+        align-items: center;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        margin: 20px 0;
+        background-color: #fff;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      th,
+      td {
+        border: 1px solid #ddd;
+        padding: 10px;
+        text-align: center;
+      }
+
+      th {
+        background-color: #f2f2f2;
+        font-weight: bold;
+      }
+
+      td {
+        font-size: 0.9em;
+      }
+
+      img {
+        width: 50%;
+        height: auto;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      section {
+        margin-bottom: 40px;
+      }
+
+      /* Grid layout for images */
+      .image-grid,
+      .image-grid4 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+      .image-grid img {
+        width: 50%; /* Make the image width 100% of its container */
+        height: 100%; /* Make the image height 100% of its container */
+
+        object-fit: contain; /* Ensures the entire image is visible without cutting */
+        object-position: center; /* Centers the image if there's extra space */
+      }
+
+      .image-grid4 img {
+        width: 80%; /* Make the image width 100% of its container */
+        height: 100%; /* Make the image height 100% of its container */
+
+        object-fit: contain; /* Ensures the entire image is visible without cutting */
+        object-position: center; /* Centers the image if there's extra space */
+      }
+
+      .image-grid-1-3 {
+        display: grid;
+        grid-template-columns: 2fr 1fr; /* First image takes 2 parts, second takes 1 part */
+        gap: 20px;
+        align-items: center; /* Align images vertically if they differ in height */
+      }
+
+      .image-grid-1-3 img {
+        width: 80%; /* Make the image width 100% of its container */
+        height: 100%; /* Make the image height 100% of its container */
+        object-fit: cover; /* Ensures the image covers the space while maintaining aspect ratio */
+      }
+
+      p {
+        background-color: #eef;
+        padding: 10px;
+        border-left: 4px solid #0056b3;
+      }
+    </style>
+  </head>
+  <body>
+    <h2>Reverse engineering of a 433MHz Transmitter & receiver</h2>
+
+    <p>Cost of the product (Aliexpress): 5.5 euros, Date: 02/12/2024</p>
+    <div class="image-grid">
+      <img src="imgs/IMG_20241202_124453.jpg"/>
+
+    </div>
+    <section>
+      <h3>The transmitter</h3>
+      <div class="image-grid">
+        <img src="imgs/IMG_20241127_130359.jpg" />
+        <img src="imgs/IMG_20241127_130426.jpg"  />
+      </div>
+	  <h4>Electronic schematic of the transmitter</h4>
+ <img src="imgs/IMG_20241127_130921.jpg" />
+ <p> PCB </p>
+ <img src="imgs/CamScanner 12-02-2024 13.39_3.jpg" />
+ <p> Electronic schematic, IC1=BOIL SA5001 SOC-N 2424</p>
+ <p> Even if the external box has only 2 buttons, the PCB is equipped with 3 symmetric buttons</p>
+
+    </section>
+	    <section>
+      <h3>The receiver</h3>
+
+	  <h4>Electronic schematic of the transmitter</h4>
+ <img src="imgs/IMG_20241127_125512.jpg" />
+ <p> PCB, Relay Y3F-105DM 16A 250VAC 280VDC </p>
+ <img src="imgs/CamScanner 12-02-2024 13.39_2.jpg" />
+ <p> Electronic schematic, IC1=BOIL SA5001 SOC-N 2424 , IC1 and IC2 No ref</p>
+ <img src="imgs/CamScanner 12-02-2024 13.39_4.jpg" />
+ <p> Electronic schematic with function block</p>
+ 
+    </section>
+  </body>
+</html>
