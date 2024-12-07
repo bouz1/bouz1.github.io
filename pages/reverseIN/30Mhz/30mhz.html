@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<!--V2-->
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Remote control for automatic gate 30.875MHz</title>
+    <style>
+      body {
+        font-family: Arial, sans-serif;
+        margin: 20px;
+        line-height: 1.6;
+        background-color: #f9f9f9;
+        color: #333;
+      }
+
+      h2,
+      h3 , h4{
+        color: #0056b3;
+      }
+      h2 {
+        align-items: center;
+      }
+
+
+
+      img {
+        width: 80%; /* 80% of the viewport width  or 80vw*/
+        height: auto;
+        border: 2px solid #ddd;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+	  
+	  .imgH{
+	    width: auto; 
+        height: 100vh;
+	  }
+	  .img100{
+	    width: 100%; 
+        height: auto;
+	  }
+
+      section {
+        margin-bottom: 40px;
+      }
+
+      
+      .image-grid,
+      .image-grid4 {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 20px;
+      }
+      .image-grid img {
+        width: 80%; /* Make the image width 100% of its container */
+        height: 100%; /* Make the image height 100% of its container */
+
+        object-fit: contain; /* Ensures the entire image is visible without cutting */
+        object-position: center; /* Centers the image if there's extra space */
+      }
+
+      .image-grid4 img {
+        width: 80%; /* Make the image width 100% of its container */
+        height: 100%; /* Make the image height 100% of its container */
+
+        object-fit: contain; /* Ensures the entire image is visible without cutting */
+        object-position: center; /* Centers the image if there's extra space */
+      }
+
+      .image-grid-1-3 {
+        display: grid;
+        grid-template-columns: 2fr 1fr; /* First image takes 2 parts, second takes 1 part */
+        gap: 20px;
+        align-items: center; /* Align images vertically if they differ in height */
+      }
+
+      .image-grid-1-3 img {
+        width: 80%; /* Make the image width 100% of its container */
+        height: 100%; /* Make the image height 100% of its container */
+        object-fit: cover; /* Ensures the image covers the space while maintaining aspect ratio */
+      }
+
+      p {
+        background-color: #eef;
+        padding: 10px;
+        border-left: 4px solid #0056b3;
+      }
+	  
+	  
+
+
+    </style>
+  </head>
+  <body>
+    <h2>Reverse engineering of a remote control for automatic gate 30.875MHz</h2>
+	<h3> Introduction</h3>
+
+    <p>Cost of the product; around 30 euros, Date: 07/12/2024</p>
+    <div class="image-grid4">
+      <img src="imgs/img (2).jpg"/>
+      <img src="imgs/img (4).jpg"/>
+
+    </div>
+    <p>
+      <b>Ref of the product: </b><br>
+      Nice PROTECT 2000 <br>
+
+      01.34.61.20.48 <br>
+      OMOLOGA PIT APRIPORTE <br>
+      Mod. Bio <br>
+      Freq. 30,875Mhz<br>
+      Pot. 100µW<br>
+    </p>
+
+    <section>
+      <div class="flex-container">
+        <h3>Electronic schematic of the transmitter</h3>
+        <h4> PCB</h4>
+        <img src="imgs/img (5).jpg" />
+		<p>
+		The integrated circuit IC: 
+		<br> 
+		MOTOROLA NICE COD 003 2E30A XLAA9810
+		</p>
+        <h4> Schematic</h4>
+		<p> I'm not sure 100% about the schematic (Particulary the oscillator)<br>
+		Tp1, Tp2, Tp3, Tp4: Test points
+		<br>
+		The measurement of V5 is around 4.5V <br>
+		End: Enable, Cmd: Command, Nc: Note connected</p>
+        <img class="imgH"  src="imgs/img (15).jpg" />
+        <h4> Functional block diagram</h4>
+        <img class="imgH" src="imgs/img (1).jpg" />
+		<h3>Oscilloscope measurement</h3>
+		<p><b> Measurement of the pin3 of the integrated circuit (Cmd in the schematic)</b></p>
+		<div class="image-grid">
+		<p> Full signal</p>
+		<p> Saturating the signal to see the sended code</p>
+		<img src="imgs/img (13).jpg" />
+		<img src="imgs/img (14).jpg" />
+		</div>
+		<p><b> Measurement of the antenna transistor (MeasE in the schematic)</b></p>
+		<div class="image-grid">
+		<p> carrier signal</p>
+		<p> carrier signal and the other harmonics</p> 		
+		<img src="imgs/img (9).jpg" />
+		<img src="imgs/img (10).jpg" />
+		<img src="imgs/img (11).jpg" />
+		<img src="imgs/img (12).jpg" />
+		</div>
+		<h3>Post Processing of the signal</h3>
+		<p> In this section, we will use python to post processing the oscilloscope measurements</p>
+ 
+		<p>To download the notebook file:  
+		<a href="postprocessing/postProcessing.zip" download>postProcessing.ipynb</a>
+		</p>
+		<img src="imgs/transmittedPin3.jpg" />
+		<p>
+		The bit time 480µs (around 2083bps)<br>
+		The transmitted code time 47.38ms <br>
+		The numeric transmitted code <br>
+		111000000110100100100110110110100100100100110100110100110100100110100110100100100110100110110111
+		</p>
+		<img src="imgs/transmittedCode.jpg" />
+		<p> FFT of the signal: we can see the carrier 30.903Mhz, and the harmonics 61.706Mhz, 92.609Mhz ...</p>
+		<img class="img100" src="imgs/transmittedSignal.jpg" />
+		<h3> Example of transistor crystal oscillator 9.133Mhz</h3>
+		<p>To download the ltspice file:  
+		<a href="LtspiceSimulation/oscil.zip" download>LTSPICE FILE</a>
+		</p>
+		<img class="img100" src="imgs/ltspice.jpg" />
+		
+		
+
+		
+		
+		
+      
+
+
+    </section>
+  </body>
+</html>
