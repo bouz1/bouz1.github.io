@@ -1,0 +1,306 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Composition with Counters and Borders</title>
+
+    <style>
+      .canvasDiv {
+        /*border: 1px solid black;*/
+      }
+      body {
+        /*background-color:blue;*/
+      }
+    </style>
+  </head>
+  <body>
+    <input type="file" id="fileInputImg" accept="image/*" />
+    <br />
+    <!-- <button onclick="loadCanvas()"> load </button> -->
+    <br />
+    <div class="controls">
+      <label>
+        X Translation:
+        <input type="number" id="xTranslate" value="0" step="1" />
+      </label>
+      <label>
+        Y Translation:
+        <input type="number" id="yTranslate" value="0" step="1" />
+      </label>
+      <label>
+        Scale:
+        <input
+          type="number"
+          id="scale"
+          value="1"
+          step="0.1"
+          min="0.3"
+          max="1.5"
+        />
+      </label>
+      <!-- <label> -->
+      <!-- Rotate(deg): -->
+      <!-- <input type="number" id='rotateID' value="0" step="1" min="-360" max="360"> -->
+      <!-- </label> -->
+
+      <!-- <label> -->
+      <!-- Paper Color: -->
+      <!-- <input type="text" id='BuckColorID' value="#ecfbfb" > -->
+      <!-- </label> -->
+      <!-- <label> -->
+      <!-- Image BackGround Color: -->
+      <!-- <input type="text" id='ImageBuckColorID' value="#ecfbfb" > -->
+      <!-- </label> -->
+
+      <!-- <label> -->
+      <!-- Light(%): -->
+      <!-- <input type="number" id='lightID' value="100" step="2" min="0" max="200"> -->
+      <!-- </label> -->
+    </div>
+    <br />
+    <label>
+      <input type="checkbox" id="toggle-border" />
+      Show Gabarie
+    </label>
+    <br />
+    <div class="canvasDiv">
+      <canvas id="canvas"> </canvas>
+    </div>
+
+    <script>
+      const scaleInput = document.getElementById("scale");
+      const xTranslateInput = document.getElementById("xTranslate");
+      const yTranslateInput = document.getElementById("yTranslate");
+
+      var Init = true;
+      var srcHref =
+        "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Emmanuel_Macron_March_2024_%284%29.jpg/330px-Emmanuel_Macron_March_2024_%284%29.jpg";
+      var GabarieChecked = false;
+
+      function loadCanvas() {
+        // Create a canvas element
+        const scale = parseFloat(scaleInput.value, 10);
+        var xTranslate = parseInt(xTranslateInput.value, 10);
+        var yTranslate = parseInt(yTranslateInput.value, 10);
+
+        var xPosInit = 0;
+        var yPosInit = 0;
+
+        const canvas = document.getElementById("canvas");
+        const ctx = canvas.getContext("2d");
+
+        // Load the image
+        const img = new Image();
+        img.src = srcHref; // Replace with your image path
+        img.onload = () => {
+          // Set canvas size to 3 columns and 2 rows of the image size, plus margins
+
+          const imgWidth = img.width;
+          const imgHeight = img.height;
+
+          // Calculate new width and height for cropping based on aspect ratio (H/W = 4.5/3.5)
+
+          var newHeight = imgWidth * (4.5 / 3.5);
+          var newWidth = imgHeight * (3.5 / 4.5);
+          if (newHeight < imgHeight) {
+            newWidth = imgWidth;
+          } else {
+            newHeight = imgHeight;
+          }
+
+          //var scale = 0.7;
+          newHeight = scale * imgHeight;
+          newWidth = scale * newWidth;
+
+          //var dWidth= Math.min(newWidth, newWidth- xTranslate)
+
+          //var dHeight= Math.min(newHeight, newHeight- yTranslate)
+
+          var dWidth = newWidth;
+
+          var dHeight = newHeight;
+          console.log(newHeight, dHeight, yTranslate);
+
+          // Crop the image to the desired aspect ratio
+          const cropX = (imgWidth - newWidth) / 2; // X position to start cropping (no horizontal offset)
+          const cropY = (imgHeight - newHeight) / 2; // Center the crop vertically
+
+          if (Init) {
+            Init = false;
+            xTranslate = xTranslateInput.value = cropX;
+            yTranslate = yTranslateInput.value = cropY;
+          }
+
+          // Adjust canvas size to accommodate 3 columns and 2 rows with margins
+          const margin = (1 / (4.5 * 3)) * newHeight; // Set margin size
+
+          canvas.height = newHeight * 2 + 3 * margin;
+          canvas.width = Math.max(
+            (newWidth + margin) * 3 + margin,
+            (canvas.height * 15) / 10
+          );
+          console.log(
+            (newWidth + margin) * 3 + margin,
+            (canvas.height * 15) / 10,
+            canvas.height,
+            canvas.width
+          );
+
+          let imageCount = 0; // Counter for image numbers
+
+          // Apply translation, rotation, scaling, and draw in a 3x2 grid
+          for (let row = 0; row < 2; row++) {
+            for (let col = 0; col < 3; col++) {
+              imageCount++; // Increment image counter
+
+              // Apply transformation, rotation, and cropping for each image
+              ctx.save(); // Save the current state before transformations
+              // Calculate position for each image in the grid
+              var xPos = col * (newWidth + margin) + xPosInit;
+              var yPos = row * (newHeight + margin) + yPosInit;
+              if (xPos == 0) {
+                xPosInit = xPos = margin;
+                yPosInit = yPos = margin;
+              }
+              console.log(xPos, yPos);
+
+              ctx.translate(xPos, yPos);
+
+              // Draw the cropped portion of the image
+              //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
+              //var sx = Math.max(cropX, -xTranslate);
+              //console.log(sx,cropX);
+              ctx.drawImage(
+                img,
+                xTranslate,
+                yTranslate,
+                dWidth,
+                dHeight,
+                0,
+                0,
+                dWidth,
+                dHeight
+              );
+              //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
+
+              // Draw a border around the image
+              // Draw a dashed border around the image
+              ctx.setLineDash([2, 10]); // 5px dash, 5px gap
+              ctx.strokeStyle = "black"; // Border color
+              ctx.lineWidth = 1; // Border thickness
+              ctx.strokeRect(0, 0, newWidth, newHeight); // Draw rectangle for the border
+
+              if (GabarieChecked) {
+                // Define oval properties
+                const centerX = newWidth / 2; // X coordinate of the center
+                const centerY = ((85 - 46) / 85) * newHeight; // Y coordinate of the center
+                const radiusX = ((42 / 66) * newWidth) / 2; // Horizontal radius (width of the oval)
+                const radiusY = ((32 / 45) * newHeight) / 2; // Vertical radius (height of the oval)
+
+                // Draw the oval (ellipse) with the arc method
+                ctx.setLineDash([8, 8]); // 5px dash, 5px gap
+                ctx.strokeStyle = "black"; // Border color
+                ctx.lineWidth = 2; // Border thickness
+                ctx.beginPath();
+                ctx.ellipse(
+                  centerX,
+                  centerY,
+                  radiusX,
+                  radiusY,
+                  0,
+                  0,
+                  Math.PI * 2
+                ); // Draw ellipse
+                ctx.stroke(); // Apply stroke to the oval (with the dashed border)
+
+                ctx.beginPath();
+                ctx.ellipse(
+                  centerX,
+                  centerY,
+                  (36 / 32) * radiusX,
+                  (36 / 32) * radiusY,
+                  0,
+                  0,
+                  Math.PI * 2
+                ); // Draw ellipse
+                ctx.stroke(); // Apply stroke to the oval (with the dashed border)
+
+                //Zone yeux
+
+                ctx.strokeRect(
+                  0,
+                  newHeight * (23 / 85),
+                  newWidth,
+                  (19 / 85) * newHeight
+                ); // Draw rectangle for the border
+              }
+
+              // Restore the state to undo transformations
+              ctx.restore();
+            }
+          }
+        };
+      }
+
+      scaleInput.addEventListener("input", loadCanvas);
+      xTranslateInput.addEventListener("input", loadCanvas);
+      yTranslateInput.addEventListener("input", loadCanvas);
+
+      loadCanvas();
+    </script>
+
+    <!-- <script> -->
+    <!-- function downloadCanvasAsImage() { -->
+    <!-- // Get the base64 image data from the canvas -->
+    <!-- let canvasImage = canvas.toDataURL('image/png'); -->
+
+    <!-- // Send the image data to the PHP backend for download -->
+    <!-- let xhr = new XMLHttpRequest(); -->
+    <!-- xhr.open('POST', 'save_canvas.php', true); -->
+    <!-- xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded'); -->
+    <!-- xhr.onload = function () { -->
+    <!-- if (xhr.status == 200) { -->
+    <!-- // Once the server responds, trigger the download -->
+    <!-- let a = document.createElement('a'); -->
+    <!-- a.href = xhr.responseText; // URL of the generated image -->
+    <!-- a.download = 'canvas_image.png'; -->
+    <!-- a.click(); -->
+    <!-- } -->
+    <!-- }; -->
+    <!-- xhr.send('imageData=' + encodeURIComponent(canvasImage)); -->
+    <!-- } -->
+    <!-- </script> -->
+    <!-- <button onclick="downloadCanvasAsImage()">Download as PNG</button> -->
+
+    <script>
+      document
+        .getElementById("fileInputImg")
+        .addEventListener("change", function (event) {
+          const file = event.target.files[0];
+
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              srcHref = e.target.result;
+
+              console.log(srcHref);
+              loadCanvas();
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+    </script>
+
+    <script>
+      // Get all elements with the class "child"
+
+      const checkbox = document.getElementById("toggle-border");
+
+      checkbox.addEventListener("change", () => {
+        GabarieChecked = checkbox.checked;
+        loadCanvas();
+      });
+    </script>
+  </body>
+</html>
