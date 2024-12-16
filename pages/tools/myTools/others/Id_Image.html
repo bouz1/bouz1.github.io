@@ -39,19 +39,30 @@
           max="1.5"
         />
       </label>
+	  <label>
+        print correction:
+        <input
+          type="number"
+          id="printcorrectionID"
+          value="0.943"
+          step="0.01"
+          min="0.5"
+          max="1.5"
+        />
+      <!-- </label> -->
       <!-- <label> -->
       <!-- Rotate(deg): -->
       <!-- <input type="number" id='rotateID' value="0" step="1" min="-360" max="360"> -->
       <!-- </label> -->
 
-      <!-- <label> -->
-      <!-- Paper Color: -->
-      <!-- <input type="text" id='BuckColorID' value="#ecfbfb" > -->
-      <!-- </label> -->
-      <!-- <label> -->
-      <!-- Image BackGround Color: -->
-      <!-- <input type="text" id='ImageBuckColorID' value="#ecfbfb" > -->
-      <!-- </label> -->
+      <label>
+      Paper Color:
+      <input type="text" id='BuckColorID' value="#ffffff" >
+      </label>
+      <label>
+      Image BackGround Color:
+      <input type="text" id='ImageBuckColorID' value="#e3f5fa" >
+      </label>
 
       <!-- <label> -->
       <!-- Light(%): -->
@@ -72,26 +83,37 @@
       const scaleInput = document.getElementById("scale");
       const xTranslateInput = document.getElementById("xTranslate");
       const yTranslateInput = document.getElementById("yTranslate");
+	  const printCorr = document.getElementById("printcorrectionID");
+	  
+	  const BuckColorInput = document.getElementById("BuckColorID");
+	  const ImageBuckColorInput = document.getElementById('ImageBuckColorID');
 
       var Init = true;
-      var srcHref =
-        "https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Emmanuel_Macron_March_2024_%284%29.jpg/330px-Emmanuel_Macron_March_2024_%284%29.jpg";
+      //var srcHref = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Yun_Du-seo.jpg/160px-Yun_Du-seo.jpg";
+      //var srcHref ="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Emmanuel_Macron_March_2024_%284%29.jpg/330px-Emmanuel_Macron_March_2024_%284%29.jpg";
+		var srcHref ="Id_Image.png"; 
       var GabarieChecked = false;
 
       function loadCanvas() {
         // Create a canvas element
         const scale = parseFloat(scaleInput.value, 10);
+		const printCorrVal=  parseFloat(printCorr.value, 10);
         var xTranslate = parseInt(xTranslateInput.value, 10);
         var yTranslate = parseInt(yTranslateInput.value, 10);
+		const BuckColorVal=BuckColorInput.value;
+	  const ImageBuckColorVal= ImageBuckColorInput.value;
 
         var xPosInit = 0;
         var yPosInit = 0;
 
         const canvas = document.getElementById("canvas");
+		canvas.style.border = '1px dashed red'; // Change border dynamically
         const ctx = canvas.getContext("2d");
+	
 
         // Load the image
         const img = new Image();
+		img.crossOrigin = "anonymous"; // Allow cross-origin image loading
         img.src = srcHref; // Replace with your image path
         img.onload = () => {
           // Set canvas size to 3 columns and 2 rows of the image size, plus margins
@@ -103,14 +125,22 @@
 
           var newHeight = imgWidth * (4.5 / 3.5);
           var newWidth = imgHeight * (3.5 / 4.5);
-          if (newHeight < imgHeight) {
-            newWidth = imgWidth;
-          } else {
-            newHeight = imgHeight;
-          }
+		  //console.log("imgWidth=>newWidth",imgWidth, newWidth);
+		  //console.log("imgHeight => newHeight", imgHeight, newHeight );
+		  
+          <!-- if (newHeight < imgHeight) { -->
+            <!-- newWidth = imgWidth; -->
+          <!-- } else   { -->
+            <!-- newHeight = imgHeight; -->
+          <!-- } -->
+		  
+		  newWidth = Math.min(imgWidth, newWidth);
+		  newHeight = Math.min(imgHeight, newHeight);
 
+		  //console.log("imgWidth=>newWidth",imgWidth, newWidth);
+		  //console.log("imgHeight => newHeight", imgHeight, newHeight );
           //var scale = 0.7;
-          newHeight = scale * imgHeight;
+          newHeight = scale * newHeight;
           newWidth = scale * newWidth;
 
           //var dWidth= Math.min(newWidth, newWidth- xTranslate)
@@ -120,7 +150,7 @@
           var dWidth = newWidth;
 
           var dHeight = newHeight;
-          console.log(newHeight, dHeight, yTranslate);
+          //console.log(newHeight, dHeight, yTranslate);
 
           // Crop the image to the desired aspect ratio
           const cropX = (imgWidth - newWidth) / 2; // X position to start cropping (no horizontal offset)
@@ -133,19 +163,19 @@
           }
 
           // Adjust canvas size to accommodate 3 columns and 2 rows with margins
-          const margin = (1 / (4.5 * 3)) * newHeight; // Set margin size
+		  const correctionHeight= 2*newHeight * (1/printCorrVal-1)/3;
+          const margin = (1 / (4.5 * 3)) * newHeight+correctionHeight; // Set margin size
+
 
           canvas.height = newHeight * 2 + 3 * margin;
           canvas.width = Math.max(
             (newWidth + margin) * 3 + margin,
             (canvas.height * 15) / 10
           );
-          console.log(
-            (newWidth + margin) * 3 + margin,
-            (canvas.height * 15) / 10,
-            canvas.height,
-            canvas.width
-          );
+
+              ctx.fillStyle = BuckColorVal; // Change this to your preferred color
+        ctx.fillRect(0, 0, canvas.width, canvas.height); // Fill the entire canvas with color
+
 
           let imageCount = 0; // Counter for image numbers
 
@@ -160,10 +190,11 @@
               var xPos = col * (newWidth + margin) + xPosInit;
               var yPos = row * (newHeight + margin) + yPosInit;
               if (xPos == 0) {
-                xPosInit = xPos = margin;
+                xPosInit = xPos = margin*3;
                 yPosInit = yPos = margin;
+
               }
-              console.log(xPos, yPos);
+              //console.log(xPos, yPos);
 
               ctx.translate(xPos, yPos);
 
@@ -171,16 +202,33 @@
               //drawImage(image, sx, sy, sWidth, sHeight, dx, dy, dWidth, dHeight)
               //var sx = Math.max(cropX, -xTranslate);
               //console.log(sx,cropX);
+			            <!-- if (newHeight < imgHeight) { -->
+            <!-- newWidth = imgWidth; -->
+          <!-- } else   { -->
+            <!-- newHeight = imgHeight; -->
+          <!-- } -->
+		  
+			//console.log("imgWidth, imgHeight ,  newWidth,newHeight, newHeight < imgHeight " );
+		  //console.log(imgWidth, imgHeight ,  newWidth,newHeight, newHeight < imgHeight );
+		  //console.log("For loop");
+		  		  //console.log("imgWidth=>newWidth",imgWidth, newWidth);
+		  //console.log("imgHeight => newHeight", imgHeight, newHeight );
+		  
+		      // Draw the background color in the area where the image will be placed
+    ctx.fillStyle = ImageBuckColorVal;
+    ctx.fillRect(0, 0, newWidth, newHeight); // Draw background behind the image
+
+
               ctx.drawImage(
                 img,
                 xTranslate,
                 yTranslate,
-                dWidth,
-                dHeight,
+                newWidth,
+                newHeight,
                 0,
                 0,
-                dWidth,
-                dHeight
+                newWidth,
+                newHeight
               );
               //https://developer.mozilla.org/en-US/docs/Web/API/CanvasRenderingContext2D/drawImage
 
@@ -236,42 +284,61 @@
                 ); // Draw rectangle for the border
               }
 
+
+
+
+
               // Restore the state to undo transformations
+			  
               ctx.restore();
             }
           }
+		  
+		  
+		  
+// ADD text 
+
+              xPos = 3.2 * (newWidth + margin) + xPosInit;
+               yPos = 0.5 * (newHeight + margin) + yPosInit;
+       
+       //console.log(xPos, yPos, canvas.width, canvas.height);
+
+              ctx.translate(xPos, yPos);
+			  
+        const angle = Math.PI / 2; // Rotate 90 degrees (π/2 radians)
+		const date = new Date().toLocaleDateString('en-GB').replace(/-/g, '/');
+        const text = "Paper 15x10 cm , Image 45x35 mm , Date "+date;
+		
+
+
+
+        // Move to the text position
+        //ctx.translate(xPos, yPos  );
+
+
+        // Rotate the canvas
+        ctx.rotate(angle);
+
+        // Draw the text at the new orientation
+        ctx.font = "20px Arial"; // Set font size and style
+        ctx.fillStyle = "black";  // Set text color
+        ctx.fillText(text, 0, 0);
+
+        // Restore the canvas to its original state
+        ctx.restore();
         };
       }
 
+// Add listeners 
       scaleInput.addEventListener("input", loadCanvas);
       xTranslateInput.addEventListener("input", loadCanvas);
       yTranslateInput.addEventListener("input", loadCanvas);
+	  printCorr.addEventListener("input", loadCanvas);
+	  BuckColorInput.addEventListener("input", loadCanvas);
+	  ImageBuckColorInput.addEventListener("input", loadCanvas);
 
       loadCanvas();
     </script>
-
-    <!-- <script> -->
-    <!-- function downloadCanvasAsImage() { -->
-    <!-- // Get the base64 image data from the canvas -->
-    <!-- let canvasImage = canvas.toDataURL('image/png'); -->
-
-    <!-- // Send the image data to the PHP backend for download -->
-    <!-- let xhr = new XMLHttpRequest(); -->
-    <!-- xhr.open('POST', 'save_canvas.php', true); -->
-    <!-- xhr.setRequestHeader('Content-Type', 'application/x-www-form-urlencoded'); -->
-    <!-- xhr.onload = function () { -->
-    <!-- if (xhr.status == 200) { -->
-    <!-- // Once the server responds, trigger the download -->
-    <!-- let a = document.createElement('a'); -->
-    <!-- a.href = xhr.responseText; // URL of the generated image -->
-    <!-- a.download = 'canvas_image.png'; -->
-    <!-- a.click(); -->
-    <!-- } -->
-    <!-- }; -->
-    <!-- xhr.send('imageData=' + encodeURIComponent(canvasImage)); -->
-    <!-- } -->
-    <!-- </script> -->
-    <!-- <button onclick="downloadCanvasAsImage()">Download as PNG</button> -->
 
     <script>
       document
@@ -284,7 +351,7 @@
             reader.onload = function (e) {
               srcHref = e.target.result;
 
-              console.log(srcHref);
+              //console.log(srcHref);
               loadCanvas();
             };
             reader.readAsDataURL(file);
@@ -302,5 +369,43 @@
         loadCanvas();
       });
     </script>
+	
+
+
+
+  
+	<button onclick="getBase64()">Save Image</button>
+
+  <script>
+
+    const canvas = document.getElementById('canvas');
+    function getBase64() {
+      const base64Code = canvas.toDataURL('image/png');
+      
+    
+ 
+  
+            const base64Parts = base64Code.split(',');
+            const mimeType = base64Parts[0].match(/:(.*?);/)[1]; // Extract MIME type
+            const byteString = atob(base64Parts[1]); // Decode Base64 string
+            
+            const byteArray = new Uint8Array(byteString.length);
+            for (let i = 0; i < byteString.length; i++) {
+                byteArray[i] = byteString.charCodeAt(i);
+            }
+
+            const blob = new Blob([byteArray], { type: mimeType });
+
+            // Create a link element to download the image
+            const link = document.createElement("a");
+            link.href = URL.createObjectURL(blob);
+            link.download = "image.png"; // Change to "image.jpg" for JPG format
+            document.body.appendChild(link); // Append link to the body
+            link.click(); // Programmatically click the link
+            document.body.removeChild(link); // Clean up
+        };
+    </script>
+  
+  
   </body>
 </html>
