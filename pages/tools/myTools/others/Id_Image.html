@@ -22,25 +22,42 @@
     <div class="controls">
       <label>
         X Translation:
+
         <input type="number" id="xTranslate" value="0" step="1" />
       </label>
       <label>
         Y Translation:
+	
         <input type="number" id="yTranslate" value="0" step="1" />
       </label>
       <label>
         Scale:
         <input
-          type="number"
-          id="scale"
+          type="range"
+          id="scaleRange"
           value="1"
           step="0.1"
           min="0.3"
           max="1.5"
         />
+		<input type="number" 
+		id="scale" 
+          value="1"
+          step="0.1"
+          min="0.3"
+          max="1.5"</span>
       </label>
+	  <br><br>
 	  <label>
         print correction:
+		  <input
+          type="range"
+          id="printcorrectionIDRange"
+          value="0.943"
+          step="0.01"
+          min="0.5"
+          max="1.5"
+        />
         <input
           type="number"
           id="printcorrectionID"
@@ -57,11 +74,11 @@
 
       <label>
       Paper Color:
-      <input type="text" id='BuckColorID' value="#ffffff" >
+      <input type="color" id='BuckColorID' value="#ffffff" >
       </label>
       <label>
       Image BackGround Color:
-      <input type="text" id='ImageBuckColorID' value="#e3f5fa" >
+      <input type="color" id='ImageBuckColorID' value="#e3f5fa" >
       </label>
 
       <!-- <label> -->
@@ -91,7 +108,7 @@
       var Init = true;
       //var srcHref = "https://upload.wikimedia.org/wikipedia/commons/thumb/a/a7/Yun_Du-seo.jpg/160px-Yun_Du-seo.jpg";
       //var srcHref ="https://upload.wikimedia.org/wikipedia/commons/thumb/7/7b/Emmanuel_Macron_March_2024_%284%29.jpg/330px-Emmanuel_Macron_March_2024_%284%29.jpg";
-		var srcHref ="Id_Image.png"; 
+	var srcHref ="https://bouz1.github.io/pages/tools/myTools/others/Id_Image.png"; 
       var GabarieChecked = false;
 
       function loadCanvas() {
@@ -330,7 +347,7 @@
       }
 
 // Add listeners 
-      scaleInput.addEventListener("input", loadCanvas);
+      //scaleInput.addEventListener("input", loadCanvas);
       xTranslateInput.addEventListener("input", loadCanvas);
       yTranslateInput.addEventListener("input", loadCanvas);
 	  printCorr.addEventListener("input", loadCanvas);
@@ -404,6 +421,37 @@
             link.click(); // Programmatically click the link
             document.body.removeChild(link); // Clean up
         };
+    </script>
+	
+	
+	
+	    <script>
+        const scaleInputRange = document.getElementById('scaleRange');
+        scaleInput.addEventListener('input', function() {
+            scaleInputRange.value = scaleInput.value;
+			loadCanvas();
+        });
+
+        scaleInputRange.addEventListener('input', function() {
+            scaleInput.value = scaleInputRange.value;
+			loadCanvas();
+        });
+		
+		
+        const printcorrectionIDInputRange = document.getElementById('printcorrectionIDRange');
+		const printcorrectionIDInput = document.getElementById("printcorrectionID");
+        printcorrectionIDInput.addEventListener('input', function() {
+            printcorrectionIDInputRange.value = printcorrectionIDInput.value;
+			loadCanvas();
+        });
+
+        printcorrectionIDInputRange.addEventListener('input', function() {
+            printcorrectionIDInput.value = printcorrectionIDInputRange.value;
+			loadCanvas();
+        });
+		
+		
+
     </script>
   
   
