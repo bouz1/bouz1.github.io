@@ -1,0 +1,500 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Click Coordinates</title>
+    <style>
+
+
+
+      #image-container {
+        display: inline-block;
+        position: relative;
+        padding: 1%;
+        cursor: crosshair;
+        width: 300px; /* or any specific width */
+        height: 200px; /* or any specific height */
+      }
+
+      #image {
+        display: block;
+        object-position: left top; 
+        border: 1px solid black;
+        object-fit: contain;
+        width: 100%;
+        height: 100%;
+        margin-left: 0px;
+      }
+
+
+
+      #coordinates {
+        margin-top: 10px;
+        font-size: 1.2em;
+        /*text-shadow: 0px 0px 5px white; *//* Adds a soft white glow */
+        text-shadow: 2px 2px white;
+      }
+
+      table {
+        margin-top: 20px;
+        border-collapse: collapse;
+        width: 50%;
+      }
+      table, th, td {
+        border: 1px solid black;
+      }
+      th, td {
+        padding: 8px;
+        text-align: center;
+      }
+      .coordClass{
+        position: absolute;
+
+
+        font-size: 16px;
+        color: black;
+
+        /*border: 1px solid black;*/
+
+      }
+
+
+      button {
+        background-color: #16a9c9; 
+        border: none;
+        color: white;
+        margin: 10px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        width:180px;
+        height: 40px;
+      }
+      #ox_inp, #oy_inp, #refx_inp, #refy_inp{
+        width: 80px;
+        margin : 10px;
+
+
+
+
+        padding: 5px 10px;
+
+        text-align: center;
+        text-decoration: none;
+
+        font-size: 16px;
+      }
+      .OrigineRefDiv > label{
+
+        display: inline-block; /* Or inline-block */
+        width: 100px;
+
+
+        padding: 5px 10px;
+        margin: 10px;
+        text-align: center;
+        text-decoration: none;
+
+        font-size: 16px;
+      }
+
+      #origine , #RefPoint {
+        width:160px;
+      }
+
+      .OrigineRefDiv > select{
+        display: inline-block; /* Or inline-block */
+        width: 100px;
+        padding: 10px ;
+        margin: 10px;
+        text-align: center;
+        text-decoration: none;
+        font-size: 16px;
+      }
+
+    </style>
+    <style>
+      /* Style for file input 
+      Hide the default file input button */
+      #fileInputImg {
+        display: none;
+      }
+
+      /* Custom button style */
+      .custom-file-input {
+        background-color: #16a9c9; 
+        border: none;
+        color: white;
+        margin: 10px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        width:180px;
+        height: 25px;
+      }
+
+
+
+    </style>
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css">
+  </head>
+  <body onload="fitImg()">
+
+
+    <input type="file" id="fileInputImg" accept="image/*" />
+    <label for="fileInputImg" class="custom-file-input">
+      <i class="fa fa-folder-open-o" aria-hidden="true"></i>
+      Open Image</label>
+
+    <br>
+    <div id="image-container">
+      <img id="image" src="Data_From_Image_Curve.png" alt="Click on the image">
+
+
+    </div>
+    <label class="coordClass" id="coordinates"></label>
+    <br>
+
+
+
+    <div class="OrigineRefDiv"> 
+      <button id="PicOrigineID" onclick="activatePick(this,'origine')">
+        <i class="fa fa-map-marker" aria-hidden="true"></i>
+        Pick the origine
+      </button>
+
+      <label> Origin X</label>
+      <input type = "number" id ="ox_inp" value=0 >
+
+      <label> Origin Y</label>
+      <input type = "number" id ="oy_inp" value =300>
+
+      <label id="origine"></label>
+
+
+      <br>
+      <button id="PicRefID" onclick="activatePick(this,'RefPoint')">
+        <i class="fa fa-map-marker" aria-hidden="true"></i>
+        Pick another ref
+      </button>
+      <label> Reference X</label>
+      <input type = "number" id ="refx_inp" value=14>
+
+      <label> Reference Y</label>
+      <input type = "number" id ="refy_inp" value = 550>
+
+
+      <label id="RefPoint"></label>
+      <br>
+      <button style="visibility: hidden;">Click Me</button>
+
+      <label> Scale X</label>
+      <select id="scalexID">
+        <option value="linear">Linear</option>
+        <option value="log10">Log 10</option>
+      </select>
+      <label> Scale Y</label>
+      <select id="scaleyID">
+        <option value="linear">Linear</option>
+        <option value="log10">Log 10</option>
+      </select>
+      <br>
+    </div>
+    <br>
+    <button id = "PicPointsID" onclick="activatePick(this,'PickPoint')">
+      <i class="fa fa-area-chart" aria-hidden="true"></i>
+      Pick Points</button>
+
+
+    <br>
+    <button onclick="saveTableAsCSV()">
+      <i class="fa fa-save" aria-hidden="true"></i>
+      Save CSV
+    </button>
+    <button id="resetTable" onclick="resetTable()">
+      <i class="fa fa-eraser" aria-hidden="true"></i>
+      Clear table</button>
+
+    <table id="pointsTable">
+      <thead>
+        <tr>
+          <th>Point</th>
+          <th>X</th>
+          <th>Y</th>
+        </tr>
+      </thead>
+      <tbody>
+        <!-- Points will be added here -->
+      </tbody>
+    </table>
+
+
+    <script>
+      const image = document.getElementById("image");
+      const coordinatesLabel = document.getElementById("coordinates");
+      const origineLabel = document.getElementById("origine");
+      const refPointLabel = document.getElementById("RefPoint");
+      const pointsTable = document.getElementById("pointsTable").getElementsByTagName("tbody")[0];
+      let pointCount = 0;
+      const ox_inp = document.getElementById("ox_inp");
+      const oy_inp = document.getElementById("oy_inp");
+      const refx_inp = document.getElementById("refx_inp");
+      const refy_inp = document.getElementById("refy_inp");
+      const scalexElem = document.getElementById("scalexID");
+      const scaleyElem = document.getElementById("scaleyID");
+      var o_picked = false; 
+      var ref_picked= false; 
+
+      let activeLabel = null;
+      var ox, oy, refx, refy;
+
+
+
+
+      image.addEventListener("mousemove", (event) => {
+        const rect = image.getBoundingClientRect();
+        const scalex= scalexElem.value;
+        const scaley= scaleyElem.value;
+        //console.log(rect);
+        var x = event.clientX ;
+        var y = event.clientY ;
+
+        x = event.clientX - rect.left; // X-coordinate relative to the image
+        y = event.clientY - rect.top;  // Y-coordinate relative to the image
+
+        coordinatesLabel.style.left=(x-coordinatesLabel.style.width/2)+"px";
+        coordinatesLabel.style.top = (y-coordinatesLabel.style.height) + "px";
+        coordinatesLabel.style.color =  "black"
+
+        y=rect.height-y;
+
+        var refxinp=parseFloat(refx_inp.value);
+        var oxinp=parseFloat(ox_inp.value);
+        var refyinp=parseFloat(refy_inp.value);
+        var oyinp=parseFloat(oy_inp.value);
+
+        if (o_picked & ref_picked) {
+          //console.log(scalex=="linear" && scaley=="linear");
+          if (scalex=="linear"){
+            x=(refxinp-oxinp)*(x-ox)/(refx-ox)+oxinp;
+          }
+          else {
+            x=Math.pow(refxinp/oxinp, (x-ox)/(refx-ox))*oxinp;
+          }
+          if (scaley=="linear"){
+            y=(refyinp-oyinp)*(y-oy)/(refy-oy)+oyinp;
+          }
+          else {
+            y=Math.pow(refyinp/oyinp, (y-oy)/(refy-oy))*oyinp;
+          }
+
+
+
+
+
+        }
+
+        //console.log(x,y);
+        coordinatesLabel.textContent = `(${x.toFixed(4)}, ${y.toFixed(4)})`;
+      });
+
+
+
+      // Update click coordinates on the image
+      image.addEventListener("click", (event) => {
+        console.log("ok");
+        const rect = image.getBoundingClientRect();
+        const scalex= scalexElem.value;
+        const scaley= scaleyElem.value;
+        //console.log(rect);
+        var x = event.clientX - rect.left; // X-coordinate relative to the image
+        var y = event.clientY - rect.top;  // Y-coordinate relative to the image
+        y=rect.height-y;
+
+        var refxinp=parseFloat(refx_inp.value);
+        var oxinp=parseFloat(ox_inp.value);
+        var refyinp=parseFloat(refy_inp.value);
+        var oyinp=parseFloat(oy_inp.value);
+        console.log(oxinp,oyinp,refxinp,refyinp );
+        console.log(o_picked  , ref_picked)
+        console.log(x  , y)			
+        if ((o_picked & ref_picked) & (activeLabel =='PickPoint')  ) {
+          console.log(scalex=="linear" && scaley=="linear");
+          if (scalex=="linear"){
+            x=(refxinp-oxinp)*(x-ox)/(refx-ox)+oxinp;
+          }
+          else {
+
+            //console.log((refxinp/oxinp),(x-ox)/(refx-ox), oxinp);
+            //console.log(refxinp, oxinp,x,ox, refx, ox, oxinp);
+            //console.log("ox",ox);
+            if (oxinp >0){
+              x=Math.pow(refxinp/oxinp, (x-ox)/(refx-ox))*oxinp;
+            }
+            else {
+              alert("Origin X must be strictly positive in log scale")
+            }
+
+          }
+          if (scaley=="linear"){
+            y=(refyinp-oyinp)*(y-oy)/(refy-oy)+oyinp;
+          }
+          else {
+
+            if (oyinp >0){
+              y=Math.pow(refyinp/oyinp, (y-oy)/(refy-oy))*oyinp;
+            }
+            else {
+              alert("Origin Y must be strictly positive in log scale")
+            }
+          }
+
+
+
+
+
+        }
+
+        console.log(x,y);
+        //coordinatesLabel.textContent = `Coordinates: (${x}, ${y})`;
+        coordinatesLabel.style.color =  "green"
+
+        console .log(activeLabel);
+        if (activeLabel == 'PickPoint'){
+          // Increment point count and create a new table row
+          pointCount++;
+          const newRow = pointsTable.insertRow();
+          const cell1 = newRow.insertCell(0);
+          const cell2 = newRow.insertCell(1);
+          const cell3 = newRow.insertCell(2);
+
+          cell1.textContent = pointCount;
+          cell2.textContent = x;
+          cell3.textContent = y;//.toFixed(2);
+        }
+        else if (activeLabel=="origine"){
+          ox=x;
+          oy=y;
+          o_picked =true; 
+          document.getElementById(activeLabel).textContent = `(${x.toFixed(2)}, ${y.toFixed(2)})`;
+        }
+        else if(activeLabel=='RefPoint') {//ref
+          refx=x; 
+          refy=y;
+          ref_picked =true; 
+          document.getElementById(activeLabel).textContent = `(${x.toFixed(2)}, ${y.toFixed(2)})`;
+        }
+
+
+
+      });
+
+      // Activate a label for picking coordinates
+      //function activatePick(labelId) {
+      function activatePick(button, labelId) {
+
+        // Remove the 'active-button' class from all buttons
+        document.querySelectorAll('button').forEach(btn => {
+          btn.style.color="white";
+
+
+        });
+
+        // Add the 'active-button' class to the clicked button
+        button.style.color="#fae3e9";
+
+
+
+
+        activeLabel = labelId;
+      }
+
+      // Clear the table and reset the point count
+      function resetTable() {
+        pointsTable.innerHTML = ""; // Clear all table rows
+        pointCount = 0; // Reset point count
+      }
+    </script>
+    <script>
+      document
+        .getElementById("fileInputImg")
+        .addEventListener("change", function (event) {
+        const file = event.target.files[0];
+
+
+
+        if (file) {
+          const reader = new FileReader();
+          reader.onload = function (e) {
+            srcHref = e.target.result;
+            fitImg();
+            //ssconsole.log(srcHref);
+            image.src=srcHref;
+
+          };
+          reader.readAsDataURL(file);
+        }
+      });
+    </script>
+    <script>
+      function saveTableAsCSV() {
+        const table = document.getElementById("pointsTable");
+        let csvContent = "";
+
+        // Loop through rows of the table
+        for (let row of table.rows) {
+          const cells = Array.from(row.cells).map(cell => {
+            let cellValue = cell.textContent.trim();
+
+            // Convert to float if the content is numeric
+            let floatValue = parseFloat(cellValue);
+            if (!isNaN(floatValue)) {
+              return floatValue;//.toFixed(2); // Format as a float with 2 decimal places
+            } else {
+              return cellValue; // Leave non-numeric values as strings
+            }
+          });
+          csvContent += cells.join(",") + "\n";
+        }
+
+        // Create a Blob and link for download
+        const blob = new Blob([csvContent], { type: "text/csv" });
+        const url = URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = "table_data.csv";
+        link.click();
+
+        // Cleanup
+        URL.revokeObjectURL(url);
+      }
+
+    </script>
+    <script>
+      function   fitImg(){
+        const div  = document.getElementById( "image-container");
+        let viewportWidth = window.innerWidth;
+        let viewportHeight = window.innerHeight;
+        div.style.height= window.innerHeight*0.8+"px";
+        div.style.width= window.innerWidth+"px";
+
+        console.log("Viewport Width: " + viewportWidth);
+        console.log("Viewport Height: " + viewportHeight);
+        console.log("div.style.height: " + div.style.height);
+      }
+
+    </script>
+
+  </body>
+</html>
