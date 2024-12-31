@@ -43,10 +43,10 @@ current_folder_path = os.getcwd()
 # Move each .png file to the "imgs" folder
 for path in png_files:
     newpath= os.path.join("imgs", path)
-    newabspath = "bouz1.github.io"+current_folder_path.split("bouz1.github.io")[1]+newpath
+    newabspath = "bouz1.github.io"+current_folder_path.split("bouz1.github.io")[1]+"/"+newpath
     newabspath ='https://'+newabspath.replace("\\","/")
     shutil.move(path, newpath)
-    readmetxt.replace(path, newabspath)
+    readmetxt= readmetxt.replace(path, newabspath)
     print( newabspath) 
 with open(newreadmeFile, "w") as f:
     f.write(readmetxt)

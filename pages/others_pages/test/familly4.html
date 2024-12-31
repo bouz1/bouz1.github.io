@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8">
+    <title>Family Tree with Enhanced Curved Links</title>
+    <style>
+      .node circle {
+        fill: #999;
+        stroke: steelblue;
+        stroke-width: 1.5px;
+      }
+      .node text {
+        font: 12px sans-serif;
+      }
+      .link {
+        fill: none;
+        stroke: #555;
+        stroke-width: 1.5px;
+      }
+      .spouse-link {
+        stroke: #ff6347; /* Distinct color for spouse links */
+        stroke-width: 2px;
+      }
+      .parent-link {
+        stroke: #555;
+        stroke-dasharray: 5, 5; /* Dotted line */
+      }
+      .additional-link {
+        stroke: #00f;
+        stroke-width: 1.5px;
+        stroke-dasharray: 2, 2;
+      }
+      .arrow {
+        marker-end: url(#arrow);
+      }
+    </style>
+  </head>
+  <body>
+    <script src="https://d3js.org/d3.v6.min.js"></script>
+    <script>
+	//♂️♀️
+	/* 
+	TO DO LIST 
+	ADD WIFE if the wife is extern of the familly : Example grandmère de Hanane
+	*/
+      const families = [
+        { parents: ["Rahou 1", ""], children: ["Bouzian 1"] },
+        { parents: ["Bouzian 1", ""], children: ["Mouha 1"] },
+        { parents: ["Mouha 1", ""], children: ["Mohmadin 1", "Boutiab 1" ,"Aissa 1", "Alkamla 1", "Rqia 1", "Fatna 1" ] },
+        { parents: ["Boutiab 1", ""], children: ["Mouha 2", "Boutahr 1", "Tlia 1", "Ftima 1", "Aicha 1", "Alqaima 1"] },
+        { parents: ["Alkamla 1","Lafdil 1" ], children: ["Zahra 1", "Aicha 2", "Mbarka 1"] },		
+        { parents: ["Rqia 1","Lmqadam 1" ], children: ["Yamna 1"] },	
+        { parents: ["Yamna 1","" ], children: ["Ben said 1"] },
+        { parents: ["Ben said 1","Mbarka 2" ], children: ["Fatim 1","Aissa 2","Mouhamed 1","Bachir 1"] },	
+        { parents: ["Fatna 1","Maamar 1" ], children: ["AbdeSlam 1"] },
+        { parents: ["AbdeSlam 1","" ], children: ["Maamr 2", "Moha ben Maamar","Mbarka ben Maamar"] },
+        { parents: ["Moha ben Maamar","" ], children: ["Brami", "Aamar", "Ali 1", "Fatoum 1"] }, 
+        { parents: ["Mbarka ben Maamar","" ], children: ["Khdija 1","Yamna 2", "Ali 2"] },
+        { parents: ["Mouha 2","Zahra 1" ], children: ["Mbarek 2", "Fatna 2", "Mariam 2"] },
+		{ parents: ["Mouha 2","Hadhom 1" ], children: ["Said 4", "Mahjouba 4", "Zhor 4", "Lkamla 4"] },
+        { parents: ["Mbarek 2","Hlima 1" ], children: ["Abdelaziz 1", "Fatima 3", "Mostafa 1", "Zahra 5", "Khadija 1", "Mouhamed 3"] },
+        { parents: ["Fatim 1","Bouabid" ], children: ["Hanane 1", "Ali 3", "Hafsa 1", "Oumnia 1" ] },
+        { parents: ["Ali 1","Yamna 2" ], children: ["Lfdil 3"] },
+        { parents: ["Aamar","Khdija 1"], children: ["Mahjouba 1"] },
+        { parents: ["Ali 2","Fatoum 1"], children: ["Aziz 1"] },
+        { parents: ["Aissa 1",""], children: ["Bouzian 2", "Zaa 1","Ali ben aissa","Mouha 5","Fatna"] },
+        { parents: ["Mouha 5","Ftima 1" ], children: ["Mastafa","Aissa 2"] }, 
+		{ parents: ["Zaa 1","Boutahr 1" ], children: ["Bouzian 3","Mouhamed 2", "Talia 3"] }, 
+        { parents: ["Mohmadin 1","Zana 1"], children: ["Mohmadin2", "Hmad 1", "Mariam 1"] }, 
+        { parents: ["Abdelaziz 1","Hanane 1"], children: ["Anir 1"] }		
+		
+      ];	
+
+
+
+
+/*
+
+for (let family of families) {
+  // Update parents
+  family.parents = family.parents.map((parent, index) => {
+    if (parent) { // Check for non-empty parent
+      const symbol = index === 0 ? "♂️" : "♀️"; // Male for the first parent, female for the second
+      const updatedParent = `${parent} ${symbol}`;
+
+      // Update children if they match
+      family.children = family.children.map(child => 
+        child === parent ? updatedParent : child
+      );
+
+      return updatedParent; // Return updated parent
+    }
+    return parent; // Return unchanged if empty
+  });
+}
+*/
+
+	  
+	
+      const family_root = families[0]["parents"][0];
+
+      function buildFamilyTree(families) {
+        const familyMap = new Map();
+
+        // Initialize the family map with parents
+        families.forEach(family => {
+          family.parents.forEach(parent => {
+            if (parent && !familyMap.has(parent)) {
+              familyMap.set(parent, { name: parent, children: [], spouses: [] });
+            }
+          });
+        });
+
+        // Add children and spouses to the family map
+        families.forEach(family => {
+          const [parent1, parent2] = family.parents;
+          if (parent2) {
+            // Avoid adding empty strings as spouses
+            if (parent2 !== "") {
+              familyMap.get(parent1).spouses.push(parent2);
+              familyMap.get(parent2).spouses.push(parent1);
+            }
+          }
+
+          family.children.forEach(child => {
+            if (!familyMap.has(child)) {
+              familyMap.set(child, { name: child, children: [], spouses: [] });
+            }
+            familyMap.get(parent1).children.push(familyMap.get(child));
+            if (parent2 && parent2 !== "") {
+              //familyMap.get(parent2).children.push(familyMap.get(child));
+			  a=null; 
+            }
+          });
+        });
+
+        // Find the root of the family tree
+        let root = null;
+        if (familyMap.has(family_root)) {
+          root = familyMap.get(family_root);
+        }
+
+        return root;
+      }
+
+      const familyTree = buildFamilyTree(families);
+
+      const width = 3800;
+      const height = 1200; // Further increased height to accommodate more curves
+      const padding = 100;
+
+      const svg = d3.select("body").append("svg")
+        .attr("width", width + padding * 2)
+        .attr("height", height + padding * 2)
+        .append("g")
+        .attr("transform", `translate(${padding}, ${padding})`);
+
+      // Define arrow marker
+      svg.append("defs").append("marker")
+        .attr("id", "arrow")
+        .attr("viewBox", "0 -5 10 10")
+        .attr("refX", 10)
+        .attr("refY", 0)
+        .attr("markerWidth", 6)
+        .attr("markerHeight", 6)
+        .attr("orient", "auto")
+        .append("path")
+        .attr("d", "M0,-5L10,0L0,5")
+        .attr("fill", "#555");
+
+      const root = d3.hierarchy(familyTree, d => d.children);
+
+      const treeLayout = d3.tree().size([width, height - 200]);
+      treeLayout(root);
+
+      // Assign unique IDs to each node for easy reference
+      const nodesByName = {};
+      root.descendants().forEach(d => {
+        nodesByName[d.data.name] = d;
+      });
+
+      // Add spouse nodes
+      const spouseNodes = [];
+      const processedSpouses = new Set(); // To track processed spouse pairs
+
+      root.descendants().forEach(d => {
+        d.data.spouses.forEach(spouse => {
+          // Create a sorted key to avoid duplicate processing (A-B same as B-A)
+          const spouseKey = [d.data.name, spouse].sort().join('-');
+          if (!processedSpouses.has(spouseKey)) {
+            const spouseNode = {
+              name: spouse,
+              isSpouse: true,
+              parent: d
+            };
+            spouseNodes.push(spouseNode);
+            processedSpouses.add(spouseKey);
+          }
+        });
+      });
+
+      // Create a separate hierarchy for spouses
+      const spouseHierarchy = d3.hierarchy({ children: spouseNodes }, d => d.children);
+
+      // Position spouse nodes relative to their parent nodes
+      spouseHierarchy.descendants().forEach(d => {
+        if (d.parent && d.data.isSpouse) {
+          d.x = d.parent.x + 60; // Offset for spouse
+          d.y = d.parent.y;
+        }
+      });
+
+      // Combine main nodes and spouse nodes
+      const allNodes = root.descendants().concat(spouseHierarchy.descendants().filter(d => d.data.isSpouse));
+
+      // Draw nodes
+      svg.selectAll('circle.node')
+        .data(allNodes)
+        .enter()
+        .append('circle')
+        .attr('cx', d => d.x)
+        .attr('cy', d => d.y)
+        .attr('r', 5)
+        .attr('class', 'node')
+        .style('fill', d => d.data.isSpouse ? '#ff6347' : '#999');
+
+      // Draw labels
+      svg.selectAll('text')
+        .data(allNodes)
+        .enter()
+        .append('text')
+        .attr('x', d => d.x)
+        .attr('y', d => d.y - 10)
+        .attr('text-anchor', 'middle')
+        .text(d => d.data.name);
+
+      // Create a link type property
+      const links = root.links().map(link => ({
+        source: link.source,
+        target: link.target,
+        type: 'parent'
+      }));
+
+      // Add spouse links
+      spouseHierarchy.descendants().filter(d => d.data.isSpouse).forEach(d => {
+        links.push({
+          source: d.parent,
+          target: d,
+          type: 'spouse'
+        });
+      });
+
+      // Additional Links for related spouses
+      const additionalLinks = [];
+      const processedAdditionalLinks = new Set(); // To track processed additional links
+
+      // Example: If a spouse is also a member of the family tree, connect them to their other relations
+      spouseNodes.forEach(spouse => {
+        // Check if the spouse exists elsewhere in the tree
+        if (nodesByName[spouse.name] && nodesByName[spouse.name] !== spouse.parent) {
+          // Create a sorted key to avoid duplicate additional links (A-B same as B-A)
+          const additionalLinkKey = [spouse.parent.data.name, spouse.name].sort().join('-');
+          if (!processedAdditionalLinks.has(additionalLinkKey)) {
+            additionalLinks.push({
+              source: spouse.parent,
+              target: nodesByName[spouse.name],
+              type: 'additional'
+            });
+            processedAdditionalLinks.add(additionalLinkKey);
+          }
+        }
+      });
+
+      // Combine all links
+      const allLinks = links.concat(additionalLinks);
+
+      // Define link generators for different types
+      const linkGenerators = {
+        parent: d3.linkVertical()
+          .x(d => d.x)
+          .y(d => d.y),
+        spouse: (d) => {
+          // Custom curved path for spouse links
+          const curvature = 0.5;
+          const x_diff = d.target.x - d.source.x;
+          return `M${d.source.x},${d.source.y} C${d.source.x + curvature * x_diff},${d.source.y + 100} ${d.target.x - curvature * x_diff},${d.target.y - 100} ${d.target.x},${d.target.y}`;
+        },
+        additional: (d) => {
+          // More pronounced curvature for additional links to avoid overlaps
+          const curvature = 0.7;
+          const x_diff = d.target.x - d.source.x;
+          return `M${d.source.x},${d.source.y} C${d.source.x + curvature * x_diff},${d.source.y + 150} ${d.target.x - curvature * x_diff},${d.target.y - 150} ${d.target.x},${d.target.y}`;
+        }
+      };
+
+      // Draw all links using appropriate link generators
+      svg.selectAll('path.link')
+        .data(allLinks)
+        .enter()
+        .append('path')
+        .attr('d', d => {
+          switch (d.type) {
+            case 'parent':
+              return linkGenerators.parent({
+                source: { x: d.source.x, y: d.source.y },
+                target: { x: d.target.x, y: d.target.y }
+              });
+            case 'spouse':
+              return linkGenerators.spouse(d);
+            case 'additional':
+              return linkGenerators.additional(d);
+            default:
+              return '';
+          }
+        })
+        .attr('class', d => {
+          switch (d.type) {
+            case 'parent':
+              return 'link parent-link';
+            case 'spouse':
+              return 'link spouse-link';
+            case 'additional':
+              return 'link additional-link';
+            default:
+              return 'link';
+          }
+        })
+        .attr('marker-end', d => d.type === 'parent' ? 'url(#arrow)' : null);
+
+    </script>
+  </body>
+</html>
