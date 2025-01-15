@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image to Base64 Converter</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+        }
+        .container {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            margin-top: 20px;
+        }
+        .section {
+            width: 45%;
+        }
+        .section h3 {
+            margin: 0 0 10px;
+        }
+        textarea {
+            width: 100%;
+            box-sizing: border-box;
+        }
+        button {
+            margin-top: 10px;
+        }
+        #imagePreview {
+            margin-top: 20px;
+            width : 30%;
+        }
+        img {
+            max-width: 100%;
+            height: auto;
+            border: 1px solid #ccc;
+            padding: 10px;
+        }
+    </style>
+</head>
+<body>
+    <h2>Image to Base64 Converter</h2>
+    <label>Choose your image</label><br>
+    <input type="file" id="imageInput" accept="image/*">
+    <br>
+    <label>You can use Ctrl+V to paste your image. Click outside the text area and press Ctrl+V.</label>
+    <br><br>
+
+    <!-- Preview Section -->
+    <div id="imagePreview"></div>
+
+    <div class="container">
+        <!-- HTML Code Section -->
+        <div class="section">
+            <h3>HTML Code</h3>
+            <textarea id="htmlOutput" rows="10" placeholder="Base64 output will appear here..."></textarea>
+            <br>
+            <button id="copyHtmlButton">Copy HTML Code</button>
+        </div>
+        <!-- Obsidian Code Section -->
+        <div class="section">
+            <h3>Obsidian Code</h3>
+            <textarea id="obsidianOutput" rows="10" placeholder="Obsidian Base64 output will appear here..."></textarea>
+            <br>
+            <button id="copyObsidianButton">Copy Obsidian Code</button>
+        </div>
+    </div>
+
+    <script>
+        const imageInput = document.getElementById('imageInput');
+        const htmlOutput = document.getElementById('htmlOutput');
+        const obsidianOutput = document.getElementById('obsidianOutput');
+        const copyHtmlButton = document.getElementById('copyHtmlButton');
+        const copyObsidianButton = document.getElementById('copyObsidianButton');
+        const imagePreview = document.getElementById('imagePreview');
+
+        // Handle file selection
+        imageInput.addEventListener('change', function(event) {
+            const file = event.target.files[0];
+            if (file) {
+                convertToBase64(file);
+            }
+        });
+
+        // Handle pasting an image
+        document.addEventListener('paste', function(event) {
+            const items = event.clipboardData?.items;
+            if (items) {
+                for (const item of items) {
+                    if (item.type.startsWith('image/')) {
+                        const file = item.getAsFile();
+                        if (file) {
+                            convertToBase64(file);
+                        }
+                    }
+                }
+            }
+        });
+
+        // Copy HTML Code
+        copyHtmlButton.addEventListener('click', function() {
+            htmlOutput.select();
+            document.execCommand('copy');
+            //alert('HTML Base64 code copied to clipboard!');
+        });
+
+        // Copy Obsidian Code
+        copyObsidianButton.addEventListener('click', function() {
+            obsidianOutput.select();
+            document.execCommand('copy');
+            //alert('Obsidian Base64 code copied to clipboard!');
+        });
+
+        // Convert file to Base64 and update both outputs
+        function convertToBase64(file) {
+            const reader = new FileReader();
+            reader.onload = function(e) {
+                const base64 = e.target.result;
+                htmlOutput.value = `<img width="600" src="${base64}" />`;
+                obsidianOutput.value = `![image](${base64})`;
+                updateImagePreview(base64);
+            };
+            reader.readAsDataURL(file);
+        }
+
+        // Update the preview with the selected or pasted image
+        function updateImagePreview(base64) {
+            imagePreview.innerHTML = `<h3>Image Preview</h3><img src="${base64}" alt="Selected Image" />`;
+        }
+    </script>
+</body>
+</html>
