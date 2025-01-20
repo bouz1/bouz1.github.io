@@ -1,0 +1,232 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Image Click Coordinates</title>
+    <style>
+      #image-container {
+        display: inline-block;
+        position: relative;
+        cursor: crosshair;
+        width: 300px; /* or any specific width */
+        height: 200px; /* or any specific height */
+      }
+
+      #image {
+        display: block;
+        object-position: left top;
+        /*border: 1px solid black;*/
+        object-fit: contain;
+        width: 100%;
+        height: 100%;
+        margin-left: 0px;
+      }
+
+      button {
+        background-color: #0d5869;
+        border: none;
+        color: white;
+        margin: 10px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        padding: 10px 20px;
+        border: none;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 180px;
+        height: 40px;
+      }
+
+      /* Canvas style to overlay on the image */
+      #canvas {
+        position: absolute;
+        top: 0;
+        left: 0;
+        pointer-events: none; /* To allow clicks through the canvas */
+        width: 100%;
+        height: 100%;
+      }
+      label{
+		  font-size: 25px;
+	  }
+	  input{
+		  font-size: 25px;
+		  width: 80px;
+	  }
+	  
+    </style>
+    <style>
+      /* Hide the default file input button */
+      #fileInputImg {
+        display: none;
+      }
+
+      /* Custom button style */
+      .custom-file-input {
+        background-color: #16a9c9; /* Corrected typo */
+        border: none;
+        color: white;
+        margin: 10px;
+        text-align: center;
+        text-decoration: none;
+        display: inline-block;
+        padding: 10px 20px;
+        border-radius: 5px;
+        cursor: pointer;
+        font-size: 16px;
+        width: 180px;
+        height: auto; /* Adjusted height for better styling */
+      }
+
+      .custom-file-input i {
+        margin-right: 8px; /* Adds space between icon and text */
+      }
+    </style>
+    <link
+      rel="stylesheet"
+      href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css"
+    />
+  </head>
+  <body onload="fitImg()">
+    <input type="file" id="fileInputImg" />
+    <label for="fileInputImg" class="custom-file-input">
+      <i class="fa fa-folder-open-o" aria-hidden="true"></i>
+      Open Image
+    </label>
+
+    <div id="image-container">
+      <img id="image" src="testMeter.jpg" alt="Click on the image" />
+      <!-- Canvas to draw the line -->
+      <canvas id="canvas"></canvas>
+    </div>
+
+    <br />
+    <label class="coordClass" id="coordinates"></label>
+    <br />
+
+    <div class="OrigineRefDiv">
+      <button id="PicOrigineID" onclick="pick_ref_dsit()">
+        <i class="fa fa-map-marker" aria-hidden="true"></i>
+        Pick the ref dist
+      </button>
+      <br>
+      <label> Reference distance</label>
+      <input type="number" id="ref_dist" value="10" />
+      <br />
+      <br>
+      <label> Result distance</label>
+      <label id="res_dist" value="0"></label>
+    </div>
+
+    <br />
+
+    <script>
+      const image = document.getElementById("image");
+      const canvas = document.getElementById("canvas");
+      const pickbutt = document.getElementById("PicOrigineID");
+      const ctx = canvas.getContext("2d");
+
+      var xold = NaN;
+      var yold = NaN;
+      var refdist = NaN;
+      var distpx;
+      var pickref = true;
+
+      function pick_ref_dsit() {
+        pickref = true;
+        pickbutt.style.backgroundColor = "#0d5869"; // Change to your desired color
+      }
+
+      image.addEventListener("click", (event) => {
+        //var x = event.clientX ;
+        //var y = event.clientY ;
+
+        const rect = image.getBoundingClientRect();
+
+        var x = event.clientX - rect.left; // X-coordinate relative to the image
+        var y = event.clientY - rect.top; // Y-coordinate relative to the image
+
+        if (Number.isNaN(xold)) {
+          xold = x;
+          yold = y;
+        } else {
+          distpx = Math.sqrt((x - xold) ** 2 + (y - yold) ** 2);
+
+          if (pickref) {
+            refdist = distpx;
+            pickbutt.style.backgroundColor = "#16a9c9";
+            pickref = false;
+            console.log(x, y, xold, yold);
+
+            drawLine(x, y, xold, yold, "green");
+          } else {
+            var ref_dist_u = parseFloat(
+              document.getElementById("ref_dist").value
+            );
+            console.log("dist", distpx, refdist, ref_dist_u);
+            console.log("real dist", (distpx / refdist) * ref_dist_u);
+            //document.getElementById("res_dist" ).value=(distpx/refdist)*ref_dist_u;
+            var val = (distpx / refdist) * ref_dist_u;
+            document.getElementById("res_dist").textContent = val.toFixed(3);
+
+            drawLine(x, y, xold, yold, "red");
+          }
+          xold = NaN;
+          yold = NaN;
+        }
+      });
+
+      function drawLine(x1, y1, x2, y2, c) {
+        // Ensure canvas has the same size as the image
+        canvas.width = image.width;
+        canvas.height = image.height;
+
+        // Clear the canvas before drawing
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        // Set the line style and color
+        ctx.strokeStyle = c;
+        ctx.lineWidth = 2;
+
+        // Draw the line
+        ctx.beginPath();
+        ctx.moveTo(x1, y1);
+        ctx.lineTo(x2, y2);
+        ctx.stroke();
+      }
+    </script>
+    <script>
+      document
+        .getElementById("fileInputImg")
+        .addEventListener("change", function (event) {
+          const file = event.target.files[0];
+
+          if (file) {
+            const reader = new FileReader();
+            reader.onload = function (e) {
+              srcHref = e.target.result;
+              image.src = srcHref;
+            };
+            reader.readAsDataURL(file);
+          }
+        });
+    </script>
+
+    <script>
+      function fitImg() {
+        const div = document.getElementById("image-container");
+        let viewportWidth = window.innerWidth;
+        let viewportHeight = window.innerHeight;
+        div.style.height = window.innerHeight * 0.8 + "px";
+        div.style.width = window.innerWidth + "px";
+
+        console.log("Viewport Width: " + viewportWidth);
+        console.log("Viewport Height: " + viewportHeight);
+        console.log("div.style.height: " + div.style.height);
+      }
+    </script>
+  </body>
+</html>
