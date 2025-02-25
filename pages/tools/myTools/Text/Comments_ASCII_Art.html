@@ -1,0 +1,435 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>Comments using ASCII Art</title>
+
+    <style>
+      /* Body Styling */
+      body {
+        font-family: "Courier New", monospace;
+        background-color: #f4f4f4;
+        color: #333;
+        margin: 0;
+        padding: 20px;
+        line-height: 1.6;
+      }
+
+      /* Header Styling */
+      h1 {
+        font-size: 28px;
+        color: #2c3e50;
+        text-align: center;
+        margin-bottom: 20px;
+        font-weight: bold;
+      }
+
+      /* Input Styling */
+      input[type="text"],
+      input[type="number"],
+      textarea {
+        font-family: "Courier New", monospace;
+        padding: 10px;
+        margin: 5px 0;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+
+      input[type="text"]:focus,
+      input[type="number"]:focus,
+      textarea:focus {
+        border-color: #3498db;
+        outline: none;
+      }
+
+      /* Label Styling */
+      label {
+        font-size: 16px;
+        color: #34495e;
+        margin-bottom: 5px;
+        display: inline-block;
+      }
+
+      /* Textarea Styling */
+      textarea {
+        resize: vertical;
+        min-height: 300px;
+        font-size: 14px;
+        line-height: 1.4;
+        background-color: #ffffff;
+        color: #2c3e50;
+        border: 1px solid #ccc;
+        border-radius: 5px;
+        padding: 10px;
+      }
+
+      /* Button Styling */
+      button {
+        background-color: #7f7f7f;
+        color: white;
+        border: none;
+        border-radius: 5px;
+        padding: 10px 20px;
+        cursor: pointer;
+        font-size: 16px;
+        transition: background-color 0.3s ease;
+      }
+
+      button:hover {
+        background-color: #2980b9;
+      }
+
+      button:focus {
+        outline: none;
+      }
+
+      /* Container for controls */
+      .controls-container {
+        margin-bottom: 20px;
+      }
+
+      /* Container for ASCII Art result */
+      .ascii-output {
+        margin-top: 20px;
+        padding: 20px;
+        background-color: #2c3e50;
+        color: white;
+        font-family: "Courier New", monospace;
+        white-space: pre-wrap;
+        word-wrap: break-word;
+        border-radius: 5px;
+        box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+      }
+
+      /* Space between inputs */
+      .spaced-inputs label,
+      .spaced-inputs input {
+        display: inline-block;
+        margin-right: 10px;
+      }
+
+      /* Custom Input Range Styling */
+      input[type="number"] {
+        width: 120px;
+      }
+
+      /* Checkbox Styling */
+      input[type="checkbox"] {
+        margin-right: 5px;
+      }
+
+      /* Form Grouping */
+      .form-group {
+        margin-bottom: 15px;
+      }
+
+      /* Additional Container for ASCII Art */
+      #textId,
+      #textId2 {
+        font-size: 16px;
+        line-height: 1.4;
+        background-color: #333;
+        color: #ecf0f1;
+        padding: 20px;
+        width: 100%;
+        margin-top: 10px;
+        border: none;
+        border-radius: 5px;
+        white-space: pre-wrap;
+        overflow-wrap: break-word;
+      }
+
+      input[type="text"],
+      input[type="number"] {
+        width: 50px;
+      }
+
+      .custom-separator {
+        border: none;
+        border-top: 2px solid #ccc; /* Light gray line */
+        margin: 20px 0;
+        width: 100%;
+      }
+    </style>
+
+    <style>
+      input[type="text"],
+      input[type="number"] {
+        width: 50px;
+        padding: 5px;
+        box-sizing: border-box; /* Ensures padding and borders are included in width */
+      }
+
+      /* Ensure number input doesn't show the spinner arrows */
+      input[type="number"] {
+        appearance: none;
+        -moz-appearance: textfield;
+        -webkit-appearance: none;
+      }
+    </style>
+  </head>
+  <body onload="runonload()">
+    <h1>Comments using ASCII Art</h1>
+
+    <label for="textInput">Input Text:</label>
+    <!-- <input type="text" id="textInput" placeholder="Enter text here" value="Test 123"> -->
+    <textarea id="textInput">Test 123</textarea>
+    <br /><br />
+
+    <label for="commentCharInput">Comment Character:</label>
+    <input type="text" id="commentCharInput" placeholder="#" value="#" />
+    <label>border width left/right</label>
+    <input
+      type="Number"
+      max="10"
+      min="0"
+      value="2"
+      id="m_id"
+      style="width: 50px"
+    />
+    <label>border width top/bottom</label>
+    <input
+      type="Number"
+      max="10"
+      min="0"
+      value="1"
+      id="m_idtop"
+      style="width: 50px"
+    />
+
+    <label>space</label>
+    <input
+      type="Number"
+      max="10"
+      min="0"
+      value="3"
+      id="space_id"
+      style="width: 50px"
+    />
+    <hr class="custom-separator" />
+    <button onclick="generateAsciiArt()">Generate ASCII Art</button>
+    <textarea id="textId"> </textarea>
+    <button onclick="copyToClipboard('textId')">copy</button>
+
+    <hr class="custom-separator" />
+    <label>Nb Chars by lines</label>
+    <input
+      type="Number"
+      min="0"
+      value="80"
+      id="nbcharsrow_id"
+      style="width: 50px"
+    />
+
+    <label>Upper case</label>
+    <input type="checkbox" checked id="chbxId" />
+    <br />
+    <button onclick="simple_comment_text()">Simple comment</button>
+
+    <textarea id="textId2"> </textarea>
+    <button onclick="copyToClipboard('textId2')">copy</button>
+
+    <script>
+      // Define a mapping of characters to their ASCII art representations.
+      const charToArt = {
+        A: [" ### ", "#   #", "#####", "#   #", "#   #"],
+        B: ["#### ", "#   #", "#### ", "#   #", "#### "],
+        C: [" ### ", "#   #", "#    ", "#   #", " ### "],
+        D: ["#### ", "#   #", "#   #", "#   #", "#### "],
+        E: ["#####", "#    ", "#####", "#    ", "#####"],
+        F: ["#####", "#    ", "#####", "#    ", "#    "],
+        G: [" ### ", "#    ", "#  ##", "#   #", " ### "],
+        H: ["#   #", "#   #", "#####", "#   #", "#   #"],
+        I: [" ### ", "  #  ", "  #  ", "  #  ", " ### "],
+        J: ["  ###", "   # ", "   # ", "#  # ", " ##  "],
+        K: ["#   #", "#  # ", "###  ", "#  # ", "#   #"],
+        L: ["#    ", "#    ", "#    ", "#    ", "#####"],
+        M: ["#   #", "## ##", "# # #", "#   #", "#   #"],
+        N: ["#   #", "##  #", "# # #", "#  ##", "#   #"],
+        O: [" ### ", "#   #", "#   #", "#   #", " ### "],
+        P: ["#### ", "#   #", "#### ", "#    ", "#    "],
+        Q: [" ### ", "#   #", "#   #", "#  ##", " ####"],
+        R: ["#### ", "#   #", "#### ", "#  # ", "#   #"],
+        S: [" ####", "#    ", " ### ", "    #", "#### "],
+        T: ["#####", "  #  ", "  #  ", "  #  ", "  #  "],
+        U: ["#   #", "#   #", "#   #", "#   #", " ### "],
+        V: ["#   #", "#   #", "#   #", " # # ", "  #  "],
+        W: ["#   #", "#   #", "# # #", "## ##", "#   #"],
+        X: ["#   #", " # # ", "  #  ", " # # ", "#   #"],
+        Y: ["#   #", " # # ", "  #  ", "  #  ", "  #  "],
+        Z: ["#####", "   # ", "  #  ", " #   ", "#####"],
+        " ": ["     ", "     ", "     ", "     ", "     "],
+        0: [" ### ", "#  ##", "# # #", "##  #", " ### "],
+        1: ["  #  ", " ##  ", "  #  ", "  #  ", " ### "],
+        2: [" ### ", "#   #", "   # ", "  #  ", "#####"],
+        3: [" ### ", "    #", "  ## ", "    #", " ### "],
+        4: ["   # ", "  ## ", " # # ", "#####", "   # "],
+        5: ["#####", "#    ", "#### ", "    #", "#### "],
+        6: [" ### ", "#    ", "#### ", "#   #", " ### "],
+        7: ["#####", "    #", "   # ", "  #  ", "  #  "],
+        8: [" ### ", "#   #", " ### ", "#   #", " ### "],
+        9: [" ### ", "#   #", " ####", "    #", " ### "],
+        " ": ["     ", "     ", "     ", "     ", "     "],
+      };
+
+      /**
+       * Converts text into ASCII art.
+       *
+       * @param {string} text - The input text to convert.
+       * @param {string} commentChar - The character to use as the comment character.
+       * @returns {string} - The ASCII art representation of the text.
+       */
+      function textToAsciiArt(text, commentChar) {
+        // Get the values of m and space from the input fields.
+        const space = document.getElementById("space_id").value;
+        const m = document.getElementById("m_id").value;
+
+        // Convert the text to uppercase for consistency.
+        text = text.toUpperCase();
+        // Initialize an array to hold the lines of ASCII art.
+        let lines = ["", "", "", "", ""];
+
+        // Iterate over each character in the text.
+        for (let char of text) {
+          // Check if the character exists in the charToArt map.
+          if (charToArt[char]) {
+            // If it exists, iterate over the lines of the character's ASCII art.
+            for (let i = 0; i < 5; i++) {
+              // Append the line to the corresponding line in the lines array, adding spaces after each character.
+              lines[i] += charToArt[char][i] + " ".repeat(space); // Add space after each char
+            }
+          } else {
+            // If the character is not found in the map, add six spaces to each line to represent an unknown character.
+            for (let i = 0; i < 5; i++) {
+              lines[i] += "      "; // 6 spaces for unknown chars
+            }
+          }
+        }
+
+        // Add comment characters to the beginning and end of each line
+        const paddedLines = lines.map(
+          (line) =>
+            commentChar.repeat(m) +
+            " ".repeat(space) +
+            line +
+            commentChar.repeat(m)
+        );
+
+        // Create the top and bottom borders
+        const bigLine = commentChar.repeat(paddedLines[0].length);
+        const row_empties =
+          commentChar.repeat(m) +
+          " ".repeat(paddedLines[0].length - 2 * m) +
+          commentChar.repeat(m);
+        const mtop = +document.getElementById("m_idtop").value;
+        const arrayOfBigLines = Array.from({ length: mtop }, () => bigLine);
+
+        const borderedArt = [
+          ...arrayOfBigLines,
+          row_empties,
+          ...paddedLines,
+          row_empties,
+          ...arrayOfBigLines,
+        ];
+
+        return borderedArt.join("\n");
+      }
+
+      /**
+       * Generates ASCII art based on user input.
+       */
+      function generateAsciiArt() {
+        // Get the text and comment character from the input fields.
+        const text = document.getElementById("textInput").value;
+        const commentChar = document.getElementById("commentCharInput").value;
+        // Generate the ASCII art using the textToAsciiArt function.
+        const asciiArt = textToAsciiArt(text, commentChar);
+        // Display the ASCII art in the output element.
+        //document.getElementById("output").textContent = asciiArt;
+        document.getElementById("textId").textContent = asciiArt;
+      }
+
+      function simple_comment_text() {
+        const space = +document.getElementById("space_id").value;
+        const m = +document.getElementById("m_id").value;
+        const mtop = +document.getElementById("m_idtop").value;
+        const NB = +document.getElementById("nbcharsrow_id").value;
+        const commentChar = document.getElementById("commentCharInput").value;
+        const L1 = commentChar.repeat(NB);
+        const L2 =
+          commentChar.repeat(m) +
+          " ".repeat(NB - 2 * m) +
+          commentChar.repeat(m);
+        var text = document.getElementById("textInput").value;
+        const NBtxt = NB - (space + m) * 2;
+        //console.log(NB, space, m, NB - (space+m)*2, NBtxt);
+        const chunks = [];
+
+        if (document.getElementById("chbxId").checked) {
+          text = text.toUpperCase();
+        }
+
+        // Split text by newlines
+        const lines = text.split("\n");
+        // Process each line
+        lines.forEach((line) => {
+          if (line.length <= NBtxt) {
+            chunks.push(line);
+          } else {
+            // Split long lines into chunks of NBtxt
+            for (let i = 0; i < line.length; i += NBtxt) {
+              chunks.push(line.slice(i, i + NBtxt));
+            }
+          }
+        });
+
+        /*
+	const chunks = [];
+	const NBtxt=  NB - (space*m)*2
+	for (let i = 0; i < text.length; i += NBtxt) {
+	  chunks.push(text.slice(i, i + NBtxt));
+	}
+	*/
+        var result = "";
+        for (const line of chunks) {
+          result =
+            result +
+            commentChar.repeat(m) +
+            " ".repeat(space) +
+            line +
+            " ".repeat(NBtxt - line.length) +
+            " ".repeat(space) +
+            commentChar.repeat(m) +
+            "\n";
+        }
+
+        //const mtop = +document.getElementById("m_idtop").value;
+        const L1arr = Array.from({ length: mtop }, () => L1);
+        const L1str = L1arr.join("\n");
+
+        document.getElementById("textId2").textContent =
+          L1str + "\n" + L2 + "\n" + result + L2 + "\n" + L1str;
+      }
+
+      //commentChar.repeat(m)
+
+      function runonload() {
+        simple_comment_text();
+        generateAsciiArt();
+      }
+
+      function copyToClipboard(idTextArea) {
+        // Get the textbox element by its ID
+        const textBox = document.getElementById(idTextArea);
+
+        // Select the text inside the textbox
+        textBox.select();
+        textBox.setSelectionRange(0, 99999); // For mobile devices
+
+        // Copy the selected text to the clipboard
+        document.execCommand("copy");
+      }
+    </script>
+  </body>
+</html>
