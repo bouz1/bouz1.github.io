@@ -156,13 +156,13 @@
         async function initCamera() {
             try {
                 mediaStream = await navigator.mediaDevices.getUserMedia({ 
-                   // video: true, 
+                  video: true, 
                     
-                 video: {
+                 /*video: {
                     facingMode: { ideal: 'environment' }, // Prefer back camera
                     width: { ideal: 1280 },
                     height: { ideal: 720 }
-                },
+                },*/
                     audio: true 
                 });
                 videoPreview.srcObject = mediaStream;
