@@ -1,0 +1,644 @@
+<!DOCTYPE html> 
+<!--==================V20.2=========================-->
+<html>
+  <head>
+    <title>BOUZINAI Portfolio</title>
+    <link rel = "icon" href = "https://bouz1.github.io/images/logo_4.png" type = "image/x-icon">
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, minimum-scale=1.0">
+    <!--link rel="stylesheet" href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/3.1.0/css/font-awesome.min.css" /-->
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/font-awesome/4.6.3/css/font-awesome.min.css" />
+    <link rel="stylesheet" href="CSS_21.css">
+    <link rel="shortcut icon" href="favicon.ico" type="image/x-icon" />
+    <script type="text/javascript" src="https://rawcdn.githack.com/chrisveness/crypto/7067ee62f18c76dd4a9d372a00e647205460b62b/sha1.js"></script>
+    <!--script type="text/javascript" src="scriptv1.js"></script-->
+
+  </head>
+  <body>
+
+    <div class="page">
+
+
+
+      <!--===========================================-->
+      <!--===========================================-->
+      <!--==================HEAD ====================-->
+      <!--===========================================-->
+      <div class='div_head'>
+        <div class='head_left'>
+          <img class='mean_img' id='id_photo' src="https://bouz1.github.io/images/Photo1_2.png?raw=true" alt='picture'  >
+
+          <p  class='body_head_info_p'>
+            <a class='link_head' href='https://www.linkedin.com/in/abdelaziz-bouziani/' > <i style="font-size:20px"   class="fa fa-linkedin-square"></i> Linkedin </a>
+          </p>
+
+          <p  class='body_head_info_p'>
+            <a class='link_head' href='https://github.com/bouz1' >
+
+
+              <i style="font-size:20px"  class="fa fa-github" ></i>
+
+              GitHub</a>
+          </p>
+
+          <p  class='body_head_info_p'>
+            <a class='link_head' href='https://bouz1.github.io/pages/conctactme.html' >
+              <!--i style="font-size:24px" class="fa">&#xf09b;</i-->
+              <i style="font-size:20px"  class="fa fa-envelope" ></i>
+
+              My Email</a>
+          </p>
+
+          <p  class='body_head_info_p'>
+            <a class='link_head' href='https://bouz1.github.io/pages/cv/Cv_Bouziani_Abdelaziz_FR.html'>
+              <!--i style="font-size:24px" class="fa">&#xf09b;</i-->
+              <i style="font-size:20px"  class="fa fa-file-o" ></i>
+
+              My Resume(CV) </a>
+          </p>
+
+          <p  class='body_head_info_p'>
+            <a class='link_head' 
+               href='https://bouz1.github.io/pages/other_accounts.html' >
+              <i style="font-size:20px"  class="fa fa-user" ></i>
+              Other accounts</a>
+          </p>
+
+        </div>
+        <div class='head_right'>
+          <h1 class='mean_h1'>
+            Data science portfolio
+          </h1>
+          <h1 class='mean_h2'>
+            Abdelaziz BOUZIANI
+          </h1>
+          <div class="Profil_parag">
+          <p>
+            I'm a data scientist at Renault group, My job is around the vehicle data starting by data mining, data analysis and elaboration of ML model, and delivering results such dashboards to help the others teams to take the right decisions
+          </p>
+        </div>
+        </div>
+      </div>
+
+
+
+
+
+      <div class="pcss3t pcss3t-effect-scale pcss3t-theme-1">
+
+
+
+        <!--===========================================-->
+        <!--===========================================-->
+        <!--==================TABS LABELS==============-->
+        <!--===========================================-->
+
+
+
+        <input type="radio" name="pcss3t" checked  id="tab1" class="tab-content-first input_rad">
+        <label for="tab1" class='tabs_ul_li_label'><i class="fa tabs_ul_li_label_i fa-dashboard" > </i>Projects</label>
+        <input type="radio" name="pcss3t" id="tab2" class="tab-content-2 input_rad">  
+        <label for="tab2" class='tabs_ul_li_label'><i class="fa tabs_ul_li_label_i fa-wpforms" > </i>Certificates</label>
+
+        <input type="radio" name="pcss3t" id="tab3" class="tab-content-3 input_rad">
+        <label for="tab3" class='tabs_ul_li_label'><i class="fa tabs_ul_li_label_i fa-calculator" > </i>Math</label>
+
+        <input type="radio" name="pcss3t" id="tab5" class="tab-content-last input_rad">
+        <label for="tab5" class='tabs_ul_li_label'><i class="fa tabs_ul_li_label_i fa-search" > </i>In Dev</label>
+
+
+
+        <!--===========================================-->
+        <!--===========================================-->
+        <!--==================TAB CONTENT =============-->
+        <!--===========================================-->
+        <ul class='mean_ul'>
+
+
+
+          <!--===========================================-->
+          <!--===========================================-->
+          <li class="tab-content tab-content-2 typography">
+            <h1 class='ul_li_mean_h1' >Certificates</h1>
+
+            <h1 class='li_ul_li_h1_chapter' >
+              <a class='li_ul_h1_link' href="https://www.coursera.org/professional-certificates/ibm-data-science?">Coursera: IBM Data Science Professional</a>
+            </h1>
+
+            <h1 class='li_ul_li_h1' >
+              <a class='li_ul_h1_link'  href="https://www.coursera.org/learn/what-is-datascience?specialization=ibm-data-science">
+                Course 1: What is Data Science?</a>
+
+              <h2 class='li_ul_li_h2' >
+                <a class='li_ul_h2_link' href="https://bouz1.github.io/certificates/IBM_DataScienceProfessional/Coursera_2ZH34DYCYWGN.pdf">Certificate as PDF <i class="fa icone_link_cert fa-file-pdf-o" > </i></a>,<a class='li_ul_h2_link' href="https://www.coursera.org/verify/2ZH34DYCYWGN"> Verification link <i class="fa icone_link_cert fa-link" > </i></a></h2>
+
+            </h1>
+            <h1 class='li_ul_li_h1' >
+              <a class='li_ul_h1_link'  href="https://www.coursera.org/learn/python-for-applied-data-science-ai?specialization=ibm-data-science">
+                Course 4: Python for Data Science, AI &amp; Development</a>
+
+              <h2 class='li_ul_li_h2' >
+                <a class='li_ul_h2_link' href="https://bouz1.github.io/certificates/IBM_DataScienceProfessional/Coursera_PFVHZ36PBVEU.pdf">Certificate as PDF <i class="fa icone_link_cert fa-file-pdf-o" > </i></a>,<a class='li_ul_h2_link' href="https://www.coursera.org/verify/PFVHZ36PBVEU"> Verification link <i class="fa icone_link_cert fa-link" > </i></a></h2></h1>
+            <h1 class='li_ul_li_h1' >
+              <a class='li_ul_h1_link'  href="https://www.coursera.org/learn/sql-data-science?specialization=ibm-data-science">
+                Course 5: Databases and SQL for Data Science with Python</a>
+
+              <h2 class='li_ul_li_h2' >
+                <a class='li_ul_h2_link' href="https://bouz1.github.io/certificates/IBM_DataScienceProfessional/Coursera_9SG9UB7MTEKX.pdf">Certificate as PDF <i class="fa icone_link_cert fa-file-pdf-o" > </i></a>,<a class='li_ul_h2_link' href="https://www.coursera.org/verify/9SG9UB7MTEKX"> Verification link <i class="fa icone_link_cert fa-link" > </i></a></h2></h1>
+            <h1 class='li_ul_li_h1' ><a class='li_ul_h1_link'  href="https://www.coursera.org/learn/python-for-data-visualization?specialization=ibm-data-science">Course 8: Data Visualization with Python</a>
+
+              <h2 class='li_ul_li_h2' ><a class='li_ul_h2_link' href="https://bouz1.github.io/certificates/IBM_DataScienceProfessional/Coursera_56JGGC5RNG4V.pdf">Certificate as PDF <i class="fa icone_link_cert fa-file-pdf-o" > </i></a>,<a class='li_ul_h2_link' href="https://www.coursera.org/verify/56JGGC5RNG4V"> Verification link <i class="fa icone_link_cert fa-link" > </i></a></h2></h1>
+            <h1 class='li_ul_li_h1' ><a class='li_ul_h1_link'  href="https://www.coursera.org/learn/machine-learning-with-python?specialization=ibm-data-science">Course 9: Machine Learning with Python</a>
+
+              <h2 class='li_ul_li_h2' ><a class='li_ul_h2_link' href="https://bouz1.github.io/certificates/IBM_DataScienceProfessional/Coursera_RT5DRFX5QVQC.pdf">Certificate as PDF <i class="fa icone_link_cert fa-file-pdf-o" > </i></a>,<a class='li_ul_h2_link' href="https://www.coursera.org/verify/RT5DRFX5QVQC"> Verification link <i class="fa icone_link_cert fa-link" > </i></a></h2></h1>
+
+
+
+
+
+
+
+            <h1 class='li_ul_li_h1_chapter' >
+              <a class='li_ul_h1_link' href="https://www.coursera.org/specializations/deep-learning?">Coursera: Deep Learning Specialization</a>
+            </h1>
+
+            <h2 class='li_ul_li_h2' ><a class='li_ul_h2_link'  href="https://bouz1.github.io/certificates/IBM_DataScienceProfessional/Coursera_2ZH34DYCYWGN.pdf">Certificate as PDF <i class="fa icone_link_cert fa-file-pdf-o" > </i></a>,
+              <a class='li_ul_h2_link'  href="https://www.coursera.org/verify/2ZH34DYCYWGN"> Verification link <i class="fa icone_link_cert fa-link" > </i></a>
+            </h2>
+
+
+
+            <h1 class='li_ul_li_h1' ><a class='li_ul_h1_link'  href="https://www.coursera.org/learn/neural-networks-deep-learning?specialization=deep-learning">Course 1: Neural Networks and Deep Learning</a>
+
+              <h2 class='li_ul_li_h2' ><a class='li_ul_h2_link' href="/certificates/DeepLearning_AI/Coursera_2885FW8HSZYA.pdf">Certificate as PDF <i class="fa icone_link_cert fa-file-pdf-o" > </i></a>,<a class='li_ul_h2_link' href="https://www.coursera.org/verify/2885FW8HSZYA"> Verification link <i class="fa icone_link_cert fa-link" > </i></a></h2>
+
+            </h1>
+            <h1 class='li_ul_li_h1' ><a class='li_ul_h1_link'  href="https://www.coursera.org/learn/deep-neural-network?specialization=deep-learning">Course 2: Improving Deep Neural Networks: Hyperparameter Tuning, Regularization and Optimization</a>
+
+              <h2 class='li_ul_li_h2' ><a class='li_ul_h2_link' href="/certificates/DeepLearning_AI/Coursera_X72CB3L6VBYZ.pdf">Certificate as PDF <i class="fa icone_link_cert fa-file-pdf-o" > </i></a>,<a class='li_ul_h2_link' href="https://www.coursera.org/verify/X72CB3L6VBYZ"> Verification link <i class="fa icone_link_cert fa-link" > </i></a></h2>
+
+            </h1>
+            <h1 class='li_ul_li_h1' ><a class='li_ul_h1_link'  href="https://www.coursera.org/learn/machine-learning-projects">Course 3: Structuring Machine Learning Projects</a>
+
+              <h2 class='li_ul_li_h2' ><a class='li_ul_h2_link' href="/certificates/DeepLearning_AI/Coursera_BTTCD3QQY7MN.pdf">Certificate as PDF <i class="fa icone_link_cert fa-file-pdf-o" > </i></a>,<a class='li_ul_h2_link' href="https://www.coursera.org/verify/BTTCD3QQY7MN"> Verification link <i class="fa icone_link_cert fa-link" > </i></a></h2>
+
+            </h1>
+            <h1 class='li_ul_li_h1' ><a class='li_ul_h1_link'  href="https://www.coursera.org/learn/convolutional-neural-networks?specialization=deep-learning">Course 4: Convolutional Neural Networks</a>
+
+              <h2 class='li_ul_li_h2' ><a class='li_ul_h2_link' href="/certificates/DeepLearning_AI/Coursera_Y24AKUPY9QY3.pdf">Certificate as PDF <i class="fa icone_link_cert fa-file-pdf-o" > </i></a>,<a class='li_ul_h2_link' href="https://www.coursera.org/verify/Y24AKUPY9QY3"> Verification link <i class="fa icone_link_cert fa-link" > </i></a></h2>
+
+            </h1>
+            <h1 class='li_ul_li_h1' ><a class='li_ul_h1_link'  href="https://www.coursera.org/learn/nlp-sequence-models">Course 5: Sequence Models</a>
+
+              <h2 class='li_ul_li_h2' ><a class='li_ul_h2_link' href="/certificates/DeepLearning_AI/Coursera_Y4QQT29YGKE3.pdf">Certificate as PDF <i class="fa icone_link_cert fa-file-pdf-o" > </i></a>,<a class='li_ul_h2_link' href="https://www.coursera.org/verify/Y4QQT29YGKE3"> Verification link <i class="fa icone_link_cert fa-link" > </i></a></h2></h1>
+
+
+
+
+
+            <h1 class='li_ul_li_h1_chapter' >
+              <a class='li_ul_h1_link' href="https://www.coursera.org/specializations/natural-language-processing">Coursera: Natural Language Processing Specialization (NLP)</a>
+            </h1>
+            <h1 class='li_ul_li_h1' >
+              <a class='li_ul_h1_link'  href="https://www.coursera.org/learn/classification-vector-spaces-in-nlp?specialization=natural-language-processing">
+                Course 1: NLP with Classification and Vector Spaces</a>
+
+              <h2 class='li_ul_li_h2' >
+                <a class='li_ul_h2_link' href="https://bouz1.github.io/certificates/IBM_DataScienceProfessional/Coursera_RTL4Q78VV3N7.pdf">Certificate as PDF <i class="fa icone_link_cert fa-file-pdf-o" > </i></a>,<a class='li_ul_h2_link' href="https://www.coursera.org/verify/RTL4Q78VV3N7"> Verification link <i class="fa icone_link_cert fa-link" > </i></a></h2>
+            </h1>
+
+
+            <h1 class='li_ul_li_h1_chapter' >
+              <a class='li_ul_h1_link' href="https://aste.asso.fr/formations-safi-statistical-analysis-for-industry/">Statistiques Appliquées Formation Industrielle (University of Bradford)</a>
+            </h1>
+            <h1 class='li_ul_li_h1' >
+              <a class='li_ul_h1_link'  href="https://aste.asso.fr/formations-safi/industrial-big-data-analysis-and-mining-safi-m8/">
+                SAFI 08</a>
+              <h2 class='li_ul_li_h2' >
+                <a class='li_ul_h2_link' href="https://bouz1.github.io/certificates/SAFI/SAFI_08_Bouziani_Abdelaziz.pdf">Certificate as PDF <i class="fa icone_link_cert fa-file-pdf-o" > </i></a></h2>
+            </h1>
+
+          </li>
+
+
+
+
+
+
+
+
+          <!--===========================================-->
+          <!--===========================================-->
+          <li class="tab-content tab-content-first typography">
+
+
+            <h1 class='ul_li_mean_h1' >Projects</h1>
+
+            <div id='projet_principal_div_id'>
+              <!--h1 class='li_ul_li_h1_chapter' >
+              Web Sracping Projects
+            </h1--->
+              <div class="prject_date_div" date='2022/07/01'>
+
+                <h1 class='li_ul_li_h1' >
+                  <a class='li_ul_h1_link'  href="https://github.com/bouz1/web_scraping/blob/main/Web_scaping_V3.ipynb">
+                    July 2022 : Web scraping</a>
+
+                </h1>
+                <p>In this project, a sample way to gather the data from the web. As the gathering vehicle data such price, power … from a France web site of second hand vehicles
+                  <a href="https://www.lacentrale.fr">La Central</a>
+                  <br>
+                  <a href="https://github.com/bouz1/web_scraping/blob/main/Web_scaping_V3.ipynb">Open the project</a>
+                  <br></p>
+                <img class='img_projects_class' src="https://bouz1.github.io/images/img1.png" alt="drawing" >    
+              </div>
+              <div class="prject_date_div" date='2022/10/02'>
+
+                <h1 class='li_ul_li_h1' >
+                  <a class='li_ul_h1_link'  href="https://github.com/bouz1/Manipulation_of_second_hand_vehicles_data/blob/main/Data_Manipulation_Lacentral_V1.ipynb">October 2022 : Manipulation of second hand vehicles data</a>
+
+                </h1>
+                <p>In this project we will manipulate data that we gathered by the web scraping:
+                  <br>
+                  •  In the first part, we will clearing data and convert it to numerical form
+                  <br>
+                  •  In the second part, we will check the price correlation with other features
+                  <br>
+                  •  In the third part, we will analyze the data and plotting some features and distribution
+                  <br>
+                  • In the last part, we will try to build a model to predict the price by linear regression and deep learning algorithm</p>
+
+                <p>
+                  <a href="https://github.com/bouz1/Manipulation_of_second_hand_vehicles_data/blob/main/Data_Manipulation_Lacentral_V1.ipynb">Open the project</a>
+                  <br></p>
+
+                <img class='img_projects_class' src="https://bouz1.github.io/images/data_manipulation.png" alt="drawing" >  
+              </div>
+
+
+              <div class="prject_date_div" date="2023/12/10">
+                <h1 class='li_ul_li_h1' >
+                  <a class='li_ul_h1_link'  href="https://bouz1.github.io/fils/selenium/webSrap_indeed_V2.html">December 2023 : Web scraping using Selenium</a>
+                </h1>
+                <p>
+                  This Python project is a web scraping script that extracts job offers from the Indeed website. It uses the **Selenium** and BeautifulSoup libraries to automate the process of entering search queries and extracting data from the website. The script is designed to search for job offers related to a topic and a location.       
+                </p>
+                <p>
+                  <a href="https://github.com/bouz1/Web-scraping-using-Selenium/blob/main/webSrap_indeed_V2.ipynb" >Open the project</a>
+                  <br></p>
+                <img class='img_projects_class' src="https://bouz1.github.io/fils/selenium/images/img1.PNG" alt="drawing"  > 
+              </div>
+
+
+
+              <div class="prject_date_div" date='2024/01/26'>
+                <h1 class='li_ul_li_h1' >
+                  <a class='li_ul_h1_link'  href="https://bouz1.github.io/fils/PMSM_temp_LSTM/Electrical_motor_temperature_LSTM_DNN_RandForest_LinRegr_V2.html">
+                    January 2024 : Electrical motor temperature prediction with LSTM, DNN, Random Forest, LinRegression</a>
+
+                </h1>
+                <p>
+                  The Permanent Magnet Synchronous Motor (PMSM) is used in many application: electric vehicle, wind turbines, motorcycles.
+                  <br>
+                  For the best functionality of the PMSM, the temperature of the rotor/magnetic must be monitored by the control unite to avoid the overheating of the permanent magnetic.
+                  <br>
+                  In the below project, we will compare some of regression ML to predict the rotor temperature of the PMSM
+                  <br>
+                  <a href="https://bouz1.github.io/fils/PMSM_temp_LSTM/Electrical_motor_temperature_LSTM_DNN_RandForest_LinRegr_V2.html">Open the project as HTML file</a> 
+                  <br>
+                  <a href="https://github.com/bouz1/Electrical_motor_temperature_LSTM_DNN_RandForest_LinRegr">
+                    Open the github repository (ipynb file...)</a>
+                  <br></p>
+                <img class='img_projects_class' src="https://bouz1.github.io/fils/PMSM_temp_LSTM/img_bar.PNG" alt="drawing" >    
+              </div>
+
+
+
+
+
+              <div class="prject_date_div" date='2024/02/10'>
+                <h1 class='li_ul_li_h1' >
+                  <a class='li_ul_h1_link'  href="https://bouz1.github.io/fils/MEGAN_ETECH_220/EV_Megan_E_TECH_Simulation_V0.html">
+                    February 2024 : RENAULT Megane E-TECH (EV):Time Series Dataset with simulation model</a>
+
+                </h1>
+                <p>
+       The idea of this project is to generate a dataset of electric vehicle driving using a Matlab/simulink simulation model. The dataset will be published in many plateformes as kaggle and github to be accessible by others sudents / data scientist / analyst. 
+                  <br>
+                  <a href="https://bouz1.github.io/fils/MEGAN_ETECH_220/EV_Megan_E_TECH_Simulation_V0.html">Open the project as HTML file</a> 
+                  <br>
+                  <a href="https://github.com/bouz1/EV_Matlab_Simulink_Megane_E_TECH_to_generate_data">
+                    Open the github repository (ipynb file...)</a>
+                  <br></p>
+                <img class='img_projects_class' src="https://bouz1.github.io/fils/MEGAN_ETECH_220/projectCoverPicture.png" alt="drawing" >    
+              </div>
+			  
+			  
+			  
+			  
+			  
+			  
+              <div class="prject_date_div" date='2024/12/30'>
+                <h1 class='li_ul_li_h1' >
+                  <a class='li_ul_h1_link'  href="https://bouz1.github.io/fils/MLModelToArduinoCpp/MLModelToArduinoCpp.html">
+                    December 2024 : Convert a Python Machine Learning Model to Arduino Code (C++)</a>
+
+                </h1>
+                <p>
+				This project demonstrates the conversion of Python machine learning (ML) models to Arduino C++ code. 
+				<br>
+				In certain applications, such as embedded systems, small microcontrollers with limited memory and computing resources are used. The idea is to train a machine learning model in a Python environment and then convert the trained model to C++ for deployment on a microcontroller.
+				
+                  <br>
+                  <a href="https://bouz1.github.io/fils/MLModelToArduinoCpp/MLModelToArduinoCpp.html">Open the project as HTML file</a> 
+                  <br>
+                  <a href="https://github.com/bouz1/ML-Model-To-Arduino-Cpp">
+                    Open the github repository (ipynb file...)</a>
+                  <br>
+                  <a href="https://pypi.org/project/mltoarduino/">
+                    Open PyPi Package (to install the package)</a>
+                  <br>
+				  
+				  </p>
+                <img class='img_projects_class' src="https://bouz1.github.io/fils/MLModelToArduinoCpp/illustration2.png" alt="drawing" >    
+              </div>
+              
+              
+
+
+              <!--h1 class='li_ul_li_h1_chapter' >
+                Natural Language Processing Projects (NLP)
+
+              </h1-->
+              <div class="prject_date_div" date='2023/05/01'>
+
+                <h1 class='li_ul_li_h1' >
+                  <a class='li_ul_h1_link'  href="https://bouz1.github.io/fils/Naive_bayes_vs_LSTM_v7_3.html">May 2023 : Sentiment analysis, Naive Bayes vs LSTM</a>
+
+                </h1>
+                <p>In this project we will compare two methods of sentiment analysis: 
+
+                  <br><br>
+                  &#x2022; The prediction of Negative/Positive sentiment using a simple Naïve Bayes model
+                  <br>
+                  &#x2022; The prediction of Negative/Positive sentiment using a LSTM kera model
+                  <br><br>
+                  The dataset is twitter post with label : 'neutral', 'negative', 'positive'
+                  <br> in this project, we will do many functions handy to understand how they work
+                  <br>
+                  <a href="https://bouz1.github.io/fils/Naive_bayes_vs_LSTM_v7_3.html">Open the project as HTML file</a> 
+                  <br>
+                  <a href="https://github.com/bouz1/Sentiment-Analysis-LSTM-vs-Naive-Bayes/blob/main/Naive_bayes_vs_LSTM_v7_3.ipynb">Open the github repository (ipynb file...)</a>
+                  <br></p>
+                <img class='img_projects_class' src="https://bouz1.github.io/images/negative_Positif_inp.png" alt="drawing" >  
+              </div>
+            </div>
+          </li>
+
+          <!--===========================================-->
+          <!--===========================================-->
+          <li class="tab-content tab-content-3 typography">
+
+
+            <h1 class='ul_li_mean_h1' >Math Projects</h1>
+            <div id='projet_principal_div_id2'>
+              <!--h1 class='li_ul_li_h1_chapter' >
+              Linear Algebra Projects
+            </h1-->
+              <!--===========================================-->
+              <div class="prject_date_div" date='2023/05/01'>
+                <h1 class='li_ul_li_h1' >
+                  <a class='li_ul_h1_link'  href="https://bouz1.github.io/fils/NumpyLR.html">May 2023 : Linear Logistic Regression with NumPy pure code and a comparison wit Sklearn model</a>
+
+                </h1>
+                <p>A local linear regression (LR) object was generated only by pure numpy code, and this object has the same behaviours of Sklearn LR.
+                  This exercise helps understanding the linear logistic regression algorithm
+
+                  <br>
+                  <a href="https://bouz1.github.io/fils/NumpyLR.html">Open the project</a>
+                  <br></p>
+                <br>
+                <img class='img_projects_class' src="https://bouz1.github.io/images/LR_project_img.png" alt="drawing">  
+              </div>
+              <!--===========================================-->
+
+              <div class="prject_date_div" date='2023/06/03'> 
+                <h1 class='li_ul_li_h1' >
+                  <a class='li_ul_h1_link'  href="https://bouz1.github.io/fils/EigenValue_Correlation_Covariance.html">Jun 2023: Eigenvalues / EigenVectors, Covariance, Correlation</a>
+
+                </h1>
+                <p>The goal of this netbook is to understand the definition of eigenvalue/vector, variance/covariance, the correlation.
+                  <br>We will make some functions to calculate this parameters and compare them with numpy/pandas functions
+                  <br>
+                  <a href="https://bouz1.github.io/fils/EigenValue_Correlation_Covariance.html">Open the project as HTML file</a>
+                  <br>
+                  <a href="https://github.com/bouz1/EigenValue_Correlation_Covariance/blob/main/EigenValue_Correlation_Covariance.ipynb">Open the github repository (ipynb file...)</a>
+                  <br>
+
+                </p>
+                <br>
+                <img class='img_projects_class' src="https://bouz1.github.io/images/Cov_Corr_Eigen.png" alt="drawing">  
+
+
+              </div>
+              <!--===========================================-->
+
+              <div class="prject_date_div" date='2023/06/04'> 
+                <h1 class='li_ul_li_h1' >
+                  <a class='li_ul_h1_link'  href="https://bouz1.github.io/fils/PCA_SVM_dimension_reduction.html">Jun 2023: PCA algorithm for dimensionality reduction</a>
+
+                </h1>
+                <p>
+
+                  Visualization is a powerful tool for data exploration. But in the general case input dimension is high, so the visualisation is a hard task. The dimension reduction is a method that allows the reduction of data dimension for visualisation and for other purposes.
+                  <br> 
+                  The goal of this netbook is to understand the PCA algorithm for dimensionality reduction. 
+
+                  <br>
+                  <a href="https://bouz1.github.io/fils/PCA_SVM_dimension_reduction.html">Open the project as HTML file</a>
+                  <br>
+                  <a href="https://github.com/bouz1/PCA-algorithm-for-dimensionality-reduction/blob/main/PCA_SVM_dimension_reduction.ipynb">Open the github repository (ipynb file...)</a>
+                  <br>
+
+
+
+
+                </p>
+                <br>
+                <img class='img_projects_class' src="https://bouz1.github.io/images/PCA_reduction.png" alt="drawing">  
+
+                <!--===========================================-->
+                <!--===========================================-->
+
+                <!--h1 class='li_ul_li_h1_chapter' >
+              Machine Learning
+            </h1-->
+
+              </div>
+
+              <!--===========================================-->
+              <div class="prject_date_div" date='2023/07/04'>  
+
+
+                <h1 class='li_ul_li_h1' >
+                  <a class='li_ul_h1_link'  href="https://bouz1.github.io/fils/KNN_and_K-means_V2.html">Jully 2023: K-NN and K-Means</a>
+
+                </h1>
+                <p>
+                  In this notebook, we propose to compare a K-Nearest Neighbors (KNN) of SKLEARN library and a local realization of this algorithm, the same for K-means
+                  <br>
+                  As reminder: 
+                  <br>
+                  * The KNN is included in the supervised learning 
+                  <br>
+                  * K-means in the other hand is a part of unsupervised learning (clusterization algorithm)
+
+                  <br>
+                  <a href="https://bouz1.github.io/fils/KNN_and_K-means_V2.html">Open the project as HTML file</a>
+                  <br>
+                  <a href="https://github.com/bouz1/KNN_and_K-means/blob/main/KNN_and_K-means_V2.ipynb">Open the github repository (ipynb file...)</a>
+                  <br>
+
+
+                </p>
+                <br>
+                <img class='img_projects_class' src="https://bouz1.github.io/images/knn_Kmeans.png" alt="drawing">  
+                <!--===========================================-->
+              </div>
+            </div>
+
+          </li>
+          <!--===========================================-->
+          <!--===========================================-->
+          <li class="tab-content tab-content-last typography">
+
+
+            <h1 class='ul_li_mean_h1' >/!\ In Developpement</h1>
+            <P>
+              In this section, I have present titles of the programming assignments that I passed in the exams of the online course. Unfortunately, I cannot share the notebook due to Coursera’s Terms of Use (see below).
+            </P>
+            <p>
+              <a href="https://www.coursera.support/s/article/209818863-Coursera-Honor-Code?language=en_US">&#x2022;Rule 6 of Coursera Honor Code</a>
+            </p>
+            <p class='sub_parag'>
+              Unauthorized sharing of resources: making any information about or solutions to homework, quizzes, exams, projects, and other assessments available to anyone else (except to the extent an assessment explicitly permits sharing solutions). This includes both solutions written by you, other learners, outside resources, or any solutions provided by the course staff or others.
+            </p>
+
+            <h1 class='li_ul_li_h1_chapter' >
+              Coursera: IBM Data Science Professional
+            </h1>
+
+
+            <input type="checkbox" id="title1" class='ch_bx' />
+            <label for="title1" class='lab_ch_bx'>
+              <h1 class='li_ul_li_h1' >
+
+                <i for="title1"  class="fa fa-angle-right fa-flipp_bx" aria-hidden="true"> </i>
+                Course 9: Machine Learning with Python</h1></label>
+            <div class="content_ch_bx">
+              <h2 class='li_ul_li_h2' ><a class='li_ul_h2_link'  href="javascript:Open_File('https://github.com/','/Machine-Learning-with-Python/tree/main/01-Regression')">01-Regression</a> </h2>
+              <h2 class='li_ul_li_h2' ><a class='li_ul_h2_link'  href="javascript:Open_File('https://github.com/','/Machine-Learning-with-Python/tree/main/02-Classification')">02-Classification</a> </h2>
+              <h2 class='li_ul_li_h2' ><a class='li_ul_h2_link'  href="javascript:Open_File('https://github.com/','/Machine-Learning-with-Python/tree/main/03-Clustering')">03-Clustering</a> </h2>
+              <h2 class='li_ul_li_h2' ><a class='li_ul_h2_link'  href="javascript:Open_File('https://github.com/','/Machine-Learning-with-Python/tree/main/04-Recommender Systems')">04-Recommender Systems</a> </h2>
+              <h2 class='li_ul_li_h2' ><a class='li_ul_h2_link'  href="javascript:Open_File('https://github.com/','/Machine-Learning-with-Python/tree/main/05-final exam')">05-final exam</a> </h2>
+            </div>
+
+          </li>
+          <!--===========================================-->
+          <!--===========================================-->
+
+        </ul>
+      </div>
+      <!--/ tabs -->
+
+
+
+    </div>
+
+
+
+
+    <script>
+
+      var hash2_pw_stor='3ff77aedbd06d036e80e346d1809cc5b114431ef';
+      /*
+  ======================
+  hash(hash(PW))
+  ========================
+  Hash you PW oi=nline by :
+  https://emn178.github.io/online-tools/sha1.html 
+  */
+
+      var message='Please enter the password \nIn the first time, you must enter a password, please contact Abdelaziz BOUZIANI to get the password.'
+      function enter_pw(){
+        var hash_pw=localStorage.getItem('Hash_pw_Xws757H1Gls');
+        if (hash_pw != null){
+          var hash2_pw= Sha1.hash(hash_pw);
+          if (hash2_pw == hash2_pw_stor){
+            localStorage.setItem('Hash_pw_Xws757H1Gls', hash_pw);
+            return hash_pw
+          }
+        }
+        var n=1;
+        while (1){
+          if (n==1){
+            var pw=prompt(message);}
+          else{
+            var pw=prompt("WRONG PASSWORD:\n"+message);
+          }
+          n++;
+          if (pw == null) return null;
+          var hash_pw= Sha1.hash(pw);
+          var hash2_pw= Sha1.hash(hash_pw);
+
+          if (hash2_pw == hash2_pw_stor){
+            localStorage.setItem('Hash_pw_Xws757H1Gls', hash_pw);
+            return hash_pw
+          }
+        }
+      }
+
+      function Open_File(html_name1,html_name2){
+
+        var hash_pw=enter_pw();
+        if (hash_pw!=null){
+          href=html_name1+hash_pw.substring(0, 20)+html_name2;
+          window.location.href=href;
+        }
+      }
+
+
+
+      /***************** Sort div by date*******************/
+      function sort_divs_by_date(id_main){
+        var parentDiv = document.getElementById(id_main);
+        var divs = Array.from(parentDiv.getElementsByClassName( "prject_date_div"));
+        console.log(divs.length);
+
+
+        divs.sort(function(a, b) {
+          var dateA = a.getAttribute('date');
+          var dateB = b.getAttribute('date');
+          /*Sort DESCENDING*/
+          return dateB.localeCompare(dateA);
+          /*sort ASCENDING 
+        return dateA.localeCompare(dateB);
+        if date is integer
+        return dateA - dateB; */
+        });
+
+        divs.forEach(function(div) {
+          parentDiv.appendChild(div);
+        });
+      }
+
+      sort_divs_by_date("projet_principal_div_id");
+      sort_divs_by_date("projet_principal_div_id2");
+
+    </script>
+
+
+
+
+  </body>
+</html>
