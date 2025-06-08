@@ -1,0 +1,173 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Encoding/Decoding Tool</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+      background: #f7f9fb;
+    }
+    .container {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 2rem;
+      border-radius: 12px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    select, textarea, button {
+      width: 100%;
+      margin: 0.5rem 0;
+      padding: 0.75rem;
+      font-size: 1rem;
+    }
+    textarea {
+      height: 100px;
+    }
+    button {
+      background-color: #007BFF;
+      color: white;
+      border: none;
+      cursor: pointer;
+      border-radius: 8px;
+    }
+    button:hover {
+      background-color: #0056b3;
+    }
+    label {
+      font-weight: bold;
+      margin-top: 1rem;
+      display: block;
+    }
+    .error {
+      color: red;
+      font-weight: bold;
+      margin-top: 0.5rem;
+      display: none;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>Encoding/Decoding Tool</h2>
+    
+    <label for="inputFormat">Input Format:</label>
+    <select id="inputFormat">
+      <option value="base64">Base64</option>
+      <option value="base32">Base32</option>
+      <option value="ascii">ASCII</option>
+      <option value="utf8">UTF-8</option>
+    </select>
+
+    <label for="inputText">Input Text:</label>
+    <textarea id="inputText"></textarea>
+
+    <label for="outputFormat">Output Format:</label>
+    <select id="outputFormat">
+      <option value="base64">Base64</option>
+      <option value="base32">Base32</option>
+      <option value="ascii">ASCII</option>
+      <option value="utf8">UTF-8</option>
+    </select>
+
+    <button onclick="convert()">Convert</button>
+
+    <div id="errorLabel" class="error"></div>
+
+    <label for="outputText">Output:</label>
+    <textarea id="outputText" readonly></textarea>
+  </div>
+
+  <script>
+    const Base32 = {
+      _chars: "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567",
+      encode: function (str) {
+        const buffer = new TextEncoder().encode(str);
+        let bits = '';
+        for (const byte of buffer) {
+          bits += byte.toString(2).padStart(8, '0');
+        }
+        let result = '';
+        for (let i = 0; i < bits.length; i += 5) {
+          const chunk = bits.slice(i, i + 5);
+          if (chunk.length < 5) {
+            result += Base32._chars[parseInt(chunk.padEnd(5, '0'), 2)];
+          } else {
+            result += Base32._chars[parseInt(chunk, 2)];
+          }
+        }
+        return result;
+      },
+      decode: function (str) {
+        let bits = '';
+        for (const char of str.replace(/=+$/, '')) {
+          const val = Base32._chars.indexOf(char.toUpperCase());
+          if (val === -1) throw new Error("Invalid Base32 character: " + char);
+          bits += val.toString(2).padStart(5, '0');
+        }
+        const bytes = [];
+        for (let i = 0; i + 8 <= bits.length; i += 8) {
+          bytes.push(parseInt(bits.slice(i, i + 8), 2));
+        }
+        return new TextDecoder().decode(new Uint8Array(bytes));
+      }
+    };
+
+    function convert() {
+      const inputFormat = document.getElementById('inputFormat').value;
+      const outputFormat = document.getElementById('outputFormat').value;
+      const inputText = document.getElementById('inputText').value;
+      const errorLabel = document.getElementById('errorLabel');
+      let decodedText;
+
+      errorLabel.style.display = 'none';
+      errorLabel.textContent = '';
+
+      try {
+        // Step 1: Decode to raw string
+        switch (inputFormat) {
+          case 'base64':
+            if (!/^[A-Za-z0-9+/=\s]*$/.test(inputText)) throw new Error("Invalid Base64 input.");
+            decodedText = atob(inputText.trim());
+            break;
+          case 'base32':
+            decodedText = Base32.decode(inputText.trim());
+            break;
+          case 'ascii':
+            decodedText = inputText;
+            break;
+          case 'utf8':
+            decodedText = new TextDecoder().decode(new TextEncoder().encode(inputText));
+            break;
+        }
+
+        // Step 2: Encode to desired format
+        let outputText;
+        switch (outputFormat) {
+          case 'base64':
+            outputText = btoa(decodedText);
+            break;
+          case 'base32':
+            outputText = Base32.encode(decodedText);
+            break;
+          case 'ascii':
+            outputText = decodedText;
+            break;
+          case 'utf8':
+            outputText = new TextDecoder().decode(new TextEncoder().encode(decodedText));
+            break;
+        }
+
+        document.getElementById('outputText').value = outputText;
+      } catch (e) {
+        document.getElementById('outputText').value = '';
+        errorLabel.textContent = "Error: " + e.message;
+        errorLabel.style.display = 'block';
+      }
+    }
+  </script>
+</body>
+</html>
