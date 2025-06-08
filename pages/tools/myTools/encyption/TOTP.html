@@ -3,71 +3,125 @@
 <head>
   <meta charset="UTF-8">
   <title>Générateur TOTP local</title>
-  <style>
+  <!--style>
     body { font-family: sans-serif; max-width: 400px; margin: 2em auto; text-align: center; }
-    input, button { padding: .5em; font-size: 1em; margin: .5em 0; width: 100%; }
+    input, button, select { padding: .5em; font-size: 1em; margin: .5em 0; width: 100%; }
     .code { font-size: 2.5em; margin: .5em 0; letter-spacing: .1em; }
     .timer { font-size: 1em; color: #555; }
-  </style>
+  </style-->
+<style>
+  body {
+    font-family: sans-serif;
+    max-width: 400px;
+    margin: 2em auto;
+    text-align: center;
+  }
+  input, button, select, textarea {
+    padding: .5em;
+    font-size: 1em;
+    margin: .5em 0;
+    width: 100%;
+    box-sizing: border-box;
+  }
+  textarea {
+    resize: vertical;
+    min-height: 3em;
+    line-height: 1.4;
+  }
+  .code {
+    font-size: 2.5em;
+    margin: .5em 0;
+    letter-spacing: .1em;
+  }
+  .timer {
+    font-size: 1em;
+    color: #555;
+  }
+</style>
+
 </head>
 <body>
   <h1>Générateur TOTP (offline)</h1>
-<label> Entrez le secret (base32) </label>
-  <input id="secret" type="text" placeholder="Entrez le secret (base32)" value="2FASTEST">
+
+  <label>Entrez le secret</label>
+  <!--input id="secret" type="text" placeholder="Secret en base32 ou base64" value="2FASTEST"-->
+<textarea id="secret" placeholder="Secret en base32 ou base64" rows="3" style="resize: vertical;">2FASTEST</textarea>
+
+
+  <label>Format du secret</label>
+  <select id="encoding">
+    <option value="base32" selected>Base32 (par défaut)</option>
+    <option value="base64">Base64</option>
+  </select>
+
   <button id="btn">Générer</button>
+
   <div class="code" id="code">------</div>
   <div class="timer" id="timer">-- s restantes</div>
-<br> 
-<br>
-you can test it using online tools like <br>
-<a>https://2fas.com/check-token/</a>
+
+  <br><br>
+  Vous pouvez tester avec :<br>
+  <a href="https://2fas.com/check-token/" target="_blank">https://2fas.com/check-token/</a>
 
   <script>
-  // Fonction de base32 vers hex
-  function base32toHex(base32) {
-    const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
-    let bits = "", hex = "";
-    for (let c of base32.toUpperCase().replace(/=+$/, "")) {
-      let val = chars.indexOf(c);
-      bits += val.toString(2).padStart(5, '0');
+    function base32toHex(base32) {
+      const chars = "ABCDEFGHIJKLMNOPQRSTUVWXYZ234567";
+      let bits = "", hex = "";
+      for (let c of base32.toUpperCase().replace(/=+$/, "")) {
+        let val = chars.indexOf(c);
+        if (val < 0) continue;
+        bits += val.toString(2).padStart(5, '0');
+      }
+      for (let i = 0; i + 4 <= bits.length; i += 4) {
+        hex += parseInt(bits.substr(i, 4), 2).toString(16);
+      }
+      return hex;
     }
-    for (let i=0; i+4<=bits.length; i += 4) {
-      hex += parseInt(bits.substr(i,4),2).toString(16);
+
+    function base64toHex(base64) {
+      try {
+        const bin = atob(base64.replace(/-/g, '+').replace(/_/g, '/'));
+        return [...bin].map(c => c.charCodeAt(0).toString(16).padStart(2, '0')).join('');
+      } catch (e) {
+        alert("Erreur de décodage base64");
+        return "";
+      }
     }
-    return hex;
-  }
 
-  // Génération du code TOTP
-  async function generateTOTP(secret) {
-    const epoch = Math.floor(Date.now()/1000 / 30);
-    const counter = epoch.toString(16).padStart(16,'0');
-    const key = base32toHex(secret);
-    const msg = new Uint8Array(counter.match(/.{2}/g).map(b => parseInt(b,16)));
-    const keyBytes = new Uint8Array(key.match(/.{2}/g).map(b => parseInt(b,16)));
-    const cryptoKey = await crypto.subtle.importKey("raw", keyBytes, {name: "HMAC", hash: "SHA-1"}, false, ["sign"]);
-    const hmac = new Uint8Array(await crypto.subtle.sign("HMAC", cryptoKey, msg));
-    const offset = hmac[hmac.length-1] & 0xf;
-    const code = ((hmac[offset]&0x7f)<<24 | (hmac[offset+1]&0xff)<<16 | (hmac[offset+2]&0xff)<<8 | (hmac[offset+3]&0xff)) % 1e6;
-    return code.toString().padStart(6,'0');
-  }
+    async function generateTOTP(secret, encoding) {
+      const epoch = Math.floor(Date.now() / 1000 / 30);
+      const counter = epoch.toString(16).padStart(16, '0');
+      const hexKey = encoding === 'base64' ? base64toHex(secret) : base32toHex(secret);
+      const keyBytes = new Uint8Array(hexKey.match(/.{2}/g).map(b => parseInt(b, 16)));
+      const msg = new Uint8Array(counter.match(/.{2}/g).map(b => parseInt(b, 16)));
+      const cryptoKey = await crypto.subtle.importKey("raw", keyBytes, { name: "HMAC", hash: "SHA-1" }, false, ["sign"]);
+      const hmac = new Uint8Array(await crypto.subtle.sign("HMAC", cryptoKey, msg));
+      const offset = hmac[hmac.length - 1] & 0xf;
+      const code = ((hmac[offset] & 0x7f) << 24 |
+                    (hmac[offset + 1] & 0xff) << 16 |
+                    (hmac[offset + 2] & 0xff) << 8 |
+                    (hmac[offset + 3] & 0xff)) % 1e6;
+      return code.toString().padStart(6, '0');
+    }
 
-  const codeEl = document.getElementById('code');
-  const timerEl = document.getElementById('timer');
-  let secretVal = "";
+    const codeEl = document.getElementById('code');
+    const timerEl = document.getElementById('timer');
+    let secretVal = "", encoding = "base32";
 
-  async function update() {
-    if (!secretVal) return;
-    codeEl.textContent = await generateTOTP(secretVal);
-    const secs = 30 - (Math.floor(Date.now()/1000)%30);
-    timerEl.textContent = `${secs} s restantes`;
-  }
+    async function update() {
+      if (!secretVal) return;
+      codeEl.textContent = await generateTOTP(secretVal, encoding);
+      const secs = 30 - (Math.floor(Date.now() / 1000) % 30);
+      timerEl.textContent = `${secs} s restantes`;
+    }
 
-  document.getElementById('btn').onclick = () => {
-    secretVal = document.getElementById('secret').value.trim();
-    update();
-    clearInterval(window._t);
-    window._t = setInterval(update, 1000);
-  };
+    document.getElementById('btn').onclick = () => {
+      secretVal = document.getElementById('secret').value.trim();
+      encoding = document.getElementById('encoding').value;
+      update();
+      clearInterval(window._t);
+      window._t = setInterval(update, 1000);
+    };
   </script>
 </body>
 </html>
