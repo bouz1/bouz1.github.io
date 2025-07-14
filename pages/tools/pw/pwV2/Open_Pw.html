@@ -11,21 +11,83 @@
 
   <script src="PW_manager_AES_crypto_V3_23.js"></script>
   <script src="pw_montage_V001.js"></script>
-  <style>
-    input {
-      width: 100%; 
-    }
-  </style>
+
+
+
+
+<style>
+  body {
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    background: #f7f9fc;
+    color: #333;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    height: 100vh;
+    margin: 0;
+  }
+
+  label {
+    font-size: 1.1em;
+    margin-bottom: 10px;
+    font-weight: 500;
+    color: #444;
+    width: 500px;
+    text-align: left;
+    display: block;
+  }
+
+  input[type="password"] {
+    padding: 12px 16px;
+    font-size: 1em;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    width: 500px;
+    box-sizing: border-box;
+    transition: border 0.3s ease;
+  }
+
+  input[type="password"]:focus {
+    border-color: #4a90e2;
+    outline: none;
+    box-shadow: 0 0 5px rgba(74, 144, 226, 0.4);
+  }
+
+  button {
+    margin-top: 20px;
+    padding: 12px 24px;
+    font-size: 1em;
+    color: #fff;
+    background-color: #4a90e2;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: background-color 0.3s ease, transform 0.2s ease;
+    width: 500px;
+  }
+
+  button:hover {
+    background-color: #357ab7;
+    transform: translateY(-2px);
+  }
+
+  button:active {
+    transform: translateY(0);
+  }
+</style>
+
 </head>
 
 <body>
 
 
-  Password 
+  <label> Password </label>
   <br>
   <input type=password id = "PW"> </input> 
 <br><br>
 <button onclick="open_page()">decrypt and open PW page AES-256</button>
+  <label> V4002 </label>
 
 
 <script>
