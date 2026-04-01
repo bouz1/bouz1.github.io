@@ -1,0 +1,426 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Guitar Fret Calculator</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      font-family: "Segoe UI", sans-serif;
+      background: #f4f6fa;
+      color: #2c2c2c;
+      min-height: 100vh;
+      padding: 30px 20px;
+    }
+
+    h1 {
+      text-align: center;
+      font-size: 1.9rem;
+      color: #c47a00;
+      margin-bottom: 6px;
+      letter-spacing: 2px;
+    }
+
+    .subtitle {
+      text-align: center;
+      color: #777;
+      font-size: 0.85rem;
+      margin-bottom: 28px;
+    }
+
+    .controls {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 16px;
+      justify-content: center;
+      align-items: flex-end;
+      margin-bottom: 20px;
+    }
+
+    .field {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .field label {
+      font-size: 0.78rem;
+      color: #666;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-weight: 600;
+    }
+
+    .field input,
+    .field select {
+      background: #fff;
+      border: 1.5px solid #d0d5e0;
+      border-radius: 7px;
+      color: #2c2c2c;
+      font-size: 1rem;
+      padding: 8px 14px;
+      width: 160px;
+      outline: none;
+      transition: border-color 0.2s, box-shadow 0.2s;
+    }
+
+    .field input:focus,
+    .field select:focus {
+      border-color: #c47a00;
+      box-shadow: 0 0 0 3px rgba(196,122,0,0.12);
+    }
+
+    .btn-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      justify-content: center;
+      margin-bottom: 32px;
+    }
+
+    .btn {
+      border: none;
+      border-radius: 7px;
+      font-size: 0.92rem;
+      font-weight: 700;
+      padding: 10px 26px;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      transition: background 0.18s, box-shadow 0.18s;
+    }
+
+    .btn-primary {
+      background: #c47a00;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(196,122,0,0.2);
+    }
+    .btn-primary:hover { background: #e08c00; }
+
+    .btn-csv {
+      background: #2e7d32;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(46,125,50,0.2);
+    }
+    .btn-csv:hover { background: #388e3c; }
+
+    .btn-pdf {
+      background: #c62828;
+      color: #fff;
+      box-shadow: 0 2px 8px rgba(198,40,40,0.2);
+    }
+    .btn-pdf:hover { background: #e53935; }
+
+    #schematic-wrap {
+      display: none;
+      margin: 0 auto 28px;
+      max-width: 920px;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    #schematic-wrap h2 {
+      color: #c47a00;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+    }
+
+    #fretboard-svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      border-radius: 8px;
+      background: #eef2fb;
+      overflow: visible;
+    }
+
+    #table-wrap {
+      display: none;
+      max-width: 920px;
+      margin: 0 auto;
+      background: #fff;
+      border-radius: 12px;
+      padding: 20px 24px;
+      box-shadow: 0 2px 12px rgba(0,0,0,0.08);
+    }
+
+    #table-wrap h2 {
+      color: #c47a00;
+      font-size: 0.9rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      margin-bottom: 14px;
+    }
+
+    .table-scroll { overflow-x: auto; border-radius: 8px; border: 1px solid #e4e8f0; }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      font-size: 0.9rem;
+    }
+
+    thead tr { background: #fff8e8; }
+
+    th {
+      padding: 12px 18px;
+      text-align: right;
+      color: #c47a00;
+      font-weight: 700;
+      letter-spacing: 0.4px;
+      white-space: nowrap;
+      border-bottom: 2px solid #f0d898;
+    }
+
+    th:first-child, td:first-child { text-align: center; }
+
+    td {
+      padding: 9px 18px;
+      text-align: right;
+      border-top: 1px solid #eef0f5;
+      white-space: nowrap;
+      color: #333;
+    }
+
+    tbody tr:nth-child(even) { background: #fafbfd; }
+    tbody tr:nth-child(odd)  { background: #fff; }
+    tbody tr:hover            { background: #fff8e8; }
+
+    .fret-num { font-weight: 700; color: #c47a00; font-size: 1rem; }
+
+    #error-msg {
+      display: none;
+      text-align: center;
+      color: #c62828;
+      font-size: 0.9rem;
+      margin-bottom: 16px;
+    }
+
+    @media print {
+      body { background: #fff; padding: 10px; }
+      .controls, .btn-row { display: none !important; }
+      #schematic-wrap {
+        display: block !important;
+        box-shadow: none;
+        border: 1px solid #ccc;
+        page-break-inside: avoid;
+        page-break-after: always;
+        margin-bottom: 16px;
+      }
+      #table-wrap {
+        display: block !important;
+        box-shadow: none;
+        border: 1px solid #ccc;
+        margin-bottom: 16px;
+      }
+      .table-scroll {
+        overflow: visible !important;
+        border: none;
+      }
+      thead tr { background: #fff8e8 !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+      tbody tr:nth-child(even) { background: #fafbfd !important; -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    }
+  </style>
+</head>
+<body>
+
+<h1>&#127928; Guitar Fret Calculator</h1>
+<p class="subtitle">Equal-temperament rule &nbsp;|&nbsp; fret<sub>n</sub> = scale &times; (1 &minus; 2<sup>&minus;(n/12)</sup>) &nbsp;&mdash;&nbsp; e.g. fret&nbsp;1 on 648&nbsp;mm: 648 &times; (1 &minus; 2<sup>&minus;0.0833</sup>) = 648 &times; 0.0561 &asymp; <strong>36.37&nbsp;mm</strong> from nut</p>
+
+<div class="controls">
+  <div class="field">
+    <label>Scale Length (mm)</label>
+    <input type="number" id="scale" value="648" min="1" step="0.1" placeholder="e.g. 648" />
+  </div>
+  <div class="field">
+    <label>Number of Frets</label>
+    <input type="number" id="numFrets" value="22" min="1" max="40" step="1" placeholder="e.g. 22" />
+  </div>
+  <div class="field">
+    <label>Unit</label>
+    <select id="unit">
+      <option value="mm">mm</option>
+      <option value="cm">cm</option>
+      <option value="in">inches</option>
+    </select>
+  </div>
+</div>
+
+<div class="btn-row">
+  <button class="btn btn-primary" onclick="calculate()">&#9654; Calculate</button>
+  <button class="btn btn-csv" id="btn-csv" style="display:none" onclick="exportCSV()">&#11015; Export CSV</button>
+  <button class="btn btn-pdf" id="btn-pdf" style="display:none" onclick="exportPDF()">&#128438; Export PDF</button>
+</div>
+
+<p id="error-msg"></p>
+
+<div id="schematic-wrap">
+  <h2>Fretboard Schematic</h2>
+  <svg id="fretboard-svg" viewBox="0 0 860 130" xmlns="http://www.w3.org/2000/svg"></svg>
+</div>
+
+<div id="table-wrap">
+  <h2>Fret Positions</h2>
+  <div class="table-scroll">
+    <table id="fret-table">
+      <thead>
+        <tr>
+          <th>Fret #</th>
+          <th>Distance from nut</th>
+          <th>Distance from last fret</th>
+          <th>Distance to bridge</th>
+        </tr>
+      </thead>
+      <tbody id="tbody"></tbody>
+    </table>
+  </div>
+</div>
+
+<script>
+  var _rows = [], _unitLabel = "mm", _decimals = 2, _factor = 1, _scale = 648;
+
+  function fretPos(scale, n) {
+    return scale * (1 - Math.pow(2, -n / 12));
+  }
+
+  function fmt(val, dec) { return val.toFixed(dec); }
+
+  function calculate() {
+    var errEl = document.getElementById("error-msg");
+    errEl.style.display = "none";
+
+    _scale = parseFloat(document.getElementById("scale").value);
+    var numFrets = parseInt(document.getElementById("numFrets").value, 10);
+    var unit = document.getElementById("unit").value;
+
+    if (!_scale || _scale <= 0) {
+      errEl.textContent = "Please enter a valid scale length.";
+      errEl.style.display = "block";
+      return;
+    }
+    if (!numFrets || numFrets < 1 || numFrets > 40) {
+      errEl.textContent = "Number of frets must be between 1 and 40.";
+      errEl.style.display = "block";
+      return;
+    }
+
+    _factor = 1; _decimals = 2; _unitLabel = "mm";
+    if (unit === "cm") { _factor = 0.1;     _decimals = 3; _unitLabel = "cm"; }
+    if (unit === "in") { _factor = 1/25.4;  _decimals = 4; _unitLabel = "in"; }
+
+    _rows = [];
+    for (var n = 1; n <= numFrets; n++) {
+      var fromNut  = fretPos(_scale, n);
+      var fromLast = fromNut - fretPos(_scale, n - 1);
+      var toBridge = _scale - fromNut;
+      _rows.push({ n: n, fromNut: fromNut, fromLast: fromLast, toBridge: toBridge });
+    }
+
+    var tbody = document.getElementById("tbody");
+    tbody.innerHTML = "";
+    _rows.forEach(function(r) {
+      var tr = document.createElement("tr");
+      tr.innerHTML =
+        "<td class=\"fret-num\">" + r.n + "</td>" +
+        "<td>" + fmt(r.fromNut  * _factor, _decimals) + " " + _unitLabel + "</td>" +
+        "<td>" + fmt(r.fromLast * _factor, _decimals) + " " + _unitLabel + "</td>" +
+        "<td>" + fmt(r.toBridge * _factor, _decimals) + " " + _unitLabel + "</td>";
+      tbody.appendChild(tr);
+    });
+
+    document.getElementById("table-wrap").style.display = "block";
+    document.getElementById("btn-csv").style.display = "inline-flex";
+    document.getElementById("btn-pdf").style.display = "inline-flex";
+
+    drawSchematic(_scale, numFrets);
+  }
+
+  function exportCSV() {
+    if (!_rows.length) return;
+    var header = "Fret #,Distance from nut (" + _unitLabel + "),Distance from last fret (" + _unitLabel + "),Distance to bridge (" + _unitLabel + ")";
+    var lines = _rows.map(function(r) {
+      return r.n + "," + fmt(r.fromNut*_factor,_decimals) + "," + fmt(r.fromLast*_factor,_decimals) + "," + fmt(r.toBridge*_factor,_decimals);
+    });
+    var csv = [header].concat(lines).join("\r\n");
+    var blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url;
+    a.download = "guitar_frets_" + _scale + "mm.csv";
+    a.click();
+    URL.revokeObjectURL(url);
+  }
+
+  function exportPDF() {
+    window.print();
+  }
+
+  function drawSchematic(scale, numFrets) {
+    var wrap = document.getElementById("schematic-wrap");
+    var svg  = document.getElementById("fretboard-svg");
+    var W = 860, H = 130;
+    var marginL = 30, marginR = 30;
+    var drawW   = W - marginL - marginR;
+    var boardTop = 28, boardBot = 92;
+    var nutX    = marginL;
+    var bridgeX = marginL + drawW;
+    var toX = function(pos) { return marginL + (pos / scale) * drawW; };
+
+    var html = "";
+
+    html += "<rect x=\"" + nutX + "\" y=\"" + boardTop + "\" width=\"" + drawW + "\" height=\"" + (boardBot-boardTop) + "\" rx=\"4\" fill=\"#c8a87a\" stroke=\"#a07040\" stroke-width=\"1.5\"/>";
+
+    for (var s = 0; s < 6; s++) {
+      var y  = boardTop + 5 + s * ((boardBot-boardTop-10) / 5);
+      var sw = 0.5 + s * 0.28;
+      html += "<line x1=\"" + nutX + "\" y1=\"" + y + "\" x2=\"" + bridgeX + "\" y2=\"" + y + "\" stroke=\"#887850\" stroke-width=\"" + sw + "\" opacity=\"0.9\"/>";
+    }
+
+    html += "<rect x=\"" + (nutX-2) + "\" y=\"" + boardTop + "\" width=\"5\" height=\"" + (boardBot-boardTop) + "\" fill=\"#f5f0e8\" stroke=\"#aaa\" stroke-width=\"1\"/>";
+    html += "<text x=\"" + nutX + "\" y=\"" + (boardTop-6) + "\" text-anchor=\"middle\" font-size=\"9\" fill=\"#555\">NUT</text>";
+    html += "<rect x=\"" + (bridgeX-2) + "\" y=\"" + boardTop + "\" width=\"5\" height=\"" + (boardBot-boardTop) + "\" fill=\"#d4a84b\" stroke=\"#a07030\" stroke-width=\"1\"/>";
+    html += "<text x=\"" + bridgeX + "\" y=\"" + (boardTop-6) + "\" text-anchor=\"middle\" font-size=\"9\" fill=\"#555\">BRIDGE</text>";
+
+    var maxDraw = Math.min(numFrets, 24);
+    for (var n = 1; n <= maxDraw; n++) {
+      var x = toX(fretPos(scale, n));
+      html += "<line x1=\"" + x + "\" y1=\"" + boardTop + "\" x2=\"" + x + "\" y2=\"" + boardBot + "\" stroke=\"#555\" stroke-width=\"" + (n % 12 === 0 ? 2.5 : 1.2) + "\" opacity=\"0.85\"/>";
+      if (n <= 12 || n % 3 === 0) {
+        html += "<text x=\"" + x + "\" y=\"" + (boardBot+13) + "\" text-anchor=\"middle\" font-size=\"8\" fill=\"#777\">" + n + "</text>";
+      }
+    }
+
+    var midY = (boardTop + boardBot) / 2;
+    [3,5,7,9,15,17,19,21].filter(function(i){ return i <= maxDraw; }).forEach(function(n) {
+      var cx = (toX(fretPos(scale,n-1)) + toX(fretPos(scale,n))) / 2;
+      html += "<circle cx=\"" + cx + "\" cy=\"" + midY + "\" r=\"4.5\" fill=\"#fff8dc\" stroke=\"#ccc\" stroke-width=\"0.5\" opacity=\"0.85\"/>";
+    });
+    [12,24].filter(function(i){ return i <= maxDraw; }).forEach(function(n) {
+      var cx  = (toX(fretPos(scale,n-1)) + toX(fretPos(scale,n))) / 2;
+      var off = (boardBot-boardTop) / 4;
+      html += "<circle cx=\"" + cx + "\" cy=\"" + (midY-off) + "\" r=\"4.5\" fill=\"#fff8dc\" stroke=\"#ccc\" stroke-width=\"0.5\" opacity=\"0.85\"/>";
+      html += "<circle cx=\"" + cx + "\" cy=\"" + (midY+off) + "\" r=\"4.5\" fill=\"#fff8dc\" stroke=\"#ccc\" stroke-width=\"0.5\" opacity=\"0.85\"/>";
+    });
+
+    var arrowY = H - 8;
+    html += "<line x1=\"" + nutX + "\" y1=\"" + arrowY + "\" x2=\"" + bridgeX + "\" y2=\"" + arrowY + "\" stroke=\"#c47a00\" stroke-width=\"1.4\"/>";
+    html += "<polygon points=\"" + nutX + "," + arrowY + " " + (nutX+6) + "," + (arrowY-3) + " " + (nutX+6) + "," + (arrowY+3) + "\" fill=\"#c47a00\"/>";
+    html += "<polygon points=\"" + bridgeX + "," + arrowY + " " + (bridgeX-6) + "," + (arrowY-3) + " " + (bridgeX-6) + "," + (arrowY+3) + "\" fill=\"#c47a00\"/>";
+    html += "<text x=\"" + ((nutX+bridgeX)/2) + "\" y=\"" + (arrowY-3) + "\" text-anchor=\"middle\" font-size=\"9\" fill=\"#c47a00\" font-weight=\"bold\">Scale: " + fmt(_scale*_factor, _decimals) + " " + _unitLabel + "</text>";
+
+    svg.innerHTML = html;
+    svg.setAttribute("viewBox", "0 0 " + W + " " + H);
+    wrap.style.display = "block";
+  }
+
+  window.addEventListener("load", calculate);
+</script>
+</body>
+</html>
