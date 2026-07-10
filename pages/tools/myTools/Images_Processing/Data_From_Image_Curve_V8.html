@@ -1,0 +1,1516 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Image Click Coordinates — V8</title>
+  <style>
+    :root {
+      --bg: #f4f6f9;
+      --card: #ffffff;
+      --ink: #1f2937;
+      --muted: #6b7280;
+      --line: #e5e7eb;
+      --accent: #0e9bb8;
+      --accent-dark: #0b7f97;
+      --origin: #e11d48;
+      --ref: #2563eb;
+      --point: #16a34a;
+      --plot: #ea580c;
+      --shadow: 0 1px 3px rgba(16,24,40,.08), 0 1px 2px rgba(16,24,40,.04);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+      background: var(--bg);
+      color: var(--ink);
+      font-size: 15px;
+      line-height: 1.45;
+      padding: 0 0 60px;
+    }
+
+    /* ---------- header ---------- */
+    .app-header {
+      background: #fff;
+      border-bottom: 1px solid var(--line);
+      padding: 18px 24px 14px;
+    }
+    .app-header h1 { margin: 0; font-size: 22px; display: inline-block; vertical-align: middle; }
+    .version-badge {
+      display: inline-block; margin-left: 10px;
+      background: var(--accent); color: #fff; font-size: 12px; font-weight: 700;
+      border-radius: 20px; padding: 2px 10px; vertical-align: middle;
+    }
+    .subtitle { margin: 4px 0 0; color: var(--muted); font-size: 13px; }
+
+    /* ---------- tabs ---------- */
+    .tabs { display: flex; gap: 4px; padding: 12px 24px 0; border-bottom: 1px solid var(--line); background: #fff; }
+    .tab {
+      border: none; background: transparent; color: var(--muted); font-size: 15px; font-weight: 600;
+      padding: 10px 20px; cursor: pointer; border-bottom: 3px solid transparent; border-radius: 8px 8px 0 0;
+    }
+    .tab:hover { background: #f3f4f6; color: var(--ink); }
+    .tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+
+    /* ---------- panels ---------- */
+    .panel { display: none; padding: 20px 24px; max-width: 1200px; }
+    .panel.active { display: block; }
+
+    .card {
+      background: var(--card); border: 1px solid var(--line); border-radius: 12px;
+      box-shadow: var(--shadow); padding: 16px; margin-bottom: 18px;
+    }
+    .card h2 { margin: 0 0 12px; font-size: 15px; }
+
+    /* ---------- toolbar ---------- */
+    .toolbar { display: flex; flex-wrap: wrap; align-items: flex-end; gap: 14px; }
+
+    .btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: var(--accent); color: #fff; border: none; border-radius: 8px;
+      padding: 9px 16px; font-size: 14px; font-weight: 600; cursor: pointer; transition: background .15s;
+    }
+    .btn:hover { background: var(--accent-dark); }
+    .btn svg { width: 16px; height: 16px; }
+    .btn-ghost { background: #fff; color: var(--ink); border: 1px solid var(--line); }
+    .btn-ghost:hover { background: #f3f4f6; }
+    .btn.armed { background: var(--accent-dark); box-shadow: 0 0 0 3px rgba(14,155,184,.35); }
+
+    .field { display: flex; flex-direction: column; gap: 4px; }
+    .field > span { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .field input[type=text], .field select, select.mini-select {
+      border: 1px solid var(--line); border-radius: 8px; padding: 7px 10px;
+      font-size: 14px; background: #fff; color: var(--ink); min-width: 90px;
+    }
+    input:focus, select:focus { outline: 2px solid var(--accent); outline-offset: 0; }
+    .range-field { min-width: 150px; }
+    input[type=range] { accent-color: var(--accent); }
+    .toolbar-hint { font-size: 12px; color: var(--muted); flex-basis: 100%; margin-top: 2px; }
+
+    /* ---------- image ---------- */
+    .image-card { padding: 12px; }
+    .img-tools { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; flex-wrap: wrap; }
+    #imageContainer {
+      position: relative; display: inline-block; line-height: 0; cursor: crosshair;
+      border-radius: 8px; overflow: hidden; max-width: 100%; vertical-align: top;
+    }
+    #imageContainer.empty {
+      width: 560px; height: 320px; max-width: 100%;
+      border: 2px dashed var(--line); background: #fafbfc; cursor: default;
+    }
+    #imageContainer.dragover { border-color: var(--accent); background: #ecfeff; }
+    #imageContainer.picking { outline: 3px dashed var(--accent); outline-offset: 2px; }
+    #image { display: none; max-width: 100%; max-height: 70vh; width: auto; height: auto; user-select: none; -webkit-user-drag: none; }
+
+    #dropHint {
+      position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 6px; color: var(--muted); text-align: center; line-height: 1.5; pointer-events: none; padding: 20px;
+    }
+    #imageContainer:not(.empty) #dropHint { display: none; }
+    #dropHint svg { width: 46px; height: 46px; opacity: .5; margin-bottom: 6px; }
+    #dropHint b { color: var(--ink); }
+
+    /* plot overlay */
+    #plotOverlay { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; z-index: 3; display: none; }
+    #imageContainer.plotting #plotOverlay { display: block; }
+    #plotLine { fill: none; stroke: var(--plot); stroke-width: 2; stroke-dasharray: 7 5; stroke-linejoin: round; stroke-linecap: round; }
+
+    /* magnifier lens (image zoom + plotted curve overlay) */
+    #lens {
+      position: absolute; display: none; width: 150px; height: 150px;
+      border: 3px solid #fff; border-radius: 50%; overflow: hidden;
+      box-shadow: 0 0 0 1px var(--accent), 0 6px 18px rgba(0,0,0,.35);
+      background-repeat: no-repeat; pointer-events: none; z-index: 5;
+    }
+    #lensSvg { position: absolute; inset: 0; pointer-events: none; }
+    #lensPlotLine { fill: none; stroke: var(--plot); stroke-width: 2.5; stroke-dasharray: 6 4; }
+    #lens .cross-h, #lens .cross-v { position: absolute; background: rgba(225,29,72,.75); pointer-events: none; }
+    #lens .cross-h { left: 0; right: 0; top: 50%; height: 1px; }
+    #lens .cross-v { top: 0; bottom: 0; left: 50%; width: 1px; }
+    #lens .cross-dot { position: absolute; left: 50%; top: 50%; width: 6px; height: 6px; margin: -3px 0 0 -3px; border: 1px solid #fff; border-radius: 50%; background: rgba(225,29,72,.9); z-index: 2; }
+    #autoLens {
+      position: absolute; display: none; width: 150px; height: 150px;
+      border: 3px solid #fff; border-radius: 50%;
+      box-shadow: 0 0 0 1px var(--accent), 0 6px 18px rgba(0,0,0,.35);
+      pointer-events: none; z-index: 5; background: #fff;
+    }
+
+    /* markers (draggable) */
+    #markers { position: absolute; inset: 0; pointer-events: none; z-index: 4; }
+    .marker {
+      position: absolute; width: 18px; height: 18px; transform: translate(-50%, -50%);
+      display: flex; align-items: center; justify-content: center;
+      pointer-events: auto; cursor: grab;
+    }
+    .marker.dragging, .marker:active { cursor: grabbing; }
+    .marker .dot { width: 12px; height: 12px; border-radius: 50%; border: 2px solid #fff; box-shadow: 0 0 0 1px rgba(0,0,0,.35); pointer-events: none; }
+    .marker-origin .dot { background: var(--origin); }
+    .marker-ref .dot { background: var(--ref); }
+    .marker-point .dot { background: var(--point); }
+    .marker-point.hi .dot { width: 16px; height: 16px; box-shadow: 0 0 0 2px var(--point); }
+    .marker-label {
+      position: absolute; left: 15px; top: -3px; font-size: 11px; font-weight: 700; color: #111;
+      background: rgba(255,255,255,.85); border-radius: 4px; padding: 0 3px; line-height: 1.4; pointer-events: none;
+    }
+    #imageContainer.picking .marker { pointer-events: none; }
+
+    /* live coordinate readout */
+    #liveCoord {
+      position: absolute; display: none; background: rgba(17,24,39,.85); color: #fff; font-size: 12px;
+      padding: 3px 7px; border-radius: 6px; pointer-events: none; white-space: nowrap; z-index: 6; line-height: 1.3;
+    }
+
+    /* status bar */
+    .status { margin-top: 12px; padding: 9px 14px; border-radius: 8px; font-size: 13px; font-weight: 600; display: flex; align-items: center; gap: 8px; }
+    .status.collect { background: #ecfdf5; color: #065f46; border: 1px solid #a7f3d0; }
+    .status.origin  { background: #fff1f2; color: #9f1239; border: 1px solid #fecdd3; }
+    .status.ref     { background: #eff6ff; color: #1e40af; border: 1px solid #bfdbfe; }
+    .status.draw    { background: #ecfeff; color: #0b5563; border: 1px solid #a5e6f0; }
+    .status.empty   { background: #f9fafb; color: var(--muted); border: 1px solid var(--line); }
+    .dot9 { width: 9px; height: 9px; border-radius: 50%; display: inline-block; }
+    .status.collect .dot9 { background: var(--point); }
+    .status.origin .dot9 { background: var(--origin); }
+    .status.ref .dot9 { background: var(--ref); }
+    .status.draw .dot9 { background: var(--accent); }
+    .status.empty .dot9 { background: var(--muted); }
+
+    /* ---------- tables ---------- */
+    table { border-collapse: collapse; width: 100%; }
+    th, td { border: 1px solid var(--line); padding: 8px 10px; text-align: center; }
+    thead th { background: #f9fafb; font-size: 13px; color: var(--muted); }
+
+    .calib-table td input {
+      width: 110px; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; text-align: center; font-size: 14px;
+    }
+    .calib-table th[scope=row] { background: #f9fafb; }
+    .calib-table thead th { padding: 6px 8px; }
+    .axis-name-input {
+      width: 120px; border: 1px solid var(--accent); border-radius: 6px; padding: 5px 8px;
+      text-align: center; font-size: 14px; font-weight: 700; color: var(--ink); background: #fff;
+    }
+    .calib-table select {
+      width: 120px; border: 1px solid var(--line); border-radius: 6px; padding: 6px 8px; font-size: 14px; background: #fff; color: var(--ink);
+    }
+    .scale-row th[scope=row] { background: #f9fafb; }
+    .pixel-cell { font-family: ui-monospace, SFMono-Regular, Menlo, monospace; color: var(--muted); font-size: 13px; }
+    .swatch { width: 10px; height: 10px; border-radius: 50%; display: inline-block; margin-right: 6px; vertical-align: middle; }
+    .sw-origin { background: var(--origin); }
+    .sw-ref { background: var(--ref); }
+
+    .btn-pick {
+      background: #fff; color: var(--accent-dark); border: 1px solid var(--accent); border-radius: 8px;
+      padding: 7px 12px; font-size: 13px; font-weight: 600; cursor: pointer;
+    }
+    .btn-pick:hover { background: #ecfeff; }
+    .btn-pick.armed { background: var(--accent); color: #fff; animation: pulse 1s infinite; }
+    @keyframes pulse { 0%,100% { box-shadow: 0 0 0 0 rgba(14,155,184,.5); } 50% { box-shadow: 0 0 0 6px rgba(14,155,184,0); } }
+
+    .points-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 10px; }
+    .points-header h2 { margin: 0; display: flex; align-items: center; }
+    .export-controls { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .count { display: inline-block; background: var(--point); color: #fff; border-radius: 20px; font-size: 12px; padding: 1px 9px; margin-left: 6px; vertical-align: middle; }
+    .points-table tbody tr:hover { background: #f0fdf4; }
+    .pixel-val { color: var(--muted); font-style: italic; }
+    .row-del { border: none; background: transparent; color: #ef4444; font-size: 18px; line-height: 1; cursor: pointer; padding: 0 6px; border-radius: 6px; }
+    .row-del:hover { background: #fee2e2; }
+    .empty-row td { color: var(--muted); font-style: italic; padding: 18px; }
+
+    .hint { font-size: 12px; color: var(--muted); margin: 8px 0 0; }
+    .legend { display: flex; gap: 16px; flex-wrap: wrap; font-size: 12px; color: var(--muted); margin-top: 10px; }
+    .legend span { display: inline-flex; align-items: center; gap: 6px; }
+
+    .placeholder { text-align: center; color: var(--muted); padding: 60px 20px; font-size: 15px; }
+    .placeholder .big { font-size: 40px; margin-bottom: 10px; }
+
+    .steps { display: flex; flex-wrap: wrap; gap: 10px 22px; font-size: 13px; color: var(--muted); }
+    .steps b { color: var(--accent-dark); }
+
+    .delim-label { font-size: 12px; color: var(--muted); font-weight: 600; }
+    .name-input { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 14px; min-width: 210px; }
+    .chk { display: inline-flex; align-items: center; gap: 7px; font-size: 13px; color: var(--ink); font-weight: 600; cursor: pointer; }
+    .chk input { width: 16px; height: 16px; accent-color: var(--accent); cursor: pointer; }
+
+    /* ==================== AUTOMATIC TAB ==================== */
+    .auto-toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px; }
+    .auto-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 16px; margin-bottom: 12px; }
+    .auto-controls .ctl { display: flex; flex-direction: column; gap: 3px; font-size: 12px; color: var(--muted); font-weight: 600; min-width: 160px; }
+    .auto-controls .ctl .val { color: var(--accent-dark); }
+    #autoCanvasWrap {
+      position: relative; display: inline-block; line-height: 0; max-width: 100%;
+      border: 1px solid var(--line); border-radius: 8px; overflow: hidden; background: #fafbfc; vertical-align: top;
+    }
+    #autoCanvasWrap.empty { width: 560px; height: 340px; border: 2px dashed var(--line); }
+    #autoCanvasWrap.drawing { outline: 3px dashed var(--accent); outline-offset: 2px; }
+    #autoCanvas { display: block; max-width: 100%; height: auto; cursor: crosshair; }
+    #autoDropHint {
+      position: absolute; inset: 0; display: flex; align-items: center; justify-content: center;
+      color: var(--muted); text-align: center; pointer-events: none; font-size: 14px; padding: 20px; line-height: 1.5;
+    }
+    #autoCanvasWrap:not(.empty) #autoDropHint { display: none; }
+
+    .save-series-row { display: flex; gap: 8px; align-items: center; margin-top: 14px; flex-wrap: wrap; }
+    #seriesName { border: 1px solid var(--line); border-radius: 8px; padding: 8px 10px; font-size: 14px; min-width: 200px; }
+
+    #seriesList { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 14px; }
+    .series-chip {
+      display: inline-flex; align-items: center; gap: 8px; border: 1px solid var(--line);
+      border-radius: 20px; padding: 5px 6px 5px 12px; font-size: 13px; font-weight: 600; background: #fff; cursor: pointer;
+    }
+    .series-chip.active { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(14,155,184,.2); }
+    .series-chip .sw { width: 12px; height: 12px; border-radius: 50%; }
+    .series-chip .cnt { color: var(--muted); font-weight: 500; }
+    .series-chip .del { border: none; background: transparent; color: #ef4444; font-size: 16px; cursor: pointer; padding: 0 4px; border-radius: 50%; line-height: 1; }
+    .series-chip .del:hover { background: #fee2e2; }
+    .series-empty { color: var(--muted); font-style: italic; font-size: 13px; }
+  </style>
+</head>
+<body>
+  <header class="app-header">
+    <h1>Image Click Coordinates</h1>
+    <span class="version-badge">V8</span>
+    <p class="subtitle">Digitize a chart or curve image — click points or auto-trace curves and export real coordinates.</p>
+  </header>
+
+  <nav class="tabs">
+    <button class="tab active" data-tab="manual">Manual</button>
+    <button class="tab" data-tab="auto">Automatic</button>
+  </nav>
+
+  <!-- ==================== MANUAL PANEL ==================== -->
+  <section id="panel-manual" class="panel active">
+
+    <div class="card">
+      <div class="steps">
+        <span><b>1.</b> Add an image (open, drag &amp; drop, or paste with Ctrl+V)</span>
+        <span><b>2.</b> Name the axes, choose scales &amp; enter calibration</span>
+        <span><b>3.</b> Pick the origin &amp; a reference on the image</span>
+        <span><b>4.</b> Click the curve — points auto-sort by X (drag to fine-tune)</span>
+        <span><b>5.</b> Toggle Plot to check the fit, then export CSV / JSON</span>
+      </div>
+    </div>
+
+    <!-- toolbar: image input + session load -->
+    <div class="card toolbar">
+      <label class="btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h5l2 2h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+        Open image
+        <input type="file" id="fileInput" accept="image/*" hidden>
+      </label>
+      <button id="pasteBtn" class="btn btn-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/></svg>
+        Paste image
+      </button>
+      <label class="btn btn-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        Load JSON
+        <input type="file" id="jsonInput" accept="application/json,.json" hidden>
+      </label>
+      <button id="loadExampleBtn" class="btn btn-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-4 4-2-2-4 4"/></svg>
+        Load example image
+      </button>
+
+      <label class="field range-field" style="margin-left:auto">
+        <span>Lens zoom (<span id="zoomVal">3</span>×)</span>
+        <input type="range" id="zoom" min="2" max="6" step="0.5" value="3">
+      </label>
+      <div class="toolbar-hint">Tip: take a screenshot, copy it, then press <b>Ctrl + V</b> here — no need to save the image to a file.</div>
+    </div>
+
+    <!-- axes + calibration in one zone (above the image) -->
+    <div class="card">
+      <h2>Axes &amp; calibration</h2>
+      <table class="calib-table">
+        <thead>
+          <tr>
+            <th>Reference</th>
+            <th>Pixel (x, y)</th>
+            <th><input type="text" id="xLabel" class="axis-name-input" value="X" maxlength="24" title="Rename the X axis (used in the table &amp; export)"></th>
+            <th><input type="text" id="yLabel" class="axis-name-input" value="Y" maxlength="24" title="Rename the Y axis (used in the table &amp; export)"></th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"><i class="swatch sw-origin"></i>Origin</th>
+            <td class="pixel-cell" id="originPixel">not set</td>
+            <td><input type="number" id="ox" value="0" step="any"></td>
+            <td><input type="number" id="oy" value="300" step="any"></td>
+            <td><button id="pickOrigin" class="btn-pick">Pick origin</button></td>
+          </tr>
+          <tr>
+            <th scope="row"><i class="swatch sw-ref"></i>Reference</th>
+            <td class="pixel-cell" id="refPixel">not set</td>
+            <td><input type="number" id="rx" value="14" step="any"></td>
+            <td><input type="number" id="ry" value="550" step="any"></td>
+            <td><button id="pickRef" class="btn-pick">Pick reference</button></td>
+          </tr>
+          <tr class="scale-row">
+            <th scope="row">Scale</th>
+            <td></td>
+            <td><select id="scaleX"><option value="linear">Linear</option><option value="log10">Log 10</option></select></td>
+            <td><select id="scaleY"><option value="linear">Linear</option><option value="log10">Log 10</option></select></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="hint">Rename the <b>X</b> / <b>Y</b> headers to your axis names. Pick the origin &amp; reference on the image (or drag the O / R markers), type their values, and choose each axis scale in the bottom <b>Scale</b> row. The table updates automatically.</p>
+    </div>
+
+    <!-- image + overlays -->
+    <div class="card image-card">
+      <div class="img-tools">
+        <button id="plotBtn" class="btn btn-ghost">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M6 15l4-4 3 3 5-7"/></svg>
+          Plot overlay
+        </button>
+        <span class="hint" style="margin:0">Draws a dashed line through your points (in X order) so you can compare with the underlying curve — updates live as you drag.</span>
+      </div>
+      <div id="imageContainer" class="empty">
+        <img id="image" alt="Click on the image">
+        <div id="dropHint">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 9l5-5 5 5"/><path d="M12 4v12"/></svg>
+          <div><b>Drop an image here</b></div>
+          <div>or use <b>Open image</b> &middot; paste with <b>Ctrl + V</b></div>
+        </div>
+        <svg id="plotOverlay" preserveAspectRatio="none"><polyline id="plotLine" points=""></polyline></svg>
+        <div id="markers"></div>
+        <div id="liveCoord"></div>
+        <div id="lens"><svg id="lensSvg" viewBox="0 0 150 150"><polyline id="lensPlotLine" points=""></polyline></svg><span class="cross-h"></span><span class="cross-v"></span><span class="cross-dot"></span></div>
+      </div>
+      <div id="statusBar" class="status empty"><span class="dot9"></span><span id="statusText"></span></div>
+      <div class="legend">
+        <span><i class="swatch sw-origin"></i> Origin</span>
+        <span><i class="swatch sw-ref"></i> Reference</span>
+        <span><i class="swatch" style="background:var(--point)"></i> Saved point</span>
+        <span><i class="swatch" style="background:var(--plot)"></i> Plot line</span>
+        <span>Drag any marker to move it. Hover a table row to highlight its point.</span>
+      </div>
+    </div>
+
+    <!-- points -->
+    <div class="card">
+      <div class="points-header">
+        <h2>Points <span id="pointCount" class="count">0</span></h2>
+        <div class="export-controls">
+          <span class="delim-label">Separator</span>
+          <select id="delimiter" class="mini-select" style="min-width:70px">
+            <option value=",">, (comma)</option>
+            <option value=";">; (semicolon)</option>
+            <option value="tab">Tab</option>
+          </select>
+          <input type="text" id="fileNameInput" class="name-input" placeholder="File name — default Extract_date_time">
+          <button id="saveCsv" class="btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+            Save CSV
+          </button>
+          <button id="saveJson" class="btn btn-ghost">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V5a2 2 0 0 1 2-2h2M4 17v2a2 2 0 0 0 2 2h2M20 7V5a2 2 0 0 0-2-2h-2M20 17v2a2 2 0 0 1-2 2h-2"/></svg>
+            Save JSON
+          </button>
+          <button id="clearTable" class="btn btn-ghost">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4h8v2M19 6l-1 14H6L5 6"/></svg>
+            Clear
+          </button>
+        </div>
+      </div>
+      <table class="points-table" id="pointsTable">
+        <thead>
+          <tr><th class="hx">X</th><th class="hy">Y</th><th style="width:50px"></th></tr>
+        </thead>
+        <tbody id="pointsBody"></tbody>
+      </table>
+      <p class="hint" id="pixelNote" style="display:none">Not calibrated yet — showing raw pixel coordinates. Set the origin &amp; reference to get real values.</p>
+    </div>
+  </section>
+
+  <!-- ==================== AUTOMATIC PANEL ==================== -->
+  <section id="panel-auto" class="panel">
+
+    <div class="card">
+      <div class="steps">
+        <span><b>1.</b> Add an image (shared with Manual — open, drop, or Ctrl+V)</span>
+        <span><b>2.</b> Calibrate: pick origin &amp; reference, set values &amp; scales</span>
+        <span><b>3.</b> Draw a region around ONE curve</span>
+        <span><b>4.</b> Extract &amp; save it as a named series (repeat per curve)</span>
+        <span><b>5.</b> Export CSV / JSON</span>
+      </div>
+    </div>
+
+    <!-- image toolbar -->
+    <div class="card auto-toolbar">
+      <label class="btn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 7h5l2 2h11v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V7z"/></svg>
+        Open image
+        <input type="file" id="autoFileInput" accept="image/*" hidden>
+      </label>
+      <button id="autoPasteBtn" class="btn btn-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="8" y="2" width="8" height="4" rx="1"/><path d="M8 4H6a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2h-2"/></svg>
+        Paste image
+      </button>
+      <label class="btn btn-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+        Load JSON
+        <input type="file" id="autoJsonInput" accept="application/json,.json" hidden>
+      </label>
+      <button id="autoLoadExampleBtn" class="btn btn-ghost">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="16" rx="2"/><circle cx="9" cy="10" r="2"/><path d="M21 16l-5-5-4 4-2-2-4 4"/></svg>
+        Load example image
+      </button>
+      <span class="toolbar-hint">The image is shared with the Manual tab. You can paste a screenshot with <b>Ctrl + V</b> anytime.</span>
+    </div>
+
+    <!-- auto calibration -->
+    <div class="card">
+      <h2>Axes &amp; calibration (Automatic)</h2>
+      <table class="calib-table">
+        <thead>
+          <tr>
+            <th>Reference</th>
+            <th>Pixel (x, y)</th>
+            <th><input type="text" id="aXLabel" class="axis-name-input" value="X" maxlength="24" title="Rename the X axis"></th>
+            <th><input type="text" id="aYLabel" class="axis-name-input" value="Y" maxlength="24" title="Rename the Y axis"></th>
+            <th>Action</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th scope="row"><i class="swatch sw-origin"></i>Origin</th>
+            <td class="pixel-cell" id="aOriginPixel">not set</td>
+            <td><input type="number" id="aox" value="0" step="any"></td>
+            <td><input type="number" id="aoy" value="300" step="any"></td>
+            <td><button id="aPickOrigin" class="btn-pick">Pick origin</button></td>
+          </tr>
+          <tr>
+            <th scope="row"><i class="swatch sw-ref"></i>Reference</th>
+            <td class="pixel-cell" id="aRefPixel">not set</td>
+            <td><input type="number" id="arx" value="14" step="any"></td>
+            <td><input type="number" id="ary" value="550" step="any"></td>
+            <td><button id="aPickRef" class="btn-pick">Pick reference</button></td>
+          </tr>
+          <tr class="scale-row">
+            <th scope="row">Scale</th>
+            <td></td>
+            <td><select id="aScaleX"><option value="linear">Linear</option><option value="log10">Log 10</option></select></td>
+            <td><select id="aScaleY"><option value="linear">Linear</option><option value="log10">Log 10</option></select></td>
+            <td></td>
+          </tr>
+        </tbody>
+      </table>
+      <p class="hint">Click a “Pick” button then click that spot on the image below. Log axes need positive values.</p>
+    </div>
+
+    <!-- canvas + extraction -->
+    <div class="card">
+      <h2>Trace a curve</h2>
+      <div class="auto-controls">
+        <button id="drawRegionBtn" class="btn">Draw region</button>
+        <button id="clearRegionBtn" class="btn btn-ghost">Clear region</button>
+        <label class="ctl">Line darkness ≤ <span class="val" id="thrVal">130</span>
+          <input type="range" id="threshold" min="40" max="220" value="130">
+        </label>
+        <label class="ctl">Point spacing <span class="val" id="densVal">3</span> px
+          <input type="range" id="density" min="1" max="15" value="3">
+        </label>
+        <button id="extractBtn" class="btn">Extract curve</button>
+        <button id="autoPlotBtn" class="btn btn-ghost">Plot line</button>
+        <label class="ctl">Lens zoom <span class="val" id="autoZoomVal">3</span>×
+          <input type="range" id="autoZoom" min="2" max="6" step="0.5" value="3">
+        </label>
+      </div>
+      <div class="auto-controls" style="margin-top:2px">
+        <label class="chk"><input type="checkbox" id="showRegion" checked> Show selection region</label>
+      </div>
+      <div id="autoCanvasWrap" class="empty">
+        <canvas id="autoCanvas" width="560" height="340"></canvas>
+        <canvas id="autoLens" width="150" height="150"></canvas>
+        <div id="autoDropHint">Load or paste an image to begin<br>(shared with the Manual tab)</div>
+      </div>
+      <div id="autoStatus" class="status empty"><span class="dot9"></span><span id="autoStatusText"></span></div>
+      <div class="save-series-row">
+        <input type="text" id="seriesName" placeholder="Curve name (e.g. C_iss)">
+        <button id="saveSeriesBtn" class="btn">Save as series</button>
+      </div>
+    </div>
+
+    <!-- results -->
+    <div class="card">
+      <div class="points-header">
+        <h2>Series &amp; results</h2>
+        <div class="export-controls">
+          <span class="delim-label">Separator</span>
+          <select id="aDelimiter" class="mini-select" style="min-width:70px">
+            <option value=",">, (comma)</option>
+            <option value=";">; (semicolon)</option>
+            <option value="tab">Tab</option>
+          </select>
+          <input type="text" id="autoFileNameInput" class="name-input" placeholder="File name — default Extract_date_time">
+          <button id="autoSaveCsv" class="btn">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"/><path d="M17 21v-8H7v8M7 3v5h8"/></svg>
+            Save CSV
+          </button>
+          <button id="autoSaveJson" class="btn btn-ghost">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7V5a2 2 0 0 1 2-2h2M4 17v2a2 2 0 0 0 2 2h2M20 7V5a2 2 0 0 0-2-2h-2M20 17v2a2 2 0 0 1-2 2h-2"/></svg>
+            Save JSON
+          </button>
+        </div>
+      </div>
+      <div id="seriesList"></div>
+      <table class="points-table">
+        <thead><tr><th style="width:60px">#</th><th class="ahx">X</th><th class="ahy">Y</th></tr></thead>
+        <tbody id="autoPreviewBody"></tbody>
+      </table>
+      <p class="hint" id="autoPixelNote" style="display:none">Not calibrated yet — showing raw pixel coordinates.</p>
+    </div>
+  </section>
+
+  <script>
+  (function () {
+    "use strict";
+    const $ = (id) => document.getElementById(id);
+
+    const image = $("image");
+    const container = $("imageContainer");
+    const markers = $("markers");
+    const lens = $("lens");
+    const liveCoord = $("liveCoord");
+    const statusBar = $("statusBar");
+    const statusText = $("statusText");
+    const fileInput = $("fileInput");
+    const jsonInput = $("jsonInput");
+    const pasteBtn = $("pasteBtn");
+    const xLabelInput = $("xLabel");
+    const yLabelInput = $("yLabel");
+    const scaleX = $("scaleX");
+    const scaleY = $("scaleY");
+    const zoomInput = $("zoom");
+    const zoomVal = $("zoomVal");
+    const oxIn = $("ox"), oyIn = $("oy"), rxIn = $("rx"), ryIn = $("ry");
+    const originPixel = $("originPixel"), refPixel = $("refPixel");
+    const pickOriginBtn = $("pickOrigin"), pickRefBtn = $("pickRef");
+    const pointsBody = $("pointsBody");
+    const pointCountEl = $("pointCount");
+    const delimiterSel = $("delimiter");
+    const pixelNote = $("pixelNote");
+    const plotBtn = $("plotBtn");
+    const plotLine = $("plotLine");
+    const fileNameInput = $("fileNameInput");
+    const lensPlotLine = $("lensPlotLine");
+
+    const LENS_SIZE = 150;
+
+    // Points & calibration stored in NATURAL image pixels (y up) so they stay
+    // valid across resizes and can be recomputed when parameters change.
+    const state = {
+      mode: "collect", origin: null, ref: null, points: [],
+      hasImage: false, imgW: 0, imgH: 0,
+    };
+    let currentTab = "manual";
+    let plotOn = false;
+
+    // drag state
+    let dragTarget = null, dragMoved = false, suppressClick = false;
+
+    /* ---------------- tabs ---------------- */
+    function switchTab(name) {
+      currentTab = name;
+      document.querySelectorAll(".tab").forEach((t) => t.classList.toggle("active", t.dataset.tab === name));
+      document.querySelectorAll(".panel").forEach((p) => p.classList.remove("active"));
+      $("panel-" + name).classList.add("active");
+    }
+    document.querySelectorAll(".tab").forEach((tab) =>
+      tab.addEventListener("click", () => switchTab(tab.dataset.tab))
+    );
+
+    /* ---------------- geometry helpers ---------------- */
+    function pointerToModel(clientX, clientY) {
+      const rect = image.getBoundingClientRect();
+      let fx = (clientX - rect.left) / rect.width;
+      let fy = (clientY - rect.top) / rect.height;
+      fx = Math.max(0, Math.min(1, fx));
+      fy = Math.max(0, Math.min(1, fy));
+      return { mx: fx * state.imgW, my: state.imgH - fy * state.imgH };
+    }
+    const eventToModel = (e) => pointerToModel(e.clientX, e.clientY);
+    const isCalibrated = () => state.origin && state.ref;
+
+    /* ---------------- coordinate transform ---------------- */
+    function modelToData(p) {
+      if (!isCalibrated()) return null;
+      const oX = parseFloat(oxIn.value), oY = parseFloat(oyIn.value);
+      const rX = parseFloat(rxIn.value), rY = parseFloat(ryIn.value);
+      const o = state.origin, r = state.ref;
+      const dmx = r.mx - o.mx, dmy = r.my - o.my;
+      let X, Y;
+      if (scaleX.value === "linear") {
+        X = dmx === 0 ? NaN : (rX - oX) * (p.mx - o.mx) / dmx + oX;
+      } else {
+        X = (oX > 0 && rX > 0 && dmx !== 0) ? Math.pow(rX / oX, (p.mx - o.mx) / dmx) * oX : NaN;
+      }
+      if (scaleY.value === "linear") {
+        Y = dmy === 0 ? NaN : (rY - oY) * (p.my - o.my) / dmy + oY;
+      } else {
+        Y = (oY > 0 && rY > 0 && dmy !== 0) ? Math.pow(rY / oY, (p.my - o.my) / dmy) * oY : NaN;
+      }
+      return { X, Y };
+    }
+
+    function fmt(v) {
+      if (v === null || v === undefined || isNaN(v)) return "—";
+      if (v === 0) return "0";
+      const a = Math.abs(v);
+      if (a >= 1e-4 && a < 1e6) return Number(v.toFixed(4)).toString();
+      return v.toExponential(4);
+    }
+    // pixel coords (top-based) for a stored model point
+    const pxOf = (p) => ({ x: Math.round(p.mx), y: Math.round(state.imgH - p.my) });
+
+    // Keep points sorted ascending by X (real value if calibrated, else pixel X).
+    function sortKey(p) { const d = modelToData(p); return d && !isNaN(d.X) ? d.X : p.mx; }
+    function sortPoints() { state.points.sort((a, b) => sortKey(a) - sortKey(b)); }
+
+    /* ---------------- shared helpers (calibration, filename, plot) ---------------- */
+    function calManualToAuto() {
+      aox.value = oxIn.value; aoy.value = oyIn.value; arx.value = rxIn.value; ary.value = ryIn.value;
+      aScaleX.value = scaleX.value; aScaleY.value = scaleY.value;
+      aXLabel.value = xLabelInput.value; aYLabel.value = yLabelInput.value;
+    }
+    function calAutoToManual() {
+      oxIn.value = aox.value; oyIn.value = aoy.value; rxIn.value = arx.value; ryIn.value = ary.value;
+      scaleX.value = aScaleX.value; scaleY.value = aScaleY.value;
+      xLabelInput.value = aXLabel.value; yLabelInput.value = aYLabel.value;
+    }
+    function syncCalibration(source) {
+      if (source === "manual") calManualToAuto(); else calAutoToManual();
+      applyAxisNames(); applyAutoAxisNames();
+      updateAutoCalDisplay();
+      sortPoints(); redraw();
+      autoRedraw(); renderPreviewTable();
+    }
+    function defaultName() {
+      const d = new Date(), p = (n) => String(n).padStart(2, "0");
+      return "Extract_" + d.getFullYear() + "_" + p(d.getMonth() + 1) + "_" + p(d.getDate()) + "_" + p(d.getHours()) + "_" + p(d.getMinutes()) + "_" + p(d.getSeconds());
+    }
+    function fileBase(inputEl) {
+      const v = (inputEl && inputEl.value ? inputEl.value : "").trim();
+      return (v || defaultName()).replace(/\.(csv|json)$/i, "");
+    }
+    function setPlot(on) {
+      plotOn = on;
+      plotBtn.classList.toggle("armed", plotOn);
+      container.classList.toggle("plotting", plotOn);
+      autoPlotBtn.classList.toggle("armed", plotOn);
+      renderPlot();
+      if (state.hasImage) autoRedraw();
+    }
+
+    /* ---------------- rendering ---------------- */
+    function redraw() { renderMarkers(); renderTable(); renderPlot(); updateCalibDisplay(); }
+
+    function renderMarkers() {
+      markers.innerHTML = "";
+      if (!state.hasImage || !state.imgW || !state.imgH) return;
+      const rect = image.getBoundingClientRect();
+      const w = rect.width, h = rect.height, nW = state.imgW, nH = state.imgH;
+
+      const place = (p, type, cls, text, index) => {
+        const el = document.createElement("div");
+        el.className = "marker " + cls;
+        el.dataset.type = type;
+        if (index != null) el.dataset.index = index;
+        el.style.left = (p.mx / nW * w) + "px";
+        el.style.top = ((nH - p.my) / nH * h) + "px";
+        const dot = document.createElement("div"); dot.className = "dot"; el.appendChild(dot);
+        if (text !== undefined) {
+          const lbl = document.createElement("span"); lbl.className = "marker-label"; lbl.textContent = text; el.appendChild(lbl);
+        }
+        el.addEventListener("mousedown", startDrag);
+        markers.appendChild(el);
+      };
+      if (state.origin) place(state.origin, "origin", "marker-origin", "O");
+      if (state.ref) place(state.ref, "ref", "marker-ref", "R");
+      state.points.forEach((p, i) => place(p, "point", "marker-point", i + 1, i));
+    }
+
+    // dashed line through the points (in X order), overlaid on the image
+    function renderPlot() {
+      if (!plotOn || !state.hasImage || state.points.length < 2) { plotLine.setAttribute("points", ""); return; }
+      const rect = image.getBoundingClientRect();
+      const w = rect.width, h = rect.height, nW = state.imgW, nH = state.imgH;
+      const pts = state.points
+        .map((p) => (p.mx / nW * w).toFixed(1) + "," + ((nH - p.my) / nH * h).toFixed(1))
+        .join(" ");
+      plotLine.setAttribute("points", pts);
+    }
+
+    function renderTable() {
+      pointsBody.innerHTML = "";
+      const calibrated = isCalibrated();
+      pixelNote.style.display = (!calibrated && state.points.length) ? "block" : "none";
+
+      if (state.points.length === 0) {
+        pointsBody.innerHTML = '<tr class="empty-row"><td colspan="3">No points yet — click on the image to add one.</td></tr>';
+      } else {
+        state.points.forEach((p, i) => {
+          const d = modelToData(p);
+          const tr = document.createElement("tr");
+          const cX = document.createElement("td");
+          const cY = document.createElement("td");
+          if (d) { cX.textContent = fmt(d.X); cY.textContent = fmt(d.Y); }
+          else {
+            const px = pxOf(p);
+            cX.textContent = px.x; cY.textContent = px.y;
+            cX.className = cY.className = "pixel-val";
+            cX.title = cY.title = "pixel coordinate (not calibrated)";
+          }
+          const cDel = document.createElement("td");
+          const del = document.createElement("button");
+          del.className = "row-del"; del.title = "Delete point"; del.textContent = "×";
+          del.addEventListener("click", () => { state.points.splice(i, 1); redraw(); });
+          cDel.appendChild(del);
+          tr.append(cX, cY, cDel);
+          tr.addEventListener("mouseenter", () => highlightMarker(i, true));
+          tr.addEventListener("mouseleave", () => highlightMarker(i, false));
+          pointsBody.appendChild(tr);
+        });
+      }
+      pointCountEl.textContent = state.points.length;
+    }
+
+    function highlightMarker(i, on) {
+      const el = markers.querySelectorAll(".marker-point")[i];
+      if (el) el.classList.toggle("hi", on);
+    }
+
+    function updateCalibDisplay() {
+      originPixel.textContent = state.origin ? pxOf(state.origin).x + ", " + pxOf(state.origin).y : "not set";
+      refPixel.textContent = state.ref ? pxOf(state.ref).x + ", " + pxOf(state.ref).y : "not set";
+    }
+
+    /* ---------------- status ---------------- */
+    function setStatus() {
+      if (!state.hasImage) {
+        statusBar.className = "status empty";
+        statusText.textContent = "Add an image to start — open a file, drag & drop, or press Ctrl + V to paste.";
+        return;
+      }
+      statusBar.className = "status " + state.mode;
+      if (state.mode === "origin") statusText.textContent = "Click on the image to set the ORIGIN point.";
+      else if (state.mode === "ref") statusText.textContent = "Click on the image to set the REFERENCE point.";
+      else statusText.textContent = isCalibrated()
+        ? "Collecting — every click saves a point (auto-sorted by X). Drag a marker to move it."
+        : "Set the origin and reference to calibrate. You can already click points; values fill in once calibrated.";
+      pickOriginBtn.classList.toggle("armed", state.mode === "origin");
+      pickRefBtn.classList.toggle("armed", state.mode === "ref");
+      container.classList.toggle("picking", state.mode !== "collect");
+    }
+
+    /* ---------------- pick / click ---------------- */
+    pickOriginBtn.addEventListener("click", () => {
+      if (!state.hasImage) { alert("Load an image first."); return; }
+      state.mode = state.mode === "origin" ? "collect" : "origin"; setStatus();
+    });
+    pickRefBtn.addEventListener("click", () => {
+      if (!state.hasImage) { alert("Load an image first."); return; }
+      state.mode = state.mode === "ref" ? "collect" : "ref"; setStatus();
+    });
+
+    image.addEventListener("click", (e) => {
+      if (!state.hasImage) return;
+      if (suppressClick) { suppressClick = false; return; }
+      const m = eventToModel(e);
+      if (state.mode === "origin") { state.origin = m; state.mode = "collect"; updateAutoCalDisplay(); redraw(); autoRedraw(); setStatus(); }
+      else if (state.mode === "ref") { state.ref = m; state.mode = "collect"; updateAutoCalDisplay(); redraw(); autoRedraw(); setStatus(); }
+      else { state.points.push(m); sortPoints(); redraw(); }
+    });
+
+    /* ---------------- drag markers ---------------- */
+    function startDrag(e) {
+      if (state.mode !== "collect") return;
+      e.preventDefault(); e.stopPropagation();
+      const el = e.currentTarget;
+      const type = el.dataset.type;
+      // track points by object reference so live re-sorting doesn't lose the grip
+      dragTarget = (type === "point")
+        ? { type: "point", ref: state.points[+el.dataset.index] }
+        : { type: type };
+      dragMoved = false;
+      document.addEventListener("mousemove", onDrag);
+      document.addEventListener("mouseup", endDrag);
+    }
+    function onDrag(e) {
+      if (!dragTarget) return;
+      dragMoved = true;
+      const m = pointerToModel(e.clientX, e.clientY);
+      if (dragTarget.type === "origin") { state.origin = m; updateAutoCalDisplay(); autoRedraw(); }
+      else if (dragTarget.type === "ref") { state.ref = m; updateAutoCalDisplay(); autoRedraw(); }
+      else if (dragTarget.ref) { dragTarget.ref.mx = m.mx; dragTarget.ref.my = m.my; }
+      sortPoints();
+      redraw();
+      updateLens(clampToRect(e).ex, clampToRect(e).ey, image.getBoundingClientRect());
+    }
+    function endDrag() {
+      document.removeEventListener("mousemove", onDrag);
+      document.removeEventListener("mouseup", endDrag);
+      if (dragMoved) { suppressClick = true; setTimeout(() => (suppressClick = false), 30); }
+      dragTarget = null;
+    }
+    function clampToRect(e) {
+      const rect = image.getBoundingClientRect();
+      return { ex: Math.max(0, Math.min(rect.width, e.clientX - rect.left)), ey: Math.max(0, Math.min(rect.height, e.clientY - rect.top)) };
+    }
+
+    /* ---------------- live readout + magnifier lens ---------------- */
+    container.addEventListener("mousemove", (e) => {
+      if (!state.hasImage) return;
+      const rect = image.getBoundingClientRect();
+      const ex = e.clientX - rect.left, ey = e.clientY - rect.top;
+      const m = pointerToModel(e.clientX, e.clientY);
+      const d = modelToData(m);
+      const xN = xLabelInput.value || "X", yN = yLabelInput.value || "Y";
+      liveCoord.textContent = d ? xN + ": " + fmt(d.X) + "   " + yN + ": " + fmt(d.Y)
+                                : "pixel: " + Math.round(m.mx) + ", " + Math.round(state.imgH - m.my);
+      liveCoord.style.left = Math.min(ex + 14, rect.width - 6) + "px";
+      liveCoord.style.top = Math.max(ey - 30, 2) + "px";
+      updateLens(ex, ey, rect);
+    });
+
+    function updateLens(ex, ey, rect) {
+      const zoom = parseFloat(zoomInput.value);
+      lens.style.backgroundImage = 'url("' + image.src + '")';
+      lens.style.backgroundSize = (rect.width * zoom) + "px " + (rect.height * zoom) + "px";
+      lens.style.backgroundPosition = (-(ex * zoom - LENS_SIZE / 2)) + "px " + (-(ey * zoom - LENS_SIZE / 2)) + "px";
+      // draw the plotted curve inside the lens (zoomed), so the extracted line shows in the zoom
+      if (plotOn && state.points.length > 1) {
+        const nW = state.imgW, nH = state.imgH;
+        lensPlotLine.setAttribute("points", state.points.map((p) => {
+          const vx = p.mx / nW * rect.width, vy = (nH - p.my) / nH * rect.height;
+          return ((vx - ex) * zoom + LENS_SIZE / 2).toFixed(1) + "," + ((vy - ey) * zoom + LENS_SIZE / 2).toFixed(1);
+        }).join(" "));
+      } else {
+        lensPlotLine.setAttribute("points", "");
+      }
+      let lx = ex + 22, ly = ey - LENS_SIZE - 22;
+      if (ly < 0) ly = ey + 22;
+      if (lx + LENS_SIZE > rect.width) lx = ex - LENS_SIZE - 22;
+      if (lx < 0) lx = 2;
+      lens.style.left = lx + "px";
+      lens.style.top = ly + "px";
+    }
+    container.addEventListener("mouseenter", () => { if (state.hasImage) { lens.style.display = "block"; liveCoord.style.display = "block"; } });
+    container.addEventListener("mouseleave", () => { lens.style.display = "none"; liveCoord.style.display = "none"; });
+
+    /* ---------------- plot toggle ---------------- */
+    plotBtn.addEventListener("click", () => setPlot(!plotOn));
+
+    /* ---------------- shared calibration recompute ---------------- */
+    [oxIn, oyIn, rxIn, ryIn, scaleX, scaleY].forEach((el) => el.addEventListener("input", () => syncCalibration("manual")));
+
+    function applyAxisNames() {
+      const xN = xLabelInput.value || "X", yN = yLabelInput.value || "Y";
+      document.querySelectorAll(".hx").forEach((e) => (e.textContent = xN));
+      document.querySelectorAll(".hy").forEach((e) => (e.textContent = yN));
+    }
+    xLabelInput.addEventListener("input", () => syncCalibration("manual"));
+    yLabelInput.addEventListener("input", () => syncCalibration("manual"));
+    zoomInput.addEventListener("input", () => { zoomVal.textContent = zoomInput.value; autoZoom.value = zoomInput.value; autoZoomVal.textContent = zoomInput.value; });
+    fileNameInput.addEventListener("input", () => { autoFileNameInput.value = fileNameInput.value; });
+
+    /* ---------------- image loading (file / drop / paste) ---------------- */
+    function loadImage(fileOrBlob) {
+      if (!fileOrBlob) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => setImageSrc(ev.target.result);
+      reader.readAsDataURL(fileOrBlob);
+    }
+    function setImageSrc(dataUrl) {
+      image.onload = () => {
+        state.imgW = image.naturalWidth;
+        state.imgH = image.naturalHeight;
+        state.hasImage = true;
+        container.classList.remove("empty");
+        image.style.display = "block";
+        redraw(); setStatus();
+        autoOnImageLoaded();
+      };
+      image.src = dataUrl;
+    }
+
+    fileInput.addEventListener("change", (e) => { if (e.target.files[0]) loadImage(e.target.files[0]); fileInput.value = ""; });
+
+    // drag & drop anywhere on the page
+    window.addEventListener("dragover", (e) => { e.preventDefault(); container.classList.add("dragover"); });
+    window.addEventListener("dragleave", (e) => { if (!e.relatedTarget) container.classList.remove("dragover"); });
+    window.addEventListener("drop", (e) => {
+      e.preventDefault(); container.classList.remove("dragover");
+      const f = e.dataTransfer && e.dataTransfer.files && e.dataTransfer.files[0];
+      if (f && f.type.indexOf("image/") === 0) loadImage(f);
+    });
+
+    // paste with Ctrl+V (clipboard image)
+    document.addEventListener("paste", (e) => {
+      const items = (e.clipboardData || window.clipboardData) && (e.clipboardData || window.clipboardData).items;
+      if (!items) return;
+      for (const it of items) {
+        if (it.type && it.type.indexOf("image") === 0) {
+          const blob = it.getAsFile();
+          if (blob) { e.preventDefault(); loadImage(blob); return; }
+        }
+      }
+    });
+
+    // shared paste-from-clipboard (used by both tabs' Paste buttons)
+    async function pasteFromClipboard() {
+      try {
+        if (navigator.clipboard && navigator.clipboard.read) {
+          const items = await navigator.clipboard.read();
+          for (const it of items) {
+            const type = it.types.find((t) => t.startsWith("image/"));
+            if (type) { const blob = await it.getType(type); loadImage(blob); return; }
+          }
+          alert("No image found in the clipboard. Copy an image first, then click Paste (or press Ctrl + V).");
+        } else {
+          alert("This browser can't read the clipboard here. Press Ctrl + V instead.");
+        }
+      } catch (err) {
+        alert("Couldn't read the clipboard automatically. Press Ctrl + V to paste the image.");
+      }
+    }
+    pasteBtn.addEventListener("click", pasteFromClipboard);
+
+    /* ---------------- CSV / JSON export ---------------- */
+    function download(content, name, type) {
+      const blob = new Blob([content], { type });
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a"); a.href = url; a.download = name; a.click();
+      URL.revokeObjectURL(url);
+    }
+    function csvField(v, delim) {
+      v = String(v);
+      if (v.includes(delim) || v.includes('"') || v.includes("\n")) return '"' + v.replace(/"/g, '""') + '"';
+      return v;
+    }
+
+    $("saveCsv").addEventListener("click", () => {
+      if (state.points.length === 0) { alert("No points to save yet."); return; }
+      const delim = delimiterSel.value === "tab" ? "\t" : delimiterSel.value;
+      const xN = xLabelInput.value || "X", yN = yLabelInput.value || "Y";
+      const lines = [csvField(xN, delim) + delim + csvField(yN, delim)];
+      state.points.forEach((p) => {
+        const d = modelToData(p);
+        let X, Y;
+        if (d) { X = isNaN(d.X) ? "" : d.X; Y = isNaN(d.Y) ? "" : d.Y; }
+        else { const px = pxOf(p); X = px.x; Y = px.y; }
+        lines.push(X + delim + Y);
+      });
+      download(lines.join("\n"), fileBase(fileNameInput) + ".csv", "text/csv");
+    });
+
+    function collectState() {
+      return {
+        app: "Image Click Coordinates", version: "V8",
+        xLabel: xLabelInput.value || "X", yLabel: yLabelInput.value || "Y",
+        scaleX: scaleX.value, scaleY: scaleY.value,
+        delimiter: delimiterSel.value, activeTab: currentTab,
+        image: state.hasImage ? { naturalWidth: state.imgW, naturalHeight: state.imgH } : null,
+        calibration: {
+          origin: state.origin ? { mx: state.origin.mx, my: state.origin.my, valueX: parseFloat(oxIn.value), valueY: parseFloat(oyIn.value) } : null,
+          ref: state.ref ? { mx: state.ref.mx, my: state.ref.my, valueX: parseFloat(rxIn.value), valueY: parseFloat(ryIn.value) } : null,
+        },
+        points: state.points.map((p) => {
+          const d = modelToData(p), px = pxOf(p);
+          return { mx: p.mx, my: p.my, x: d ? d.X : px.x, y: d ? d.Y : px.y };
+        }),
+      };
+    }
+    $("saveJson").addEventListener("click", () => {
+      download(JSON.stringify(collectState(), null, 2), fileBase(fileNameInput) + ".json", "application/json");
+    });
+
+    /* ---------------- JSON load / restore ---------------- */
+    function applyState(s) {
+      if (!s || typeof s !== "object") throw new Error("Invalid file");
+      xLabelInput.value = s.xLabel != null ? s.xLabel : "X";
+      yLabelInput.value = s.yLabel != null ? s.yLabel : "Y";
+      scaleX.value = s.scaleX || "linear";
+      scaleY.value = s.scaleY || "linear";
+      if (s.delimiter) delimiterSel.value = s.delimiter;
+
+      if (s.image && !state.hasImage) { state.imgW = s.image.naturalWidth || 0; state.imgH = s.image.naturalHeight || 0; }
+
+      const cal = s.calibration || {};
+      if (cal.origin) { state.origin = { mx: cal.origin.mx, my: cal.origin.my }; if (cal.origin.valueX != null) oxIn.value = cal.origin.valueX; if (cal.origin.valueY != null) oyIn.value = cal.origin.valueY; }
+      else state.origin = null;
+      if (cal.ref) { state.ref = { mx: cal.ref.mx, my: cal.ref.my }; if (cal.ref.valueX != null) rxIn.value = cal.ref.valueX; if (cal.ref.valueY != null) ryIn.value = cal.ref.valueY; }
+      else state.ref = null;
+
+      state.points = Array.isArray(s.points) ? s.points.map((p) => ({ mx: p.mx, my: p.my })) : [];
+      sortPoints();
+
+      calManualToAuto();
+      applyAxisNames(); applyAutoAxisNames(); updateAutoCalDisplay();
+      if (s.activeTab) switchTab(s.activeTab);
+      redraw(); autoRedraw(); renderPreviewTable(); setStatus();
+
+      if (!state.hasImage) alert("Session loaded. The points are restored in the table — load the matching image to see them positioned on it.");
+    }
+
+    jsonInput.addEventListener("change", (e) => {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => {
+        try { applyState(JSON.parse(ev.target.result)); }
+        catch (err) { alert("Could not read this JSON session file."); }
+      };
+      reader.readAsText(file);
+      jsonInput.value = "";
+    });
+
+    $("clearTable").addEventListener("click", () => {
+      if (state.points.length && !confirm("Clear all collected points?")) return;
+      state.points = []; redraw();
+    });
+
+    window.addEventListener("resize", () => { renderMarkers(); renderPlot(); });
+
+    /* ==================================================================== */
+    /* ==================== AUTOMATIC TAB ================================== */
+    /* ==================================================================== */
+    const autoView = $("autoCanvas");
+    const autoCtx = autoView.getContext("2d");
+    const autoWrap = $("autoCanvasWrap");
+    const pixCanvas = document.createElement("canvas");
+    const pixCtx = pixCanvas.getContext("2d", { willReadFrequently: true });
+
+    const aXLabel = $("aXLabel"), aYLabel = $("aYLabel");
+    const aScaleX = $("aScaleX"), aScaleY = $("aScaleY");
+    const aox = $("aox"), aoy = $("aoy"), arx = $("arx"), ary = $("ary");
+    const aOriginPixel = $("aOriginPixel"), aRefPixel = $("aRefPixel");
+    const aPickOriginBtn = $("aPickOrigin"), aPickRefBtn = $("aPickRef");
+    const thresholdInput = $("threshold"), densityInput = $("density");
+    const thrVal = $("thrVal"), densVal = $("densVal");
+    const drawRegionBtn = $("drawRegionBtn"), clearRegionBtn = $("clearRegionBtn"), extractBtn = $("extractBtn");
+    const seriesNameInput = $("seriesName"), saveSeriesBtn = $("saveSeriesBtn");
+    const seriesListEl = $("seriesList"), autoPreviewBody = $("autoPreviewBody");
+    const aDelimiter = $("aDelimiter"), autoStatusText = $("autoStatusText"), autoStatusBar = $("autoStatus");
+    const autoPixelNote = $("autoPixelNote");
+    const autoPlotBtn = $("autoPlotBtn"), autoZoom = $("autoZoom"), autoZoomVal = $("autoZoomVal");
+    const autoLens = $("autoLens"), autoLensCtx = autoLens.getContext("2d");
+    const autoFileNameInput = $("autoFileNameInput");
+    const showRegion = $("showRegion");
+
+    let pixData = null; // Uint8ClampedArray of the natural-size image (RGBA)
+    let autoDrag = null; // {kind:'origin'|'ref'|'series'|'preview', si, pi}
+
+    const auto = {
+      mode: "idle",              // 'idle' | 'origin' | 'ref' | 'draw'
+      contour: [],               // [{x,y}] natural, top-based
+      drawing: false,
+      preview: [],               // [{x,y}] natural top-based (extracted, unsaved)
+      series: [],                // [{name,color,points:[{mx,my}]}]
+      view: { type: "preview" }, // which dataset the results table shows
+      colors: ["#e11d48", "#2563eb", "#16a34a", "#d97706", "#7c3aed", "#0891b2", "#db2777", "#65a30d"],
+    };
+
+    /* ---- shared image hook (called when any tab loads an image) ---- */
+    function autoOnImageLoaded() {
+      pixCanvas.width = state.imgW; pixCanvas.height = state.imgH;
+      pixCtx.drawImage(image, 0, 0, state.imgW, state.imgH);
+      try { pixData = pixCtx.getImageData(0, 0, state.imgW, state.imgH).data; }
+      catch (err) { pixData = null; }
+      autoView.width = state.imgW; autoView.height = state.imgH;
+      autoWrap.classList.remove("empty");
+      auto.contour = []; auto.preview = [];
+      autoRedraw(); autoSetStatus(); renderPreviewTable();
+    }
+
+    /* ---- coordinate helpers ---- */
+    function autoEventToNatural(e) {
+      const rect = autoView.getBoundingClientRect();
+      const x = (e.clientX - rect.left) * (autoView.width / rect.width);
+      const y = (e.clientY - rect.top) * (autoView.height / rect.height);
+      return { x: Math.max(0, Math.min(state.imgW, x)), y: Math.max(0, Math.min(state.imgH, y)) };
+    }
+    const modelToNatural = (p) => ({ x: p.mx, y: state.imgH - p.my });
+    const naturalToModel = (n) => ({ mx: n.x, my: state.imgH - n.y });
+    // NOTE: calibration is shared with the Manual tab; use modelToData() / isCalibrated().
+
+    /* ---- drawing on the canvas ---- */
+    function dot(x, y, r) { autoCtx.beginPath(); autoCtx.arc(x, y, r, 0, 7); autoCtx.fill(); }
+    function calMark(n, color, label, r) {
+      autoCtx.beginPath(); autoCtx.arc(n.x, n.y, r * 2, 0, 7);
+      autoCtx.fillStyle = color; autoCtx.fill();
+      autoCtx.lineWidth = Math.max(1, r / 2); autoCtx.strokeStyle = "#fff"; autoCtx.stroke();
+      autoCtx.fillStyle = "#111"; autoCtx.font = "700 " + Math.max(11, r * 3) + "px sans-serif";
+      autoCtx.fillText(label, n.x + r * 2.4, n.y - r * 1.4);
+    }
+    function autoPolyline(natPts, color, r) {
+      if (plotOn && natPts.length > 1) {
+        autoCtx.beginPath();
+        natPts.forEach((n, i) => i ? autoCtx.lineTo(n.x, n.y) : autoCtx.moveTo(n.x, n.y));
+        autoCtx.setLineDash([Math.max(6, r * 2), Math.max(4, r * 1.4)]);
+        autoCtx.lineWidth = Math.max(1.6, r * 0.75);
+        autoCtx.strokeStyle = color; autoCtx.stroke();
+        autoCtx.setLineDash([]);
+      }
+      autoCtx.fillStyle = color;
+      natPts.forEach((n) => dot(n.x, n.y, r));
+    }
+    function autoRedraw() {
+      if (!state.hasImage || !pixCanvas.width) return;
+      const W = autoView.width;
+      autoCtx.clearRect(0, 0, autoView.width, autoView.height);
+      autoCtx.drawImage(pixCanvas, 0, 0);
+      const r = Math.max(2.2, W / 320);
+
+      if (auto.contour.length && (showRegion.checked || auto.drawing)) {
+        autoCtx.beginPath();
+        auto.contour.forEach((p, i) => i ? autoCtx.lineTo(p.x, p.y) : autoCtx.moveTo(p.x, p.y));
+        if (!auto.drawing) autoCtx.closePath();
+        autoCtx.lineWidth = Math.max(1.5, W / 500);
+        autoCtx.strokeStyle = "rgba(14,155,184,.95)";
+        autoCtx.fillStyle = "rgba(14,155,184,.10)";
+        if (!auto.drawing) autoCtx.fill();
+        autoCtx.stroke();
+      }
+      auto.series.forEach((s) => autoPolyline(s.points.map(modelToNatural), s.color, r));
+      autoPolyline(auto.preview, "#ea580c", r * 1.1);
+      if (state.origin) calMark(modelToNatural(state.origin), "#e11d48", "O", r);
+      if (state.ref) calMark(modelToNatural(state.ref), "#2563eb", "R", r);
+    }
+
+    /* ---- status ---- */
+    function autoSetStatus() {
+      if (!state.hasImage) { autoStatusBar.className = "status empty"; autoStatusText.textContent = "Add an image to begin (shared with Manual — open, drop, or Ctrl + V)."; return; }
+      if (auto.mode === "origin") { autoStatusBar.className = "status origin"; autoStatusText.textContent = "Click on the image to set the ORIGIN."; }
+      else if (auto.mode === "ref") { autoStatusBar.className = "status ref"; autoStatusText.textContent = "Click on the image to set the REFERENCE."; }
+      else if (auto.mode === "draw") { autoStatusBar.className = "status draw"; autoStatusText.textContent = "Press and drag to draw a loop around ONE curve, then release."; }
+      else { autoStatusBar.className = "status collect"; autoStatusText.textContent = auto.preview.length ? "Preview ready — name it and Save as series, or adjust and Extract again." : "Draw a region around a curve, then Extract."; }
+      aPickOriginBtn.classList.toggle("armed", auto.mode === "origin");
+      aPickRefBtn.classList.toggle("armed", auto.mode === "ref");
+      drawRegionBtn.classList.toggle("armed", auto.mode === "draw");
+      autoWrap.classList.toggle("drawing", auto.mode === "draw");
+    }
+
+    /* ---- controls ---- */
+    function needImage() { if (!state.hasImage) { alert("Load an image first."); return false; } return true; }
+    aPickOriginBtn.addEventListener("click", () => { if (!needImage()) return; auto.mode = auto.mode === "origin" ? "idle" : "origin"; autoSetStatus(); });
+    aPickRefBtn.addEventListener("click", () => { if (!needImage()) return; auto.mode = auto.mode === "ref" ? "idle" : "ref"; autoSetStatus(); });
+    drawRegionBtn.addEventListener("click", () => {
+      if (!needImage()) return;
+      auto.mode = auto.mode === "draw" ? "idle" : "draw";
+      if (auto.mode === "draw") { auto.contour = []; auto.preview = []; autoRedraw(); renderPreviewTable(); }
+      autoSetStatus();
+    });
+    clearRegionBtn.addEventListener("click", () => { auto.contour = []; auto.preview = []; auto.mode = "idle"; autoRedraw(); renderPreviewTable(); autoSetStatus(); });
+
+    function autoHitTest(n) {
+      const R = Math.max(7, state.imgW / 110);
+      let best = null, bestD = R;
+      const consider = (nx, ny, target) => { const d = Math.hypot(nx - n.x, ny - n.y); if (d <= bestD) { bestD = d; best = target; } };
+      if (state.origin) { const o = modelToNatural(state.origin); consider(o.x, o.y, { kind: "origin" }); }
+      if (state.ref) { const rf = modelToNatural(state.ref); consider(rf.x, rf.y, { kind: "ref" }); }
+      auto.series.forEach((s, si) => s.points.forEach((mp, pi) => { const p = modelToNatural(mp); consider(p.x, p.y, { kind: "series", si: si, pi: pi }); }));
+      auto.preview.forEach((p, pi) => consider(p.x, p.y, { kind: "preview", pi: pi }));
+      return best;
+    }
+    function autoApplyDrag(n) {
+      if (!autoDrag) return;
+      if (autoDrag.kind === "origin") { state.origin = naturalToModel(n); updateCalibDisplay(); updateAutoCalDisplay(); redraw(); }
+      else if (autoDrag.kind === "ref") { state.ref = naturalToModel(n); updateCalibDisplay(); updateAutoCalDisplay(); redraw(); }
+      else if (autoDrag.kind === "series") { auto.series[autoDrag.si].points[autoDrag.pi] = naturalToModel(n); }
+      else if (autoDrag.kind === "preview") { auto.preview[autoDrag.pi] = { x: n.x, y: n.y }; }
+      autoRedraw(); renderPreviewTable();
+    }
+    function onAutoDrag(e) { if (autoDrag) autoApplyDrag(autoEventToNatural(e)); }
+    function endAutoDrag() { autoDrag = null; document.removeEventListener("mousemove", onAutoDrag); document.removeEventListener("mouseup", endAutoDrag); }
+    function autoUpdateLens(e, n) {
+      if (!state.hasImage) return;
+      const zoom = parseFloat(autoZoom.value);
+      const S = LENS_SIZE, srcW = S / zoom;
+      autoLensCtx.clearRect(0, 0, S, S);
+      autoLensCtx.imageSmoothingEnabled = false;
+      autoLensCtx.drawImage(autoView, n.x - srcW / 2, n.y - srcW / 2, srcW, srcW, 0, 0, S, S);
+      autoLensCtx.strokeStyle = "rgba(225,29,72,.85)"; autoLensCtx.lineWidth = 1;
+      autoLensCtx.beginPath(); autoLensCtx.moveTo(S / 2, 0); autoLensCtx.lineTo(S / 2, S); autoLensCtx.moveTo(0, S / 2); autoLensCtx.lineTo(S, S / 2); autoLensCtx.stroke();
+      const wr = autoWrap.getBoundingClientRect();
+      const ex = e.clientX - wr.left, ey = e.clientY - wr.top;
+      let lx = ex + 22, ly = ey - S - 22;
+      if (ly < 0) ly = ey + 22;
+      if (lx + S > wr.width) lx = ex - S - 22;
+      if (lx < 0) lx = 2;
+      autoLens.style.left = lx + "px"; autoLens.style.top = ly + "px"; autoLens.style.display = "block";
+    }
+
+    autoView.addEventListener("mousedown", (e) => {
+      if (!state.hasImage) return;
+      const n = autoEventToNatural(e);
+      if (auto.mode === "origin") { state.origin = naturalToModel(n); auto.mode = "idle"; updateCalibDisplay(); updateAutoCalDisplay(); redraw(); autoRedraw(); renderPreviewTable(); autoSetStatus(); }
+      else if (auto.mode === "ref") { state.ref = naturalToModel(n); auto.mode = "idle"; updateCalibDisplay(); updateAutoCalDisplay(); redraw(); autoRedraw(); renderPreviewTable(); autoSetStatus(); }
+      else if (auto.mode === "draw") { auto.drawing = true; auto.contour = [n]; autoLens.style.display = "none"; }
+      else { const hit = autoHitTest(n); if (hit) { autoDrag = hit; e.preventDefault(); document.addEventListener("mousemove", onAutoDrag); document.addEventListener("mouseup", endAutoDrag); } }
+    });
+    autoView.addEventListener("mousemove", (e) => {
+      if (!state.hasImage) return;
+      if (auto.drawing) {
+        const n = autoEventToNatural(e);
+        const last = auto.contour[auto.contour.length - 1];
+        if (!last || Math.hypot(n.x - last.x, n.y - last.y) > Math.max(1, state.imgW / 400)) { auto.contour.push(n); autoRedraw(); }
+        return;
+      }
+      const n = autoEventToNatural(e);
+      if (auto.mode === "idle") autoView.style.cursor = autoHitTest(n) ? "grab" : "crosshair";
+      autoUpdateLens(e, n);
+    });
+    window.addEventListener("mouseup", () => {
+      if (auto.drawing) { auto.drawing = false; auto.mode = "idle"; autoRedraw(); autoSetStatus(); }
+    });
+    autoWrap.addEventListener("mouseenter", () => { if (state.hasImage && auto.mode !== "draw") autoLens.style.display = "block"; });
+    autoWrap.addEventListener("mouseleave", () => { autoLens.style.display = "none"; });
+
+    /* ---- extraction ---- */
+    function spansAtX(x, poly) {
+      const ys = [];
+      for (let i = 0; i < poly.length; i++) {
+        const a = poly[i], b = poly[(i + 1) % poly.length];
+        if ((a.x <= x && b.x > x) || (b.x <= x && a.x > x)) {
+          const t = (x - a.x) / (b.x - a.x);
+          ys.push(a.y + t * (b.y - a.y));
+        }
+      }
+      ys.sort((p, q) => p - q);
+      const spans = [];
+      for (let i = 0; i + 1 < ys.length; i += 2) spans.push([Math.ceil(ys[i]), Math.floor(ys[i + 1])]);
+      return spans;
+    }
+    function nearest(arr, target) { return arr.reduce((b, v) => Math.abs(v - target) < Math.abs(b - target) ? v : b, arr[0]); }
+
+    function extract() {
+      if (!needImage()) return;
+      if (!pixData) { alert("Could not read the image pixels."); return; }
+      if (auto.contour.length < 3) { alert("Draw a region around the curve first (click ‘Draw region’)."); return; }
+      const poly = auto.contour;
+      let xmin = Infinity, xmax = -Infinity;
+      poly.forEach((p) => { xmin = Math.min(xmin, p.x); xmax = Math.max(xmax, p.x); });
+      xmin = Math.max(0, Math.floor(xmin)); xmax = Math.min(state.imgW - 1, Math.ceil(xmax));
+      const dx = parseInt(densityInput.value, 10);
+      const thr = parseInt(thresholdInput.value, 10);
+      const maxGap = 2;
+
+      const cols = [];
+      for (let x = xmin; x <= xmax; x += dx) {
+        const spans = spansAtX(x, poly);
+        if (!spans.length) continue;
+        const ys = [];
+        for (const sp of spans) {
+          const y0 = Math.max(0, sp[0]), y1 = Math.min(state.imgH - 1, sp[1]);
+          for (let y = y0; y <= y1; y++) {
+            const idx = (y * state.imgW + x) * 4;
+            if (pixData[idx + 3] < 10) continue;
+            const lum = 0.299 * pixData[idx] + 0.587 * pixData[idx + 1] + 0.114 * pixData[idx + 2];
+            if (lum <= thr) ys.push(y);
+          }
+        }
+        if (!ys.length) continue;
+        const centers = [];
+        let start = ys[0], prev = ys[0];
+        for (let k = 1; k < ys.length; k++) {
+          if (ys[k] - prev > maxGap) { centers.push((start + prev) / 2); start = ys[k]; }
+          prev = ys[k];
+        }
+        centers.push((start + prev) / 2);
+        cols.push({ x: x, centers: centers });
+      }
+      if (!cols.length) { alert("No dark pixels found in the region. Increase ‘Line darkness’ or draw a tighter region."); return; }
+
+      // seed = column with the fewest clusters, nearest the middle (a clean single-curve spot)
+      const midIdx = Math.floor(cols.length / 2);
+      let seed = midIdx, best = Infinity;
+      cols.forEach((c, i) => {
+        const score = c.centers.length * 100000 + Math.abs(i - midIdx);
+        if (score < best) { best = score; seed = i; }
+      });
+      const chosen = new Array(cols.length).fill(null);
+      const seedSpans = spansAtX(cols[seed].x, poly);
+      const seedMid = seedSpans.length ? (seedSpans[0][0] + seedSpans[seedSpans.length - 1][1]) / 2 : cols[seed].centers[0];
+      chosen[seed] = nearest(cols[seed].centers, seedMid);
+      for (let i = seed + 1; i < cols.length; i++) chosen[i] = nearest(cols[i].centers, chosen[i - 1]);
+      for (let i = seed - 1; i >= 0; i--) chosen[i] = nearest(cols[i].centers, chosen[i + 1]);
+
+      auto.preview = cols.map((c, i) => ({ x: c.x, y: chosen[i] }));
+      auto.view = { type: "preview" };
+      autoRedraw(); renderPreviewTable(); autoSetStatus();
+    }
+    extractBtn.addEventListener("click", extract);
+    thresholdInput.addEventListener("input", () => (thrVal.textContent = thresholdInput.value));
+    densityInput.addEventListener("input", () => (densVal.textContent = densityInput.value));
+
+    /* ---- calibration display + recompute ---- */
+    function updateAutoCalDisplay() {
+      aOriginPixel.textContent = state.origin ? Math.round(state.origin.mx) + ", " + Math.round(state.imgH - state.origin.my) : "not set";
+      aRefPixel.textContent = state.ref ? Math.round(state.ref.mx) + ", " + Math.round(state.imgH - state.ref.my) : "not set";
+    }
+    [aox, aoy, arx, ary, aScaleX, aScaleY].forEach((el) => el.addEventListener("input", () => syncCalibration("auto")));
+    function applyAutoAxisNames() {
+      const xN = aXLabel.value || "X", yN = aYLabel.value || "Y";
+      document.querySelectorAll(".ahx").forEach((e) => (e.textContent = xN));
+      document.querySelectorAll(".ahy").forEach((e) => (e.textContent = yN));
+    }
+    aXLabel.addEventListener("input", () => syncCalibration("auto"));
+    aYLabel.addEventListener("input", () => syncCalibration("auto"));
+    autoPlotBtn.addEventListener("click", () => setPlot(!plotOn));
+    autoZoom.addEventListener("input", () => { autoZoomVal.textContent = autoZoom.value; zoomInput.value = autoZoom.value; zoomVal.textContent = autoZoom.value; });
+    autoFileNameInput.addEventListener("input", () => { fileNameInput.value = autoFileNameInput.value; });
+
+    /* ---- series ---- */
+    function escapeHtml(s) { return String(s).replace(/[&<>"]/g, (c) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c])); }
+    saveSeriesBtn.addEventListener("click", () => {
+      if (!auto.preview.length) { alert("Extract a curve first."); return; }
+      const name = (seriesNameInput.value || "").trim() || ("Series " + (auto.series.length + 1));
+      const color = auto.colors[auto.series.length % auto.colors.length];
+      const points = auto.preview.map((n) => naturalToModel(n));
+      auto.series.push({ name: name, color: color, points: points });
+      auto.preview = []; auto.contour = [];
+      seriesNameInput.value = "";
+      auto.view = { type: "series", index: auto.series.length - 1 };
+      renderSeriesList(); autoRedraw(); renderPreviewTable(); autoSetStatus();
+    });
+
+    function renderSeriesList() {
+      seriesListEl.innerHTML = "";
+      if (!auto.series.length) { seriesListEl.innerHTML = '<span class="series-empty">No series saved yet.</span>'; return; }
+      auto.series.forEach((s, i) => {
+        const chip = document.createElement("div");
+        chip.className = "series-chip" + (auto.view.type === "series" && auto.view.index === i ? " active" : "");
+        chip.innerHTML = '<span class="sw" style="background:' + s.color + '"></span><span>' + escapeHtml(s.name) + '</span><span class="cnt">(' + s.points.length + ')</span>';
+        chip.addEventListener("click", () => { auto.view = { type: "series", index: i }; renderSeriesList(); renderPreviewTable(); });
+        const del = document.createElement("button");
+        del.className = "del"; del.textContent = "×"; del.title = "Delete series";
+        del.addEventListener("click", (ev) => { ev.stopPropagation(); auto.series.splice(i, 1); auto.view = { type: "preview" }; renderSeriesList(); autoRedraw(); renderPreviewTable(); });
+        chip.appendChild(del);
+        seriesListEl.appendChild(chip);
+      });
+    }
+
+    /* ---- results / preview table ---- */
+    function currentDataset() {
+      if (auto.view.type === "series" && auto.series[auto.view.index]) return auto.series[auto.view.index].points;
+      return auto.preview.map((n) => naturalToModel(n));
+    }
+    function renderPreviewTable() {
+      const data = currentDataset();
+      autoPreviewBody.innerHTML = "";
+      autoPixelNote.style.display = (!isCalibrated() && data.length) ? "block" : "none";
+      if (!data.length) {
+        autoPreviewBody.innerHTML = '<tr class="empty-row"><td colspan="3">Nothing to show yet — extract a curve or select a series.</td></tr>';
+        return;
+      }
+      data.forEach((mp, i) => {
+        const d = modelToData(mp);
+        const tr = document.createElement("tr");
+        let xt, yt, cls = "";
+        if (d) { xt = fmt(d.X); yt = fmt(d.Y); }
+        else { xt = Math.round(mp.mx); yt = Math.round(state.imgH - mp.my); cls = "pixel-val"; }
+        tr.innerHTML = "<td>" + (i + 1) + "</td><td class=\"" + cls + "\">" + xt + "</td><td class=\"" + cls + "\">" + yt + "</td>";
+        autoPreviewBody.appendChild(tr);
+      });
+    }
+
+    /* ---- export ---- */
+    $("autoSaveCsv").addEventListener("click", () => {
+      if (!auto.series.length && !auto.preview.length) { alert("Nothing to export — save at least one series."); return; }
+      const delim = aDelimiter.value === "tab" ? "\t" : aDelimiter.value;
+      const xN = aXLabel.value || "X", yN = aYLabel.value || "Y";
+      const list = auto.series.length ? auto.series : [{ name: "preview", points: auto.preview.map(naturalToModel) }];
+      const lines = [[csvField("series", delim), csvField(xN, delim), csvField(yN, delim)].join(delim)];
+      list.forEach((s) => {
+        s.points.forEach((mp) => {
+          const d = modelToData(mp);
+          let X, Y;
+          if (d) { X = isNaN(d.X) ? "" : d.X; Y = isNaN(d.Y) ? "" : d.Y; }
+          else { X = Math.round(mp.mx); Y = Math.round(state.imgH - mp.my); }
+          lines.push([csvField(s.name, delim), X, Y].join(delim));
+        });
+      });
+      download(lines.join("\n"), fileBase(autoFileNameInput) + ".csv", "text/csv");
+    });
+
+    $("autoSaveJson").addEventListener("click", () => {
+      const s = {
+        app: "Image Click Coordinates", version: "V8", mode: "auto",
+        xLabel: aXLabel.value || "X", yLabel: aYLabel.value || "Y",
+        scaleX: aScaleX.value, scaleY: aScaleY.value, delimiter: aDelimiter.value,
+        image: state.hasImage ? { naturalWidth: state.imgW, naturalHeight: state.imgH } : null,
+        calibration: {
+          origin: state.origin ? { mx: state.origin.mx, my: state.origin.my, valueX: parseFloat(aox.value), valueY: parseFloat(aoy.value) } : null,
+          ref: state.ref ? { mx: state.ref.mx, my: state.ref.my, valueX: parseFloat(arx.value), valueY: parseFloat(ary.value) } : null,
+        },
+        series: auto.series.map((se) => ({
+          name: se.name, color: se.color,
+          points: se.points.map((mp) => { const d = modelToData(mp); return { mx: mp.mx, my: mp.my, x: d ? d.X : Math.round(mp.mx), y: d ? d.Y : Math.round(state.imgH - mp.my) }; }),
+        })),
+      };
+      download(JSON.stringify(s, null, 2), fileBase(autoFileNameInput) + ".json", "application/json");
+    });
+
+    /* ---- auto JSON load ---- */
+    $("autoJsonInput").addEventListener("change", (e) => {
+      const file = e.target.files[0]; if (!file) return;
+      const reader = new FileReader();
+      reader.onload = (ev) => { try { applyAutoState(JSON.parse(ev.target.result)); } catch (err) { alert("Could not read this JSON file."); } };
+      reader.readAsText(file); e.target.value = "";
+    });
+    function applyAutoState(s) {
+      if (!s || typeof s !== "object") throw new Error("bad");
+      aXLabel.value = s.xLabel != null ? s.xLabel : "X";
+      aYLabel.value = s.yLabel != null ? s.yLabel : "Y";
+      aScaleX.value = s.scaleX || "linear"; aScaleY.value = s.scaleY || "linear";
+      if (s.delimiter) aDelimiter.value = s.delimiter;
+      if (s.image && !state.hasImage) { state.imgW = s.image.naturalWidth || 0; state.imgH = s.image.naturalHeight || 0; }
+      const cal = s.calibration || {};
+      state.origin = cal.origin ? { mx: cal.origin.mx, my: cal.origin.my } : null;
+      state.ref = cal.ref ? { mx: cal.ref.mx, my: cal.ref.my } : null;
+      if (cal.origin) { if (cal.origin.valueX != null) aox.value = cal.origin.valueX; if (cal.origin.valueY != null) aoy.value = cal.origin.valueY; }
+      if (cal.ref) { if (cal.ref.valueX != null) arx.value = cal.ref.valueX; if (cal.ref.valueY != null) ary.value = cal.ref.valueY; }
+      auto.series = Array.isArray(s.series) ? s.series.map((se, i) => ({ name: se.name || ("Series " + (i + 1)), color: se.color || auto.colors[i % auto.colors.length], points: (se.points || []).map((p) => ({ mx: p.mx, my: p.my })) })) : [];
+      auto.preview = []; auto.contour = []; auto.view = { type: "preview" };
+      calAutoToManual();
+      applyAxisNames(); applyAutoAxisNames(); updateCalibDisplay(); updateAutoCalDisplay(); renderSeriesList();
+      if (state.hasImage) { redraw(); autoRedraw(); }
+      renderPreviewTable(); renderTable(); autoSetStatus(); setStatus();
+      switchTab("auto");
+      if (!state.hasImage) alert("Auto session loaded. Load the matching image to see the curves positioned on it.");
+    }
+
+    /* ---- auto image inputs ---- */
+    $("autoFileInput").addEventListener("change", (e) => { if (e.target.files[0]) loadImage(e.target.files[0]); e.target.value = ""; });
+    $("autoPasteBtn").addEventListener("click", pasteFromClipboard);
+
+    // Load example_img.png (sits next to this HTML). Fetch -> blob keeps the canvas untainted so extraction works when served (e.g. GitHub Pages).
+    function loadExample() {
+      fetch("example_img.png", { cache: "reload" })
+        .then((r) => { if (!r.ok) throw new Error("HTTP " + r.status); return r.blob(); })
+        .then((blob) => loadImage(blob))
+        .catch(() => alert("Couldn't load example_img.png. It loads when the page is served (e.g. on GitHub). If you opened this HTML directly from your computer, use \u201cOpen image\u201d instead \u2014 or keep example_img.png in the same folder."));
+    }
+    $("loadExampleBtn").addEventListener("click", loadExample);
+    $("autoLoadExampleBtn").addEventListener("click", loadExample);
+    showRegion.addEventListener("change", autoRedraw);
+
+    /* ---------------- init ---------------- */
+    calManualToAuto();
+    applyAxisNames();
+    setStatus();
+    applyAutoAxisNames();
+    updateAutoCalDisplay();
+    renderSeriesList();
+    renderPreviewTable();
+    autoSetStatus();
+  })();
+  </script>
+</body>
+</html>
