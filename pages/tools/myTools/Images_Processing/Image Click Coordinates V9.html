@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Image Click Coordinates — V8</title>
+  <title>Image Click Coordinates — V9</title>
   <style>
     :root {
       --bg: #f4f6f9;
@@ -270,7 +270,7 @@
 <body>
   <header class="app-header">
     <h1>Image Click Coordinates</h1>
-    <span class="version-badge">V8</span>
+    <span class="version-badge">V9</span>
     <p class="subtitle">Digitize a chart or curve image — click points or auto-trace curves and export real coordinates.</p>
   </header>
 
@@ -337,22 +337,22 @@
           <tr>
             <th scope="row"><i class="swatch sw-origin"></i>Origin</th>
             <td class="pixel-cell" id="originPixel">not set</td>
-            <td><input type="number" id="ox" value="0" step="any"></td>
-            <td><input type="number" id="oy" value="300" step="any"></td>
+            <td><input type="number" id="ox" value="0.1" step="any"></td>
+            <td><input type="number" id="oy" value="1e-3" step="any"></td>
             <td><button id="pickOrigin" class="btn-pick">Pick origin</button></td>
           </tr>
           <tr>
             <th scope="row"><i class="swatch sw-ref"></i>Reference</th>
             <td class="pixel-cell" id="refPixel">not set</td>
-            <td><input type="number" id="rx" value="14" step="any"></td>
-            <td><input type="number" id="ry" value="550" step="any"></td>
+            <td><input type="number" id="rx" value="1000" step="any"></td>
+            <td><input type="number" id="ry" value="10" step="any"></td>
             <td><button id="pickRef" class="btn-pick">Pick reference</button></td>
           </tr>
           <tr class="scale-row">
             <th scope="row">Scale</th>
             <td></td>
-            <td><select id="scaleX"><option value="linear">Linear</option><option value="log10">Log 10</option></select></td>
-            <td><select id="scaleY"><option value="linear">Linear</option><option value="log10">Log 10</option></select></td>
+            <td><select id="scaleX"><option value="log10">Log 10</option><option value="linear">Linear</option></select></td>
+            <td><select id="scaleY"><option value="log10">Log 10</option><option value="linear">Linear</option></select></td>
             <td></td>
           </tr>
         </tbody>
@@ -480,22 +480,22 @@
           <tr>
             <th scope="row"><i class="swatch sw-origin"></i>Origin</th>
             <td class="pixel-cell" id="aOriginPixel">not set</td>
-            <td><input type="number" id="aox" value="0" step="any"></td>
-            <td><input type="number" id="aoy" value="300" step="any"></td>
+            <td><input type="number" id="aox" value="0.1" step="any"></td>
+            <td><input type="number" id="aoy" value="1e-3" step="any"></td>
             <td><button id="aPickOrigin" class="btn-pick">Pick origin</button></td>
           </tr>
           <tr>
             <th scope="row"><i class="swatch sw-ref"></i>Reference</th>
             <td class="pixel-cell" id="aRefPixel">not set</td>
-            <td><input type="number" id="arx" value="14" step="any"></td>
-            <td><input type="number" id="ary" value="550" step="any"></td>
+            <td><input type="number" id="arx" value="1000" step="any"></td>
+            <td><input type="number" id="ary" value="10" step="any"></td>
             <td><button id="aPickRef" class="btn-pick">Pick reference</button></td>
           </tr>
           <tr class="scale-row">
             <th scope="row">Scale</th>
             <td></td>
-            <td><select id="aScaleX"><option value="linear">Linear</option><option value="log10">Log 10</option></select></td>
-            <td><select id="aScaleY"><option value="linear">Linear</option><option value="log10">Log 10</option></select></td>
+            <td><select id="aScaleX"><option value="log10">Log 10</option><option value="linear">Linear</option></select></td>
+            <td><select id="aScaleY"><option value="log10">Log 10</option><option value="linear">Linear</option></select></td>
             <td></td>
           </tr>
         </tbody>
@@ -1011,7 +1011,7 @@
 
     function collectState() {
       return {
-        app: "Image Click Coordinates", version: "V8",
+        app: "Image Click Coordinates", version: "V9",
         xLabel: xLabelInput.value || "X", yLabel: yLabelInput.value || "Y",
         scaleX: scaleX.value, scaleY: scaleY.value,
         delimiter: delimiterSel.value, activeTab: currentTab,
@@ -1109,7 +1109,9 @@
     const auto = {
       mode: "idle",              // 'idle' | 'origin' | 'ref' | 'draw'
       contour: [],               // [{x,y}] natural, top-based
-      drawing: false,
+      drawing: false,            // freehand drag in progress
+      polyMode: false,           // click-by-click polygon in progress
+      cursorN: null,             // last cursor pos (for the rubber-band line)
       preview: [],               // [{x,y}] natural top-based (extracted, unsaved)
       series: [],                // [{name,color,points:[{mx,my}]}]
       view: { type: "preview" }, // which dataset the results table shows
@@ -1167,15 +1169,25 @@
       autoCtx.drawImage(pixCanvas, 0, 0);
       const r = Math.max(2.2, W / 320);
 
-      if (auto.contour.length && (showRegion.checked || auto.drawing)) {
+      const drawingActive = auto.drawing || auto.polyMode;
+      if (auto.contour.length && (showRegion.checked || drawingActive)) {
         autoCtx.beginPath();
         auto.contour.forEach((p, i) => i ? autoCtx.lineTo(p.x, p.y) : autoCtx.moveTo(p.x, p.y));
-        if (!auto.drawing) autoCtx.closePath();
+        if (auto.polyMode && auto.cursorN) autoCtx.lineTo(auto.cursorN.x, auto.cursorN.y);
+        if (!drawingActive) autoCtx.closePath();
         autoCtx.lineWidth = Math.max(1.5, W / 500);
         autoCtx.strokeStyle = "rgba(14,155,184,.95)";
         autoCtx.fillStyle = "rgba(14,155,184,.10)";
-        if (!auto.drawing) autoCtx.fill();
+        if (!drawingActive) autoCtx.fill();
         autoCtx.stroke();
+        if (auto.polyMode) {
+          const vr = Math.max(3, W / 260);
+          auto.contour.forEach((p, i) => {
+            autoCtx.beginPath(); autoCtx.arc(p.x, p.y, vr, 0, 7);
+            autoCtx.fillStyle = i === 0 ? "#0e9bb8" : "#fff"; autoCtx.fill();
+            autoCtx.lineWidth = 1.5; autoCtx.strokeStyle = "#0e9bb8"; autoCtx.stroke();
+          });
+        }
       }
       auto.series.forEach((s) => autoPolyline(s.points.map(modelToNatural), s.color, r));
       autoPolyline(auto.preview, "#ea580c", r * 1.1);
@@ -1188,8 +1200,8 @@
       if (!state.hasImage) { autoStatusBar.className = "status empty"; autoStatusText.textContent = "Add an image to begin (shared with Manual — open, drop, or Ctrl + V)."; return; }
       if (auto.mode === "origin") { autoStatusBar.className = "status origin"; autoStatusText.textContent = "Click on the image to set the ORIGIN."; }
       else if (auto.mode === "ref") { autoStatusBar.className = "status ref"; autoStatusText.textContent = "Click on the image to set the REFERENCE."; }
-      else if (auto.mode === "draw") { autoStatusBar.className = "status draw"; autoStatusText.textContent = "Press and drag to draw a loop around ONE curve, then release."; }
-      else { autoStatusBar.className = "status collect"; autoStatusText.textContent = auto.preview.length ? "Preview ready — name it and Save as series, or adjust and Extract again." : "Draw a region around a curve, then Extract."; }
+      else if (auto.mode === "draw") { autoStatusBar.className = "status draw"; autoStatusText.textContent = auto.polyMode ? "Click to add corners; click the first point or press Enter to close." : "Drag for a freehand loop, or click point-by-point for straight edges (Enter / first point closes)."; }
+      else { autoStatusBar.className = "status collect"; autoStatusText.textContent = auto.preview.length ? "Preview ready — name it and Save as series, or adjust and Extract again." : (auto.contour.length ? "Region set — drag its blue outline or use arrow keys to nudge it, then Extract." : "Draw a region around a curve, then Extract."); }
       aPickOriginBtn.classList.toggle("armed", auto.mode === "origin");
       aPickRefBtn.classList.toggle("armed", auto.mode === "ref");
       drawRegionBtn.classList.toggle("armed", auto.mode === "draw");
@@ -1203,10 +1215,12 @@
     drawRegionBtn.addEventListener("click", () => {
       if (!needImage()) return;
       auto.mode = auto.mode === "draw" ? "idle" : "draw";
-      if (auto.mode === "draw") { auto.contour = []; auto.preview = []; autoRedraw(); renderPreviewTable(); }
+      if (auto.mode === "draw") { auto.contour = []; auto.preview = []; auto.polyMode = false; auto.drawing = false; autoRedraw(); renderPreviewTable(); }
+      else if (auto.polyMode && auto.contour.length < 3) { auto.contour = []; auto.polyMode = false; autoRedraw(); }
+      else { auto.polyMode = false; }
       autoSetStatus();
     });
-    clearRegionBtn.addEventListener("click", () => { auto.contour = []; auto.preview = []; auto.mode = "idle"; autoRedraw(); renderPreviewTable(); autoSetStatus(); });
+    clearRegionBtn.addEventListener("click", () => { auto.contour = []; auto.preview = []; auto.polyMode = false; auto.drawing = false; auto.mode = "idle"; autoRedraw(); renderPreviewTable(); autoSetStatus(); });
 
     function autoHitTest(n) {
       const R = Math.max(7, state.imgW / 110);
@@ -1246,28 +1260,101 @@
       autoLens.style.left = lx + "px"; autoLens.style.top = ly + "px"; autoLens.style.display = "block";
     }
 
+    // --- region drawing (freehand drag OR click-by-click polygon) + move/nudge ---
+    let drawDownN = null, drawMoved = false, regionMove = null;
+    function pointToSegDist(p, a, b) {
+      const dx = b.x - a.x, dy = b.y - a.y, L2 = dx * dx + dy * dy;
+      let t = L2 ? ((p.x - a.x) * dx + (p.y - a.y) * dy) / L2 : 0;
+      t = Math.max(0, Math.min(1, t));
+      return Math.hypot(p.x - (a.x + t * dx), p.y - (a.y + t * dy));
+    }
+    function nearContourEdge(n) {
+      if (auto.contour.length < 2 || auto.polyMode || auto.drawing) return false;
+      const thr = Math.max(6, state.imgW / 130);
+      for (let i = 0; i < auto.contour.length; i++) {
+        if (pointToSegDist(n, auto.contour[i], auto.contour[(i + 1) % auto.contour.length]) <= thr) return true;
+      }
+      return false;
+    }
+    function translateContour(dx, dy) {
+      if (!auto.contour.length) return;
+      let minx = Infinity, miny = Infinity, maxx = -Infinity, maxy = -Infinity;
+      auto.contour.forEach((p) => { minx = Math.min(minx, p.x); miny = Math.min(miny, p.y); maxx = Math.max(maxx, p.x); maxy = Math.max(maxy, p.y); });
+      if (minx + dx < 0) dx = -minx;
+      if (maxx + dx > state.imgW) dx = state.imgW - maxx;
+      if (miny + dy < 0) dy = -miny;
+      if (maxy + dy > state.imgH) dy = state.imgH - maxy;
+      if (!dx && !dy) return;
+      auto.contour = auto.contour.map((p) => ({ x: p.x + dx, y: p.y + dy }));
+    }
+    function onRegionMove(e) {
+      if (!regionMove) return;
+      const n = autoEventToNatural(e);
+      translateContour(n.x - regionMove.lastN.x, n.y - regionMove.lastN.y);
+      regionMove.lastN = n; autoRedraw();
+    }
+    function endRegionMove() { regionMove = null; document.removeEventListener("mousemove", onRegionMove); document.removeEventListener("mouseup", endRegionMove); }
+
     autoView.addEventListener("mousedown", (e) => {
       if (!state.hasImage) return;
       const n = autoEventToNatural(e);
       if (auto.mode === "origin") { state.origin = naturalToModel(n); auto.mode = "idle"; updateCalibDisplay(); updateAutoCalDisplay(); redraw(); autoRedraw(); renderPreviewTable(); autoSetStatus(); }
       else if (auto.mode === "ref") { state.ref = naturalToModel(n); auto.mode = "idle"; updateCalibDisplay(); updateAutoCalDisplay(); redraw(); autoRedraw(); renderPreviewTable(); autoSetStatus(); }
-      else if (auto.mode === "draw") { auto.drawing = true; auto.contour = [n]; autoLens.style.display = "none"; }
-      else { const hit = autoHitTest(n); if (hit) { autoDrag = hit; e.preventDefault(); document.addEventListener("mousemove", onAutoDrag); document.addEventListener("mouseup", endAutoDrag); } }
+      else if (auto.mode === "draw") { drawDownN = n; drawMoved = false; autoLens.style.display = "none"; }
+      else {
+        const hit = autoHitTest(n);
+        if (hit) { autoDrag = hit; e.preventDefault(); document.addEventListener("mousemove", onAutoDrag); document.addEventListener("mouseup", endAutoDrag); }
+        else if (nearContourEdge(n)) { regionMove = { lastN: n }; e.preventDefault(); document.addEventListener("mousemove", onRegionMove); document.addEventListener("mouseup", endRegionMove); }
+      }
     });
     autoView.addEventListener("mousemove", (e) => {
       if (!state.hasImage) return;
-      if (auto.drawing) {
-        const n = autoEventToNatural(e);
-        const last = auto.contour[auto.contour.length - 1];
-        if (!last || Math.hypot(n.x - last.x, n.y - last.y) > Math.max(1, state.imgW / 400)) { auto.contour.push(n); autoRedraw(); }
+      const n = autoEventToNatural(e);
+      if (auto.mode === "draw") {
+        auto.cursorN = n;
+        if (drawDownN) {
+          if (!drawMoved && Math.hypot(n.x - drawDownN.x, n.y - drawDownN.y) > Math.max(3, state.imgW / 200)) {
+            drawMoved = true; auto.drawing = true; auto.polyMode = false; auto.contour = [drawDownN];
+          }
+          if (auto.drawing) {
+            const last = auto.contour[auto.contour.length - 1];
+            if (!last || Math.hypot(n.x - last.x, n.y - last.y) > Math.max(1, state.imgW / 400)) auto.contour.push(n);
+          }
+        }
+        autoRedraw();
         return;
       }
-      const n = autoEventToNatural(e);
-      if (auto.mode === "idle") autoView.style.cursor = autoHitTest(n) ? "grab" : "crosshair";
+      if (auto.mode === "idle") autoView.style.cursor = autoHitTest(n) ? "grab" : (nearContourEdge(n) ? "move" : "crosshair");
       autoUpdateLens(e, n);
     });
     window.addEventListener("mouseup", () => {
-      if (auto.drawing) { auto.drawing = false; auto.mode = "idle"; autoRedraw(); autoSetStatus(); }
+      if (auto.mode !== "draw" || drawDownN === null) return;
+      if (auto.drawing) {
+        auto.drawing = false; auto.mode = "idle"; auto.polyMode = false;
+      } else {
+        const n = drawDownN;
+        if (!auto.polyMode) { auto.polyMode = true; auto.contour = [n]; }
+        else {
+          const first = auto.contour[0];
+          if (auto.contour.length >= 3 && Math.hypot(n.x - first.x, n.y - first.y) < Math.max(8, state.imgW / 90)) { auto.polyMode = false; auto.mode = "idle"; }
+          else auto.contour.push(n);
+        }
+      }
+      drawDownN = null; drawMoved = false;
+      autoRedraw(); autoSetStatus();
+    });
+    document.addEventListener("keydown", (e) => {
+      if (currentTab !== "auto" || !state.hasImage) return;
+      const ae = document.activeElement;
+      if (ae && /^(INPUT|SELECT|TEXTAREA)$/.test(ae.tagName)) return;
+      if (e.key === "Enter" && auto.polyMode && auto.contour.length >= 3) { auto.polyMode = false; auto.mode = "idle"; e.preventDefault(); autoRedraw(); autoSetStatus(); return; }
+      if (auto.contour.length && !auto.polyMode && !auto.drawing) {
+        const step = e.shiftKey ? 5 : 1;
+        let dx = 0, dy = 0;
+        if (e.key === "ArrowLeft") dx = -step; else if (e.key === "ArrowRight") dx = step;
+        else if (e.key === "ArrowUp") dy = -step; else if (e.key === "ArrowDown") dy = step; else return;
+        e.preventDefault(); translateContour(dx, dy); autoRedraw();
+      }
     });
     autoWrap.addEventListener("mouseenter", () => { if (state.hasImage && auto.mode !== "draw") autoLens.style.display = "block"; });
     autoWrap.addEventListener("mouseleave", () => { autoLens.style.display = "none"; });
@@ -1291,6 +1378,7 @@
 
     function extract() {
       if (!needImage()) return;
+      if (auto.polyMode) { auto.polyMode = false; auto.mode = "idle"; autoSetStatus(); }
       if (!pixData) { alert("Could not read the image pixels."); return; }
       if (auto.contour.length < 3) { alert("Draw a region around the curve first (click ‘Draw region’)."); return; }
       const poly = auto.contour;
@@ -1441,7 +1529,7 @@
 
     $("autoSaveJson").addEventListener("click", () => {
       const s = {
-        app: "Image Click Coordinates", version: "V8", mode: "auto",
+        app: "Image Click Coordinates", version: "V9", mode: "auto",
         xLabel: aXLabel.value || "X", yLabel: aYLabel.value || "Y",
         scaleX: aScaleX.value, scaleY: aScaleY.value, delimiter: aDelimiter.value,
         image: state.hasImage ? { naturalWidth: state.imgW, naturalHeight: state.imgH } : null,
